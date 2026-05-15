@@ -1,0 +1,72 @@
+# .cursorrules
+# HINS — Reglas del Agente
+
+---
+
+## Orden de lectura obligatorio
+
+Antes de generar cualquier código o tomar cualquier decisión de diseño,
+leer los archivos en este orden:
+
+1. `/context/product-context.md` — qué es el producto, quiénes son los usuarios, reglas de negocio
+2. `/context/design-system.md` — tokens, principios y referencias de componentes
+3. `/context/components.md` — specs de implementación exacta (tiene la última palabra)
+4. `/context/ux-guidelines.md` — jerarquía, patrones, anti-patterns
+5. `/engineering/tech-stack.md` — stack, arquitectura, convenciones
+6. `/flows/[pantalla].md` — el flujo específico que se está implementando
+
+---
+
+## Regla de precedencia de archivos
+
+Cuando hay conflicto entre documentos, el orden de autoridad es:
+
+1. `/context/components.md` → implementación exacta — **última palabra siempre**
+2. `/context/design-system.md` → tokens y principios visuales
+3. `/context/ux-guidelines.md` → patrones de UX y navegación
+4. `/flows/[pantalla].md` → estructura y contenido de la vista
+
+---
+
+## Reglas generales
+
+- No inventar un sistema visual nuevo. Todo está definido en `design-system.md` y `components.md`.
+- No tomar decisiones de diseño no documentadas. Si algo no está en los archivos, preguntar.
+- Siempre indicar la ruta completa del archivo al generar código.
+- Respetar el aislamiento de roles: cada usuario ve solo su información.
+- El sistema es de visibilidad, no operativo. No generar flujos de acción sobre la red.
+
+## Reglas de color
+
+- `--primary` (Zinc 900) → solo en botones primarios, CTAs, focus ring.
+- `--chart-1` a `--chart-5` → exclusivo para visualizaciones de datos.
+- Estados semánticos (success/warning/error/info) → solo cuando hay un estado real que comunicar.
+- Nunca hardcodear valores hex en componentes. Siempre referenciar tokens CSS.
+- El fondo del shell principal (Main content) usa `bg-[#F7F7F7]` o el token `--background-subtle`.
+  Las cards usan `bg-white` (`--background`). Nunca invertir esto.
+
+## Reglas de componentes
+
+- Antes de crear cualquier componente, verificar si existe spec en `components.md`.
+- Si existe spec en `components.md` → usar ese spec exacto, sin interpretación.
+- Si no existe spec → mapear a shadcn/ui nativo antes de crear uno custom.
+- Charts: separación obligatoria `chartData / chartConfig / chartComponent`.
+- Navegación: siempre `next/link`, nunca `<a href>` para rutas internas.
+- Íconos: solo `lucide-react`, no mezclar librerías.
+
+## Reglas de output
+
+- Todo archivo generado debe incluir su ruta completa como comentario en la primera línea.
+- Ejemplo: `// app/dashboard/page.tsx`
+- Props siempre tipadas en TypeScript. No usar `any`.
+- Un componente por archivo.
+
+## Reglas técnicas
+
+- Assets (logos, imágenes): guardar en `/public/images`, referenciar como `/images/[archivo]`
+- Usar Next.js Image component para optimización automática.
+
+## Criterio de éxito
+
+Un developer debe poder agregar una nueva vista al producto sin tomar
+ninguna decisión de diseño. Todo debe estar resuelto por el sistema.

@@ -1,0 +1,81 @@
+"use client"
+
+import { useMemo, useState } from "react"
+
+import { ProjectCard } from "@/components/main/ProjectCard"
+import { Button } from "@/components/ui/button"
+import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { projectsMock, type Project } from "@/data/main-mock"
+import { DownloadIcon, PlusCircleIcon } from "lucide-react"
+
+const PROJECT_FILTER_TABS = [
+  { value: "todos", label: "Todos" },
+  { value: "gdc", label: "Comunitarios (GDC)" },
+  { value: "gdd", label: "Distribuidor (GDD)" },
+] as const
+
+type ProjectFilter = (typeof PROJECT_FILTER_TABS)[number]["value"]
+
+export function ProjectsView() {
+  const [projects] = useState<Project[]>(projectsMock)
+  const [filter, setFilter] = useState<ProjectFilter>("todos")
+
+  const visibleProjects = useMemo(() => {
+    if (filter === "todos") return projects
+    if (filter === "gdc") return projects.filter((p) => p.type === "GDC")
+    return projects.filter((p) => p.type === "GDD")
+  }, [projects, filter])
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+          Proyectos
+        </h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+          <TabsForBlocks
+            className="w-full min-w-0 sm:w-auto"
+            tabs={[...PROJECT_FILTER_TABS]}
+            value={filter}
+            onValueChange={(v) => setFilter(v as ProjectFilter)}
+          />
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              className="gap-1.5 shadow-sm"
+              aria-label="Nuevo proyecto (próximamente)"
+            >
+              <PlusCircleIcon className="size-4" aria-hidden />
+              Nuevo
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shadow-sm"
+              aria-label="Exportar"
+            >
+              <DownloadIcon className="size-4" aria-hidden />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {visibleProjects.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {visibleProjects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex min-h-48 items-center justify-center rounded-xl border border-dashed border-border bg-white">
+          <p className="text-sm text-muted-foreground">
+            No hay proyectos para este filtro.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}

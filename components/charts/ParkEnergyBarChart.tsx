@@ -1,0 +1,116 @@
+// components/charts/ParkEnergyBarChart.tsx
+"use client"
+
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts"
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
+import { formatChartPeriodTooltipLabel } from "@/lib/format-chart-period-tooltip"
+
+type ParkEnergyBarChartProps = {
+  data: { label: string; generated: number }[]
+  chartConfig: ChartConfig
+}
+
+/** Última barra: token chart-1. Barras pasadas: token chart-1-muted. */
+function barFill(index: number, total: number): string {
+  if (index === total - 1) {
+    return "var(--chart-1)"
+  }
+  return "var(--chart-1-muted)"
+}
+
+export function ParkEnergyBarChart({
+  data,
+  chartConfig,
+}: ParkEnergyBarChartProps) {
+  const n = data.length
+  const dataWithDelta = data.map((item, index) => ({
+    ...item,
+    deltaVsPrevious: index > 0 ? item.generated - data[index - 1].generated : 0,
+  }))
+
+  return (
+    <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
+      <BarChart
+        data={dataWithDelta}
+        margin={{ left: 4, right: 8, top: 28, bottom: 4 }}
+      >
+        <CartesianGrid
+          vertical={false}
+          strokeDasharray="3 3"
+          className="stroke-border/60"
+        />
+        <XAxis
+          dataKey="label"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          className="text-muted-foreground"
+        />
+        <YAxis
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          className="text-muted-foreground"
+          tickFormatter={(v) => `${v}`}
+        />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              labelFormatter={(value) =>
+                formatChartPeriodTooltipLabel(String(value ?? ""))
+              }
+              formatter={(value, _name, item) => {
+                const numericValue = typeof value === "number" ? value : Number(value)
+                const delta =
+                  typeof item.payload?.deltaVsPrevious === "number"
+                    ? item.payload.deltaVsPrevious
+                    : 0
+
+                return (
+                  <div className="grid gap-1">
+                    <span className="font-mono font-medium text-foreground tabular-nums">
+                      {numericValue.toLocaleString("es-AR", {
+                        maximumFractionDigits: 0,
+                      })}{" "}
+                      kWh
+                    </span>
+                    <span className="text-muted-foreground">
+                      {`${delta >= 0 ? "+" : ""}${delta.toLocaleString("es-AR", {
+                        maximumFractionDigits: 0,
+                      })} kWh vs mes anterior`}
+                    </span>
+                  </div>
+                )
+              }}
+            />
+          }
+        />
+        <Bar
+          dataKey="generated"
+          radius={[6, 6, 0, 0]}
+          barSize={56}
+        >
+          {data.map((_, index) => (
+            <Cell key={`cell-${index}`} fill={barFill(index, n)} />
+          ))}
+          <LabelList
+            position="top"
+            dataKey="generated"
+            className="fill-foreground text-[10px] font-medium"
+            formatter={(value: unknown) =>
+              typeof value === "number"
+                ? `${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })} kWh`
+                : ""
+            }
+          />
+        </Bar>
+      </BarChart>
+    </ChartContainer>
+  )
+}
