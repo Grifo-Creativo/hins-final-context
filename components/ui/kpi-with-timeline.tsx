@@ -27,7 +27,7 @@ export function KpiWithTimeline({
   const pct = timelineData.hoy.pct
 
   return (
-    <Card className="flex min-h-0 h-full flex-col bg-white p-4 shadow-sm ring-0 rounded-xl overflow-hidden">
+    <Card className="flex min-h-0 h-full flex-col bg-white p-4 shadow-xs ring-0 rounded-xl overflow-hidden">
       <div className="flex min-h-0 flex-1 flex-col justify-between">
         {/* Bloque superior: label + valor + badge */}
         <div className="flex shrink-0 flex-col gap-4">

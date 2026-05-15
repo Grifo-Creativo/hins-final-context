@@ -16,7 +16,7 @@ function AccessCta({ label }: { label: string }) {
     <span
       className={cn(
         "flex h-9 w-full items-center justify-center rounded-md border border-input bg-background",
-        "text-sm font-medium text-foreground shadow-sm",
+        "text-sm font-medium text-foreground shadow-xs",
         "group-hover/card:border-foreground/20"
       )}
     >
@@ -33,7 +33,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const inner = (
     <Card
       className={cn(
-        "group/card flex h-full flex-col overflow-hidden p-0 shadow-sm ring-0 transition-shadow",
+        "group/card flex h-full flex-col overflow-hidden p-0 shadow-xs ring-0 transition-shadow",
         canAccess && "cursor-pointer hover:shadow-md"
       )}
     >
@@ -62,7 +62,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           />
         )}
         <div className="pointer-events-none absolute left-3 top-3 z-10">
-          <SoftBadge className="bg-white/95 font-medium shadow-sm">
+          <SoftBadge className="bg-white/95 font-medium shadow-xs">
             {project.type === "GDC" ? "GDCV" : "GDD"}
           </SoftBadge>
         </div>

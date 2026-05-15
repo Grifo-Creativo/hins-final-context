@@ -179,7 +179,7 @@ const columns: ColumnDef<ConsumptionHistoryRow>[] = [
             <Button
               variant="outline"
               size="icon"
-              className="size-8 shadow-sm"
+              className="size-8 shadow-xs"
               aria-label={`Acciones — ${row.getValue("period")}`}
             >
               <MoreHorizontalIcon className="size-4" aria-hidden />
@@ -226,7 +226,7 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
   })
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h3 className="text-lg font-semibold text-foreground">
@@ -237,7 +237,7 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
             <Button
               variant="outline"
               size="icon"
-              className="md:w-auto md:px-2.5 md:gap-2 shadow-sm"
+              className="md:w-auto md:px-2.5 md:gap-2 shadow-xs"
               title="Ver columnas"
             >
               <TableIcon className="size-4" aria-hidden />

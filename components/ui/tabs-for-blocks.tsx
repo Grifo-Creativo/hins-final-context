@@ -33,7 +33,7 @@ export function TabsForBlocks({
               h-full min-w-0 flex-1 rounded-md px-2 py-2 text-center text-sm font-medium
               sm:flex-initial sm:px-5 sm:py-2.5
               data-[state=active]:bg-white
-              data-[state=active]:shadow-sm
+              data-[state=active]:shadow-xs
               data-[state=inactive]:text-muted-foreground
             "
           >

@@ -118,7 +118,7 @@ const columns: ColumnDef<GeneracionRow>[] = [
             <Button
               variant="outline"
               size="icon"
-              className="size-8 shadow-sm"
+              className="size-8 shadow-xs"
               aria-label={`Acciones — ${row.getValue("periodo")}`}
             >
               <MoreHorizontalIcon className="size-4" aria-hidden />
@@ -163,7 +163,7 @@ export function GeneracionTable({ data }: GeneracionTableProps) {
   })
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h3 className="text-lg font-semibold text-foreground">
@@ -174,7 +174,7 @@ export function GeneracionTable({ data }: GeneracionTableProps) {
             <Button
               variant="outline"
               size="icon"
-              className="md:w-auto md:px-2.5 md:gap-2 shadow-sm"
+              className="md:w-auto md:px-2.5 md:gap-2 shadow-xs"
               title="Ver columnas"
             >
               <TableIcon className="size-4" aria-hidden />

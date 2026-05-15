@@ -45,7 +45,7 @@ export function PeriodSelector({
           type="button"
           variant="outline"
           size="sm"
-          className={cn("gap-2 shadow-sm", className)}
+          className={cn("gap-2 shadow-xs", className)}
         >
           <CalendarIcon className="size-4 text-muted-foreground" aria-hidden />
           {value}

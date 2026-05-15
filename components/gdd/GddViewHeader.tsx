@@ -41,7 +41,7 @@ export function GddViewHeader() {
             type="button"
             variant="outline"
             size="icon"
-            className="size-8 shadow-sm"
+            className="size-8 shadow-xs"
             aria-label="Buscar"
           >
             <SearchIcon className="size-4" aria-hidden />
@@ -52,7 +52,7 @@ export function GddViewHeader() {
                 type="button"
                 variant="outline"
                 size="icon"
-                className="relative size-8 shadow-sm"
+                className="relative size-8 shadow-xs"
                 aria-label="Notificaciones"
                 aria-expanded={notificationsOpen}
               >
@@ -109,7 +109,7 @@ export function GddViewHeader() {
             type="button"
             variant="outline"
             size="icon"
-            className="shrink-0 bg-secondary shadow-sm"
+            className="shrink-0 bg-secondary shadow-xs"
             aria-label="Exportar datos"
           >
             <DownloadIcon className="size-4" aria-hidden />

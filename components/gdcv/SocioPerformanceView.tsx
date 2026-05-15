@@ -157,7 +157,7 @@ export function SocioPerformanceView() {
 
         {/* Right — Resumen del Parque */}
         <div className="flex flex-col gap-4">
-          <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden">
+          <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden">
             <div className="flex flex-col gap-4 p-4">
               <div className="flex items-start gap-4">
                 <IconBadge icon={ZapIcon} size="lg" />
@@ -216,7 +216,7 @@ export function SocioPerformanceView() {
               <Button
                 type="button"
                 variant="outline"
-                className="mt-2 w-full shadow-sm"
+                className="mt-2 w-full shadow-xs"
                 aria-label="Ver todos los socios"
                 onClick={() => setSheetOpen(true)}
               >
@@ -244,7 +244,7 @@ export function SocioPerformanceView() {
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="size-8 shrink-0 shadow-sm"
+                    className="size-8 shrink-0 shadow-xs"
                     aria-label="Cerrar"
                   >
                     <XIcon className="size-4" aria-hidden />

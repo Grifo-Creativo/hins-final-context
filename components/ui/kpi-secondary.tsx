@@ -32,7 +32,7 @@ export function KpiSecondary({
 
   if (layout === "horizontal") {
     return (
-      <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
+      <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full">
         <div className="flex items-start gap-3 p-4">
           <IconBadge icon={icon} size="sm" className="flex-shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -63,7 +63,7 @@ export function KpiSecondary({
 
   // Default: vertical layout (KpiSecondaryStacked behavior)
   return (
-    <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
+    <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full">
       <div className="flex flex-col gap-2 p-4 h-full justify-between">
         <div className="flex flex-col gap-2">
           <IconBadge icon={icon} size="sm" />

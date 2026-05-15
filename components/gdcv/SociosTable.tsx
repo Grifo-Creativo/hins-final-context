@@ -192,7 +192,7 @@ const columns: ColumnDef<SocioRow>[] = [
               type="button"
               variant="outline"
               size="icon"
-              className="size-8 shadow-sm"
+              className="size-8 shadow-xs"
               aria-label={`Acciones — ${row.original.nombre}`}
               onClick={(e) => e.stopPropagation()}
             >
@@ -243,7 +243,7 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
   const toRow = Math.min((pageIndex + 1) * pageSize, totalRows)
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
 
       {/* Section header */}
       <div className="flex items-center justify-between p-6 pb-0">
@@ -257,7 +257,7 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
               <Button
                 variant="outline"
                 size="icon"
-                className="md:w-auto md:px-2.5 md:gap-2 shadow-sm"
+                className="md:w-auto md:px-2.5 md:gap-2 shadow-xs"
                 title="Ver columnas"
               >
                 <TableIcon className="size-4" aria-hidden />
@@ -284,7 +284,7 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
           <Button
             type="button"
             size="icon"
-            className="md:w-auto md:px-2.5 md:gap-2 shadow-sm"
+            className="md:w-auto md:px-2.5 md:gap-2 shadow-xs"
             title="Nuevo Socio"
           >
             <PlusIcon className="size-4" aria-hidden />

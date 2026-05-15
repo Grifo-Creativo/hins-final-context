@@ -21,7 +21,7 @@ export function KpiPrimary({
   const indexed = sparklineData?.map((d, i) => ({ i, value: d.value })) ?? []
 
   return (
-    <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden">
+    <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden">
       <div className="flex flex-col gap-4 p-4">
         <div className="flex items-start gap-4">
           <IconBadge icon={icon} size="lg" />

@@ -46,7 +46,7 @@ export function ProjectsView() {
               type="button"
               variant="default"
               size="default"
-              className="gap-1.5 shadow-sm"
+              className="gap-1.5 shadow-xs"
               aria-label="Crear nuevo proyecto"
               onClick={() => setShowNewProjectDialog(true)}
             >
@@ -57,7 +57,7 @@ export function ProjectsView() {
               type="button"
               variant="outline"
               size="icon"
-              className="shadow-sm"
+              className="shadow-xs"
               aria-label="Exportar"
             >
               <DownloadIcon className="size-4" aria-hidden />

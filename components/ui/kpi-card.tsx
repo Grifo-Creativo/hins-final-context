@@ -16,7 +16,7 @@ export function KpiCard({ children, className, ...props }: KpiCardProps) {
   return (
     <Card
       className={cn(
-        "flex h-full min-h-0 flex-col bg-white p-4 shadow-sm ring-0 rounded-xl",
+        "flex h-full min-h-0 flex-col bg-white p-4 shadow-xs ring-0 rounded-xl",
         className
       )}
       {...props}

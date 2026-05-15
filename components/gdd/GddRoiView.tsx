@@ -20,7 +20,7 @@ export function GddRoiView() {
       {/* Block 1 — ROI KPIs */}
       <div className="grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Col 1 — Inversión + Ahorrado en una card */}
-        <Card className="flex h-full min-h-0 flex-col bg-white py-0 shadow-sm ring-0 rounded-xl">
+        <Card className="flex h-full min-h-0 flex-col bg-white py-0 shadow-xs ring-0 rounded-xl">
           <div className="flex min-h-0 flex-1 flex-col gap-6 p-6">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-start gap-3">
@@ -52,7 +52,7 @@ export function GddRoiView() {
         </Card>
 
         {/* Col 2 — métricas arriba, barra al borde inferior (mt-auto; sin flex-1 vacío) */}
-        <Card className="flex h-full min-h-0 flex-col bg-white p-6 shadow-sm ring-0 rounded-xl">
+        <Card className="flex h-full min-h-0 flex-col bg-white p-6 shadow-xs ring-0 rounded-xl">
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex shrink-0 items-start justify-between gap-4">
               <div className="flex flex-col gap-1">

@@ -134,7 +134,7 @@ export function SocioDetailSheet({
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="size-8 shrink-0 shadow-sm"
+                  className="size-8 shrink-0 shadow-xs"
                   aria-label="Cerrar"
                 >
                   <XIcon className="size-4" aria-hidden />

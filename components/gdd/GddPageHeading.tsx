@@ -43,7 +43,7 @@ export function GddPageHeading() {
           type="button"
           variant="outline"
           size="icon"
-          className="shrink-0 shadow-sm"
+          className="shrink-0 shadow-xs"
           aria-label="Exportar datos"
         >
           <DownloadIcon className="size-4" aria-hidden />

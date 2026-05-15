@@ -123,7 +123,7 @@ export function SocioRoiView() {
         </h2>
 
         {/* Card con el Chart */}
-        <Card className="flex flex-1 min-h-0 flex-col bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden">
+        <Card className="flex flex-1 min-h-0 flex-col bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden">
           <div className="p-4">
             <RoiRecoveryLineChart
               data={socioCurvaRecuperacion}

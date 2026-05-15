@@ -27,7 +27,7 @@ export function KpiSecondaryCompact({
   const showDelta = Boolean(delta?.trim())
 
   return (
-    <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
+    <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full">
       <div className="flex items-start gap-4 p-4">
         <IconBadge icon={icon} size="md" className="flex-shrink-0 mt-0.5" />
         <div className="flex flex-col gap-1 flex-1 min-w-0">

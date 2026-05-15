@@ -61,7 +61,7 @@ export function GdcvHeader() {
             type="button"
             variant="outline"
             size="icon"
-            className="size-8 shadow-sm"
+            className="size-8 shadow-xs"
             aria-label="Buscar"
           >
             <SearchIcon className="size-4" aria-hidden />

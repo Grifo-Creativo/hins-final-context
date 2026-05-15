@@ -81,7 +81,7 @@ function Showcase({
   children: React.ReactNode
 }) {
   return (
-    <section className="scroll-mt-8 rounded-xl border border-border bg-card p-6 shadow-sm">
+    <section className="scroll-mt-8 rounded-xl border border-border bg-card p-6 shadow-xs">
       <div className="mb-4 flex flex-col gap-1 border-b border-border pb-4">
         <h2 className="text-lg font-semibold text-foreground">{title}</h2>
         <p className="font-mono text-xs text-muted-foreground">{file}</p>
@@ -145,11 +145,11 @@ export default function DevComponentsPage() {
                   Con íconos (tamaño default)
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="default" size="default" className="gap-1.5 shadow-sm">
+                  <Button variant="default" size="default" className="gap-1.5 shadow-xs">
                     <PlusCircleIcon className="size-4" aria-hidden />
                     Nuevo
                   </Button>
-                  <Button variant="outline" size="default" className="gap-1.5 shadow-sm">
+                  <Button variant="outline" size="default" className="gap-1.5 shadow-xs">
                     <DownloadIcon className="size-4" aria-hidden />
                     Descargar
                   </Button>
@@ -164,7 +164,7 @@ export default function DevComponentsPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="shadow-sm"
+                    className="shadow-xs"
                     aria-label="Buscar"
                   >
                     <SearchIcon className="size-4" aria-hidden />
@@ -172,7 +172,7 @@ export default function DevComponentsPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="shadow-sm"
+                    className="shadow-xs"
                     aria-label="Descargar"
                   >
                     <DownloadIcon className="size-4" aria-hidden />
@@ -180,7 +180,7 @@ export default function DevComponentsPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="shadow-sm"
+                    className="shadow-xs"
                     aria-label="Más acciones"
                   >
                     <MoreHorizontal className="size-4" aria-hidden />
@@ -193,13 +193,13 @@ export default function DevComponentsPage() {
                   Tamaños
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="outline" size="sm" className="shadow-sm">
+                  <Button variant="outline" size="sm" className="shadow-xs">
                     Pequeño (sm)
                   </Button>
-                  <Button variant="outline" size="default" className="shadow-sm">
+                  <Button variant="outline" size="default" className="shadow-xs">
                     Default
                   </Button>
-                  <Button variant="outline" size="lg" className="shadow-sm">
+                  <Button variant="outline" size="lg" className="shadow-xs">
                     Grande (lg)
                   </Button>
                 </div>
@@ -210,7 +210,7 @@ export default function DevComponentsPage() {
                   Estados
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="outline" size="default" disabled className="shadow-sm">
+                  <Button variant="outline" size="default" disabled className="shadow-xs">
                     Deshabilitado
                   </Button>
                 </div>
@@ -442,7 +442,7 @@ export default function DevComponentsPage() {
               title="Título de sección"
               size="md"
               action={
-                <Button type="button" variant="outline" size="icon" className="shadow-sm" aria-label="Más">
+                <Button type="button" variant="outline" size="icon" className="shadow-xs" aria-label="Más">
                   <MoreHorizontal className="size-4" />
                 </Button>
               }
