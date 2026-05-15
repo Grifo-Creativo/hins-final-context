@@ -8,7 +8,9 @@ import { RoiRecoveryLineChart } from "@/components/charts/RoiRecoveryLineChart"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardWire } from "@/components/ui/card-wire"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { FeatureItem } from "@/components/ui/feature-item"
 import { HinsTooltip } from "@/components/ui/hins-tooltip"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
@@ -43,8 +45,11 @@ import {
 import { generationSparklinePoints } from "@/data/gdd-performance-mock"
 import Link from "next/link"
 import {
+  DownloadIcon,
   InfoIcon,
   MoreHorizontal,
+  PlusCircleIcon,
+  SearchIcon,
   SunIcon,
   ZapIcon,
 } from "lucide-react"
@@ -112,6 +117,107 @@ export default function DevComponentsPage() {
         </header>
 
         <div className="flex flex-col gap-10">
+          <Showcase title="Button" file="components/ui/button.tsx">
+            <div className="flex flex-col gap-6">
+              <div>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Variantes
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="default" size="default">
+                    Default (CTA)
+                  </Button>
+                  <Button variant="outline" size="default">
+                    Outline
+                  </Button>
+                  <Button variant="secondary" size="default">
+                    Secondary
+                  </Button>
+                  <Button variant="destructive" size="default">
+                    Destructive
+                  </Button>
+                  <Button variant="link">Link</Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Con íconos (tamaño default)
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="default" size="default" className="gap-1.5 shadow-sm">
+                    <PlusCircleIcon className="size-4" aria-hidden />
+                    Nuevo
+                  </Button>
+                  <Button variant="outline" size="default" className="gap-1.5 shadow-sm">
+                    <DownloadIcon className="size-4" aria-hidden />
+                    Descargar
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Icon-only (header, acciones)
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shadow-sm"
+                    aria-label="Buscar"
+                  >
+                    <SearchIcon className="size-4" aria-hidden />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shadow-sm"
+                    aria-label="Descargar"
+                  >
+                    <DownloadIcon className="size-4" aria-hidden />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shadow-sm"
+                    aria-label="Más acciones"
+                  >
+                    <MoreHorizontal className="size-4" aria-hidden />
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Tamaños
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="outline" size="sm" className="shadow-sm">
+                    Pequeño (sm)
+                  </Button>
+                  <Button variant="outline" size="default" className="shadow-sm">
+                    Default
+                  </Button>
+                  <Button variant="outline" size="lg" className="shadow-sm">
+                    Grande (lg)
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Estados
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="outline" size="default" disabled className="shadow-sm">
+                    Deshabilitado
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Showcase>
+
           <Showcase title="TabsForBlocks" file="components/ui/tabs-for-blocks.tsx">
             <div className="h-10 max-w-md">
               <TabsForBlocks
@@ -137,6 +243,42 @@ export default function DevComponentsPage() {
                 </p>
               </CardContent>
             </Card>
+          </Showcase>
+
+          <Showcase title="CardWire" file="components/ui/card-wire.tsx">
+            <CardWire>
+              <div className="flex flex-col gap-3">
+                <p className="text-sm font-medium text-foreground">
+                  Contenedor con borde, sin sombra
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Úsalo para desgloses de datos dentro de Sheets o vistas internas.
+                </p>
+              </div>
+            </CardWire>
+          </Showcase>
+
+          <Showcase title="FeatureItem" file="components/ui/feature-item.tsx">
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Horizontal (default)
+                </p>
+                <FeatureItem label="Ahorro generado" value="$1,250.50" />
+              </div>
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Vertical
+                </p>
+                <div className="max-w-xs">
+                  <FeatureItem
+                    label="Medidor"
+                    value="MED-2024-001"
+                    orientation="vertical"
+                  />
+                </div>
+              </div>
+            </div>
           </Showcase>
 
           <Showcase title="IconBadge" file="components/ui/icon-badge.tsx">
@@ -300,7 +442,7 @@ export default function DevComponentsPage() {
               title="Título de sección"
               size="md"
               action={
-                <Button type="button" variant="ghost" size="icon" aria-label="Más">
+                <Button type="button" variant="outline" size="icon" className="shadow-sm" aria-label="Más">
                   <MoreHorizontal className="size-4" />
                 </Button>
               }
@@ -333,9 +475,21 @@ export default function DevComponentsPage() {
 
           <section className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/30 p-6">
             <h2 className="text-lg font-semibold text-foreground">
-              Documentados en components.md, sin archivo aún
+              Documentados en components.md (ver detalle en archivo)
             </h2>
             <ul className="mt-3 list-inside list-disc text-sm text-muted-foreground">
+              <li>
+                <span className="font-mono text-foreground">Form Elements</span> —{" "}
+                <span className="font-mono">Input, Select, Textarea</span>
+              </li>
+              <li>
+                <span className="font-mono text-foreground">KpiSecondaryCompact</span> —{" "}
+                <span className="font-mono">components/ui/kpi-secondary.tsx (variante)</span>
+              </li>
+              <li>
+                <span className="font-mono text-foreground">KpiWithTimeline</span> —{" "}
+                <span className="font-mono">components/ui/kpi-with-timeline.tsx</span>
+              </li>
               <li>
                 <span className="font-mono text-foreground">PageHeader</span> —{" "}
                 <span className="font-mono">components/ui/page-header.tsx</span>

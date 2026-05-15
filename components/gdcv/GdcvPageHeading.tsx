@@ -40,7 +40,7 @@ export function GdcvPageHeading() {
         />
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="icon"
           className="shrink-0 shadow-sm"
           aria-label="Exportar datos"

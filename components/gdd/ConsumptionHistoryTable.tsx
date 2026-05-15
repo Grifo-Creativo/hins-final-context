@@ -177,9 +177,9 @@ const columns: ColumnDef<ConsumptionHistoryRow>[] = [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
-              className="size-8"
+              className="size-8 shadow-sm"
               aria-label={`Acciones — ${row.getValue("period")}`}
             >
               <MoreHorizontalIcon className="size-4" aria-hidden />
@@ -234,9 +234,14 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
         </h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2 shadow-sm">
+            <Button
+              variant="outline"
+              size="icon"
+              className="md:w-auto md:px-2.5 md:gap-2 shadow-sm"
+              title="Ver columnas"
+            >
               <TableIcon className="size-4" aria-hidden />
-              Ver columnas
+              <span className="hidden md:inline">Ver columnas</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">

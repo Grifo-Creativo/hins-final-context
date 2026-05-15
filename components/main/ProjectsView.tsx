@@ -55,7 +55,7 @@ export function ProjectsView() {
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon"
               className="shadow-sm"
               aria-label="Exportar"

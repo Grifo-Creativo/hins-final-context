@@ -50,7 +50,7 @@ export function ParkPerformanceView() {
           </CardWithContent>
 
           {/* Right column — KPI primary + 2× secondary */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 h-full">
 
             {/* KpiPrimary — generada en abril */}
             <KpiPrimary
@@ -66,7 +66,7 @@ export function ParkPerformanceView() {
             />
 
             {/* KpiSecondary row */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-6 flex-1">
               <KpiSecondary
                 icon={DollarSignIcon}
                 label={savingsCardMock.label}

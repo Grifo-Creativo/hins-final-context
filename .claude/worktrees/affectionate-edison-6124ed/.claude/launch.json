@@ -18,7 +18,7 @@
       "name": "Next.js Start (Prod)",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["start"],
-      "port": 3001
+      "port": 3000
     },
     {
       "name": "Lint",

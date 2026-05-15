@@ -59,9 +59,9 @@ export function GdcvHeader() {
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="size-8"
+            className="size-8 shadow-sm"
             aria-label="Buscar"
           >
             <SearchIcon className="size-4" aria-hidden />

@@ -39,9 +39,9 @@ export function GddViewHeader() {
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="size-8"
+            className="size-8 shadow-sm"
             aria-label="Buscar"
           >
             <SearchIcon className="size-4" aria-hidden />
@@ -50,9 +50,9 @@ export function GddViewHeader() {
             <SheetTrigger asChild>
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="relative size-8"
+                className="relative size-8 shadow-sm"
                 aria-label="Notificaciones"
                 aria-expanded={notificationsOpen}
               >

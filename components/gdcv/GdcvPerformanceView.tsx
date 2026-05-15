@@ -64,7 +64,7 @@ export function GdcvPerformanceView() {
         </CardWithContent>
 
         {/* Right column — KPI primary + 2× secondary */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 h-full">
           <KpiPrimary
             icon={ZapIcon}
             label={gdcvGeneradaAbril.title}
@@ -77,7 +77,7 @@ export function GdcvPerformanceView() {
             sparklineData={gdcvGenerationSparkline}
           />
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 flex-1">
             <KpiSecondary
               icon={DollarSignIcon}
               label={gdcvAhorroTotalAbril.label}

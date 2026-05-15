@@ -64,18 +64,20 @@ export function KpiSecondary({
   // Default: vertical layout (KpiSecondaryStacked behavior)
   return (
     <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
-      <div className="flex flex-col gap-2 p-4">
-        <IconBadge icon={icon} size="sm" />
-        <p className="text-sm font-normal text-[#737373]">{label}</p>
-        <div className="flex items-center gap-1">
-          <p className="text-xl font-semibold text-[#0A0A0A]">{value}</p>
-          {infoTooltip && (
-            <HinsTooltip
-              trigger={<InfoIcon className="size-4 text-muted-foreground" aria-hidden />}
-              content={infoTooltip.content}
-              href={infoTooltip.href}
-            />
-          )}
+      <div className="flex flex-col gap-2 p-4 h-full justify-between">
+        <div className="flex flex-col gap-2">
+          <IconBadge icon={icon} size="sm" />
+          <p className="text-sm font-normal text-[#737373]">{label}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-xl font-semibold text-[#0A0A0A]">{value}</p>
+            {infoTooltip && (
+              <HinsTooltip
+                trigger={<InfoIcon className="size-4 text-muted-foreground" aria-hidden />}
+                content={infoTooltip.content}
+                href={infoTooltip.href}
+              />
+            )}
+          </div>
         </div>
         {showDelta ? <SoftBadge>{delta}</SoftBadge> : null}
       </div>

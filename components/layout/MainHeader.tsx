@@ -49,9 +49,9 @@ export function MainHeader() {
           {/* SearchButton */}
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="size-8"
+            className="size-8 shadow-sm"
             aria-label="Buscar"
           >
             <SearchIcon className="size-4" aria-hidden />
@@ -62,9 +62,9 @@ export function MainHeader() {
             <SheetTrigger asChild>
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="relative size-8"
+                className="relative size-8 shadow-sm"
                 aria-label="Notificaciones"
                 aria-expanded={notificationsOpen}
               >

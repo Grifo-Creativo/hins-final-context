@@ -132,9 +132,9 @@ export function SocioDetailSheet({
               <SheetClose asChild>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="icon"
-                  className="size-8 shrink-0"
+                  className="size-8 shrink-0 shadow-sm"
                   aria-label="Cerrar"
                 >
                   <XIcon className="size-4" aria-hidden />

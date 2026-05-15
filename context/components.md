@@ -10,19 +10,20 @@
 ## Índice
 
 1. [Form Elements (Inputs, Selects, etc)](#form-elements)
-2. [TabsForBlocks](#tabsforblocks)
-3. [Card](#card)
-4. [CardWire](#cardwire)
-5. [FeatureItem](#featureitem)
-6. [IconBadge](#iconbadge)
-7. [KpiPrimary](#kpiprimary)
-8. [KpiSecondary](#kpisecondary)
-9. [SoftBadge](#softbadge)
-10. [CardWithContent](#cardwithcontent)
-11. [Table](#table)
-12. [GenerationSparkline](#generationsparkline)
-13. [ParkEnergyBarChart](#parkenergybarchar)
-14. [HinsTooltip](#hinstooltip)
+2. [Button](#button)
+3. [TabsForBlocks](#tabsforblocks)
+4. [Card](#card)
+5. [CardWire](#cardwire)
+6. [FeatureItem](#featureitem)
+7. [IconBadge](#iconbadge)
+8. [KpiPrimary](#kpiprimary)
+9. [KpiSecondary](#kpisecondary)
+10. [SoftBadge](#softbadge)
+11. [CardWithContent](#cardwithcontent)
+12. [Table](#table)
+13. [GenerationSparkline](#generationsparkline)
+14. [ParkEnergyBarChart](#parkenergybarchar)
+15. [HinsTooltip](#hinstooltip)
 
 ---
 
@@ -106,6 +107,171 @@ Usar `gap-2` entre label e input cuando estén en columna:
 - ✅ `text-base` en desktop es intencional — mejora accesibilidad
 - ✅ Responsive `text-sm` en mobile (`md:text-sm`) está en el componente Input nativo
 - ✅ Focus state con ring-3 es estándar shadcn — mantenerlo siempre
+
+---
+
+## Button
+
+**Archivo:** `/components/ui/button.tsx`  
+**Estado:** ✅ Aprobado  
+**Fuente:** shadcn/ui Button + custom variants
+
+### Regla fundamental
+
+**Todos los botones de acción en HINS llevan `shadow-sm` sin excepción** (según design-system.md).
+
+El componente Button soporta múltiples variantes y tamaños, pero cada caso de uso tiene un patrón específico recomendado.
+
+### Variantes permitidas
+
+| Variante | Uso | Ejemplo |
+|----------|-----|---------|
+| `default` | Botones primarios/CTA, crear, guardar | "Nuevo Socio", "Guardar cambios" |
+| `outline` | Botones secundarios, acciones en headers, tablas | Descargar, filtros, vista de columnas |
+| `secondary` | Alternativa a outline, menos énfasis | Menos común, usar con cuidado |
+| `ghost` | ❌ **NO USAR** — viola regla de shadow-sm | Use `outline` en su lugar |
+| `destructive` | Acciones peligrosas (borrar, cancelar) | Eliminar socio |
+| `link` | Links estilizados como botones | Navegar dentro de vista |
+
+### Tamaños permitidos
+
+| Tamaño | Altura | Uso |
+|--------|--------|-----|
+| `default` | `h-8` | Botones en formularios y bloques de contenido |
+| `sm` | `h-7` | Botones compactos en espacios reducidos |
+| `lg` | `h-9` | Botones destacados (menos común) |
+| `icon` | `size-8` | Botones de acción con solo ícono (headers, acciones de tabla) |
+| `icon-sm` | `size-7` | Ícono compacto (raro) |
+| `icon-xs` | `size-6` | Ícono muy pequeño (raro) |
+| `icon-lg` | `size-9` | Ícono grande (raro) |
+
+### Regla crítica: Shadow en botones de acción
+
+**Patrón estándar para botones de acción (headers, tablas, etc.):**
+
+```tsx
+<Button
+  variant="outline"        // Siempre outline o default
+  size="icon"             // Para ícono-only
+  className="shadow-sm"   // Obligatorio — ver design-system.md
+  aria-label="..."        // Accesibilidad
+>
+  <IconComponent className="size-4" aria-hidden />
+</Button>
+```
+
+**Patrón para botones primarios con texto:**
+
+```tsx
+<Button
+  type="button"
+  variant="default"       // Primary CTA
+  size="default"         // o 'lg' si es prominente
+  className="gap-1.5 shadow-sm"  // gap para ícono + texto
+>
+  <IconComponent className="size-4" aria-hidden />
+  Nuevo
+</Button>
+```
+
+### Implementación completa
+
+```tsx
+// /components/ui/button.tsx (ya existente)
+const buttonVariants = cva(
+  "group/button inline-flex shrink-0 items-center justify-center rounded-md ...",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground shadow-sm ...",
+        outline: "border-input bg-white shadow-sm hover:bg-muted ...",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm ...",
+        ghost: "hover:bg-muted hover:text-foreground ...",  // ⚠️ Sin shadow
+        destructive: "bg-destructive/10 text-destructive ...",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-8 gap-1.5 px-2.5 ...",
+        xs: "h-6 gap-1 px-2 text-xs ...",
+        sm: "h-7 gap-1 px-2.5 ...",
+        lg: "h-9 gap-1.5 px-2.5 ...",
+        icon: "size-8",
+        "icon-xs": "size-6 ...",
+        "icon-sm": "size-7 ...",
+        "icon-lg": "size-9",
+      },
+    },
+  }
+)
+```
+
+### Casos de uso en el producto
+
+**Header con botón export (outline + icon + shadow):**
+```tsx
+<Button
+  variant="outline"
+  size="icon"
+  className="shadow-sm"
+  aria-label="Exportar datos"
+>
+  <DownloadIcon className="size-4" aria-hidden />
+</Button>
+```
+
+**Botón crear nuevo (default + texto + ícono):**
+```tsx
+<Button
+  variant="default"
+  size="default"
+  className="gap-1.5 shadow-sm"
+  onClick={() => openDialog()}
+>
+  <PlusCircleIcon className="size-4" aria-hidden />
+  Nuevo Socio
+</Button>
+```
+
+**Botón de acción en tabla (outline + icon + shadow):**
+```tsx
+<DropdownMenuTrigger asChild>
+  <Button
+    variant="outline"
+    size="icon"
+    className="size-8 shadow-sm"
+    aria-label={`Acciones — ${row.getValue("periodo")}`}
+  >
+    <MoreHorizontalIcon className="size-4" aria-hidden />
+  </Button>
+</DropdownMenuTrigger>
+```
+
+### ⚠️ Atención: No usar ghost
+
+`variant="ghost"` **NO incluye shadow**. Esto viola la regla de design-system.md.
+
+❌ **Incorrecto:**
+```tsx
+<Button variant="ghost" size="icon" aria-label="Action">
+  <IconComponent className="size-4" />
+</Button>
+```
+
+✅ **Correcto:**
+```tsx
+<Button variant="outline" size="icon" className="shadow-sm" aria-label="Action">
+  <IconComponent className="size-4" />
+</Button>
+```
+
+### Notas para el agente
+
+- Siempre usar `shadow-sm` en botones de acción — es regla de design-system.md
+- `ghost` es para hover states internos, no para botones de acción visibles
+- `icon` size es estándar para acciones en headers/tablas
+- Texto + ícono siempre llevan `gap-1.5` entre ellos
+- `aria-label` es obligatorio en botones icon-only para accesibilidad
+- Focus state con ring-3 es nativo — no sobrescribir
 
 ---
 
