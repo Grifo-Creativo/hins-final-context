@@ -24,7 +24,7 @@ export function GdcvHeader() {
   const isSocioFlow = pathname.startsWith("/gdcv/socio")
 
   return (
-    <header className="sticky top-0 z-40 shrink-0 border-b border-border bg-white">
+    <header className="sticky top-0 z-40 shrink-0 bg-white shadow-xs">
       <div className="flex h-14 items-center justify-between gap-4 px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           {isSocioFlow ? (

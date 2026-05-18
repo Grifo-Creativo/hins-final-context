@@ -1,5 +1,6 @@
 // data/chart-config.ts
 import type { ChartConfig } from "@/components/ui/chart"
+import { participacionChartData } from "@/data/gdcv-socio-mock"
 
 export const parkEnergyBarChartConfig = {
   generated: {
@@ -45,3 +46,11 @@ export const gdcvEnergyBarChartConfig = {
 
 /** Alias del mismo preset que `roiRecoveryChartConfig` para GDCV/agc/socio */
 export const gdcvRoiRecoveryChartConfig = roiRecoveryChartConfig
+
+/** Donut participación por socio — un entry por slice (color desde mock). */
+export const participacionChartConfig = Object.fromEntries(
+  participacionChartData.map((slice) => [
+    slice.name,
+    { label: slice.name, color: slice.color },
+  ])
+) satisfies ChartConfig

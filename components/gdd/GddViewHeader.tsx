@@ -33,7 +33,7 @@ export function GddViewHeader() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
 
   return (
-    <div className="shrink-0 border-b border-border bg-background">
+    <div className="shrink-0 bg-background shadow-xs">
       <div className="flex h-11 items-center gap-2 px-4">
         <SidebarTrigger className="-ml-0.5" />
         <div className="ml-auto flex items-center gap-1 sm:gap-2">

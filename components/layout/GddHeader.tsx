@@ -32,7 +32,7 @@ export function GddHeader() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-10 shrink-0 border-b border-border bg-background">
+    <header className="sticky top-0 z-10 shrink-0 bg-background shadow-xs">
       {/* Top bar — trigger + breadcrumb (left), chrome actions (right) */}
       <div className="flex h-14 items-center justify-between gap-3 px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">

@@ -118,7 +118,7 @@ Usar `gap-2` entre label e input cuando estén en columna:
 
 ### Regla fundamental
 
-**Todos los botones de acción en HINS llevan `shadow-sm` sin excepción** (según design-system.md).
+**Los botones de acción en HINS llevan `shadow-xs` por defecto** para mantener una elevación visual sutil y consistente.
 
 El componente Button soporta múltiples variantes y tamaños, pero cada caso de uso tiene un patrón específico recomendado.
 
@@ -129,7 +129,7 @@ El componente Button soporta múltiples variantes y tamaños, pero cada caso de 
 | `default` | Botones primarios/CTA, crear, guardar | "Nuevo Socio", "Guardar cambios" |
 | `outline` | Botones secundarios, acciones en headers, tablas | Descargar, filtros, vista de columnas |
 | `secondary` | Alternativa a outline, menos énfasis | Menos común, usar con cuidado |
-| `ghost` | ❌ **NO USAR** — viola regla de shadow-sm | Use `outline` en su lugar |
+| `ghost` | Botones sin elevación visual (hover states internos) | Contextos modales o navegación interna |
 | `destructive` | Acciones peligrosas (borrar, cancelar) | Eliminar socio |
 | `link` | Links estilizados como botones | Navegar dentro de vista |
 
@@ -145,7 +145,7 @@ El componente Button soporta múltiples variantes y tamaños, pero cada caso de 
 | `icon-xs` | `size-6` | Ícono muy pequeño (raro) |
 | `icon-lg` | `size-9` | Ícono grande (raro) |
 
-### Regla crítica: Shadow en botones de acción
+### Patrón recomendado: Shadow en botones de acción
 
 **Patrón estándar para botones de acción (headers, tablas, etc.):**
 
@@ -153,7 +153,7 @@ El componente Button soporta múltiples variantes y tamaños, pero cada caso de 
 <Button
   variant="outline"        // Siempre outline o default
   size="icon"             // Para ícono-only
-  className="shadow-sm"   // Obligatorio — ver design-system.md
+  className="shadow-xs"   // Shadow visual sutil (defecto recomendado)
   aria-label="..."        // Accesibilidad
 >
   <IconComponent className="size-4" aria-hidden />
@@ -167,10 +167,23 @@ El componente Button soporta múltiples variantes y tamaños, pero cada caso de 
   type="button"
   variant="default"       // Primary CTA
   size="default"         // o 'lg' si es prominente
-  className="gap-1.5 shadow-sm"  // gap para ícono + texto
+  className="gap-1.5 shadow-xs"  // gap para ícono + texto
 >
   <IconComponent className="size-4" aria-hidden />
   Nuevo
+</Button>
+```
+
+**Patrón flexible: Sin shadow en contextos especiales**
+
+```tsx
+// En modales, sheets o contextos donde no necesites elevación visual
+<Button
+  variant="ghost"         // Sin shadow — hover states solo
+  size="icon"
+  aria-label="Cerrar"
+>
+  <XIcon className="size-4" aria-hidden />
 </Button>
 ```
 
@@ -183,10 +196,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm ...",
-        outline: "border-input bg-white shadow-sm hover:bg-muted ...",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm ...",
-        ghost: "hover:bg-muted hover:text-foreground ...",  // ⚠️ Sin shadow
+        default: "bg-primary text-primary-foreground shadow-xs ...",
+        outline: "border-input bg-white shadow-xs hover:bg-muted ...",
+        secondary: "bg-secondary text-secondary-foreground shadow-xs ...",
+        ghost: "hover:bg-muted hover:text-foreground ...",  // ✅ Sin shadow — para contextos modales/internos
         destructive: "bg-destructive/10 text-destructive ...",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -246,21 +259,34 @@ const buttonVariants = cva(
 </DropdownMenuTrigger>
 ```
 
-### ⚠️ Atención: No usar ghost
+### ✅ Cuándo usar cada variante
 
-`variant="ghost"` **NO incluye shadow**. Esto viola la regla de design-system.md.
+**Usa `outline` + `shadow-xs` cuando:**
+- El botón es acción principal en headers
+- El botón está en tablas (dropdown actions)
+- El botón es filtro o control visible
+- Necesitas que el botón tenga presencia visual
 
-❌ **Incorrecto:**
+**Usa `ghost` cuando:**
+- El botón está dentro de un Sheet o Dialog
+- El botón es acción interna sin elevación necesaria
+- El botón está en contextos donde el hover-only es suficiente
+- Quieres minimizar la presencia visual
+
 ```tsx
-<Button variant="ghost" size="icon" aria-label="Action">
+// ❌ Inconsistente
+<Button variant="outline" size="icon" aria-label="Action">
+  {/* Falta shadow-xs */}
+</Button>
+
+// ✅ Correcto para headers/tablas
+<Button variant="outline" size="icon" className="shadow-xs" aria-label="Action">
   <IconComponent className="size-4" />
 </Button>
-```
 
-✅ **Correcto:**
-```tsx
-<Button variant="outline" size="icon" className="shadow-sm" aria-label="Action">
-  <IconComponent className="size-4" />
+// ✅ Correcto para modales/internos
+<Button variant="ghost" size="icon" aria-label="Close">
+  <XIcon className="size-4" />
 </Button>
 ```
 

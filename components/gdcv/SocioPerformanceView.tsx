@@ -5,6 +5,7 @@ import { useMemo, useState } from "react"
 
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { GenerationSparkline } from "@/components/charts/GenerationSparkline"
+import { ParticipacionDonutChart } from "@/components/charts/ParticipacionDonutChart"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
@@ -26,74 +27,16 @@ import {
   socioEnergiaParkSparkline,
   socioPotenciaInstalada,
   socioPotenciaAcople,
-  participacionChartData,
   participacionSocios,
-  socioTotalParticipantes,
 } from "@/data/gdcv-socio-mock"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { CircleDollarSignIcon, XIcon, ZapIcon } from "lucide-react"
-import { Cell, Pie, PieChart, Tooltip, type TooltipContentProps } from "recharts"
 
 const PERIOD_TABS = [
   { value: "1m", label: "1M" },
   { value: "3m", label: "3M" },
   { value: "6m", label: "6M" },
 ]
-
-const PIE_CX = 80
-const PIE_CY = 80
-
-function renderParticipacionPieTooltip(props: TooltipContentProps) {
-  if (!props.active || !props.payload?.length) return null
-  const item = props.payload[0]
-  const datum = item.payload as { name?: string; value?: number } | undefined
-  const name = item.name ?? datum?.name
-  const valueRaw = item.value ?? datum?.value
-  const value = typeof valueRaw === "number" ? valueRaw : Number(valueRaw)
-  if (name == null || Number.isNaN(value)) return null
-
-  return (
-    <div className="rounded-lg border border-border bg-white px-3 py-2 text-sm shadow-md">
-      <p className="font-semibold text-foreground">{String(name)}</p>
-      <p className="text-muted-foreground">{value}% participación</p>
-    </div>
-  )
-}
-
-function ParticipacionDonut({
-  cellKeyPrefix,
-}: {
-  cellKeyPrefix: string
-}) {
-  return (
-    <div className="flex justify-center">
-      <div className="relative flex items-center justify-center">
-        <PieChart width={160} height={160} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-          <Pie
-            data={participacionChartData}
-            cx={PIE_CX}
-            cy={PIE_CY}
-            innerRadius={50}
-            outerRadius={72}
-            paddingAngle={0}
-            dataKey="value"
-            strokeWidth={0}
-          >
-            {participacionChartData.map((entry, index) => (
-              <Cell key={`${cellKeyPrefix}-${entry.name}-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip content={renderParticipacionPieTooltip} />
-        </PieChart>
-
-        <div className="pointer-events-none absolute text-center">
-          <p className="text-lg font-semibold leading-none text-foreground">{socioTotalParticipantes}</p>
-          <p className="text-xs text-muted-foreground">socios</p>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export function SocioPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
@@ -181,9 +124,13 @@ export function SocioPerformanceView() {
           </Card>
 
           {/* Participación por Socio */}
-          <CardWithContent title="Participación por Socio" className="h-fit">
+          <CardWithContent
+            title="Participación por Socio"
+            className="h-fit"
+            allowTooltipOverflow
+          >
             <div className="flex flex-col gap-4">
-              <ParticipacionDonut cellKeyPrefix="card" />
+              <ParticipacionDonutChart cellKeyPrefix="card" />
 
               <div className="flex flex-col">
                 {legendPreview.map((socio) => (
@@ -255,7 +202,7 @@ export function SocioPerformanceView() {
 
             <div className="min-h-0 flex-1 overflow-y-auto">
               <div className="flex flex-col gap-6 p-6 pt-0">
-                <ParticipacionDonut cellKeyPrefix="sheet" />
+                <ParticipacionDonutChart cellKeyPrefix="sheet" />
 
                 <div className="flex flex-col">
                   {participacionSocios.map((socio) => (
