@@ -10,20 +10,21 @@
 ## Índice
 
 1. [Form Elements (Inputs, Selects, etc)](#form-elements)
-2. [Button](#button)
-3. [TabsForBlocks](#tabsforblocks)
-4. [Card](#card)
-5. [CardWire](#cardwire)
-6. [FeatureItem](#featureitem)
-7. [IconBadge](#iconbadge)
-8. [KpiPrimary](#kpiprimary)
-9. [KpiSecondary](#kpisecondary)
-10. [SoftBadge](#softbadge)
-11. [CardWithContent](#cardwithcontent)
-12. [Table](#table)
-13. [GenerationSparkline](#generationsparkline)
-14. [ParkEnergyBarChart](#parkenergybarchar)
-15. [HinsTooltip](#hinstooltip)
+2. [InputWithIconButton](#inputwithiconbutton)
+3. [Button](#button)
+4. [TabsForBlocks](#tabsforblocks)
+5. [Card](#card)
+6. [CardWire](#cardwire)
+7. [FeatureItem](#featureitem)
+8. [IconBadge](#iconbadge)
+9. [KpiPrimary](#kpiprimary)
+10. [KpiSecondary](#kpisecondary)
+11. [SoftBadge](#softbadge)
+12. [CardWithContent](#cardwithcontent)
+13. [Table](#table)
+14. [GenerationSparkline](#generationsparkline)
+15. [ParkEnergyBarChart](#parkenergybarchar)
+16. [HinsTooltip](#hinstooltip)
 
 ---
 
@@ -107,6 +108,77 @@ Usar `gap-2` entre label e input cuando estén en columna:
 - ✅ `text-base` en desktop es intencional — mejora accesibilidad
 - ✅ Responsive `text-sm` en mobile (`md:text-sm`) está en el componente Input nativo
 - ✅ Focus state con ring-3 es estándar shadcn — mantenerlo siempre
+
+---
+
+## InputWithIconButton
+
+**Archivo:** `/components/ui/input-with-icon-button.tsx`  
+**Estado:** ✅ Aprobado  
+**Dependencias:** `Input`, `Button` (shadcn), `lucide-react`
+
+### Cuándo usar
+
+- Campo de texto con una **acción secundaria** en el borde derecho (buscar, validar, abrir ayuda).
+- Formularios y diálogos donde el input y el botón deben leerse como **un solo control** visual.
+
+### Cuándo NO usar
+
+- Sustituir `Select`, `PeriodSelector` o `TabsForBlocks`.
+- Acción primaria del formulario → usar `Button` aparte.
+- Solo decoración sin acción → no agregar botón; usar `Input` simple.
+
+### Spec visual
+
+| Parte | Reglas |
+|---|---|
+| Input | Mismo spec lg que `Input` (`h-8`, `text-base`). `rounded-r-none`, sin sombra propia. |
+| Botón | `variant="outline"`, `size="icon"`, `size-8`, `rounded-l-none`, `shadow-none`. |
+| Grupo | `flex` + `rounded-md shadow-xs` en el contenedor. |
+| Label | Opcional — `text-sm font-medium text-muted-foreground`, `htmlFor` al input. |
+| Focus | `focus-visible:z-10` en input y botón para ring visible en el grupo. |
+
+### Props
+
+```tsx
+export type InputWithIconButtonProps = {
+  label?: string
+  id?: string
+  icon: LucideIcon
+  iconButtonLabel: string   // obligatorio — aria-label del botón
+  iconTooltip?: string      // tooltip del botón ícono (Tooltip nativo shadcn)
+  iconTooltipSide?: "top" | "bottom" | "left" | "right"
+  onIconClick?: () => void
+  containerClassName?: string
+  inputClassName?: string
+  buttonClassName?: string
+} & Omit<ComponentProps<"input">, "className">
+```
+
+### Implementación
+
+```tsx
+import { ParkingMeter } from "lucide-react"
+import { InputWithIconButton } from "@/components/ui/input-with-icon-button"
+
+<InputWithIconButton
+  label="N° de Medidor"
+  icon={ParkingMeter}
+  iconButtonLabel="Buscar medidor"
+  iconTooltip="N° de medidor del parque"
+  placeholder="Ingresar..."
+  value={medidor}
+  onChange={(e) => setMedidor(e.target.value)}
+  onIconClick={() => { /* acción mock o real */ }}
+/>
+```
+
+### Notas para el agente
+
+- ❌ No crear variantes sm/md del grupo.
+- ✅ `iconButtonLabel` siempre definido (accesibilidad).
+- ✅ Si `disabled` en el input, el botón hereda `disabled`.
+- ✅ Ícono solo `lucide-react`.
 
 ---
 
@@ -308,7 +380,7 @@ const buttonVariants = cva(
 **Fuente:** shadcn/ui Tabs — variante Boxed (shadcn studio)
 
 ### Cuándo usar
-- Selector de período temporal (1M / 3M / 6M)
+- Selector de período temporal (1M / 3M / 6M / 1A / TODO)
 - Navegación entre vistas dentro de una misma página
 - Filtro de contenido dentro de una card
 
@@ -1444,7 +1516,50 @@ Siempre independiente — **nunca dentro de `Card`**.
 | `coverageMoney` | Cobertura ($) | ✅ | ✅ |
 | `actions` | — | ❌ Fija | ✅ |
 
-**Regla:** La primera columna (`period`) y la columna de acciones (`actions`) son siempre fijas. `enableHiding: false` en su definición.
+**Regla:** La primera columna (`period`) y la columna de acciones (`actions`) son siempre fijas en visibilidad (`enableHiding: false`). La primera columna además usa **sticky en mobile** (ver pattern abajo).
+
+---
+
+### Pattern: Sticky first column (mobile)
+
+**Cuándo usar:** Tablas con varias columnas en viewports `< md` (640px).
+
+**Comportamiento:**
+- Un solo contenedor con scroll horizontal: el wrapper de `Table` (`data-slot="table-container"`, `overflow-x-auto`).
+- La columna de referencia (Período, Socio, etc.) permanece visible con `position: sticky; left: 0` solo en `max-md`.
+- El resto de columnas se desplazan horizontalmente por debajo.
+- Sombra sutil en el borde derecho de la columna sticky al desplazar.
+
+**Column meta:**
+
+```ts
+meta: {
+  label: "Período",
+  sticky: "start",           // pin izquierdo en mobile
+  stickyWidth: "default",    // min-w-28 — textos cortos (período)
+  // stickyWidth: "wide",    // min-w-44 — avatar + nombre (Socios)
+}
+```
+
+**Utilidad:** `stickyStartCellClassName(meta)` desde `/lib/table-utils.ts` — aplicar en `TableHead` y `TableCell` junto con las clases de spec.
+
+```tsx
+import { stickyStartCellClassName } from "@/lib/table-utils"
+import { cn } from "@/lib/utils"
+
+<TableHead
+  className={cn(
+    "text-sm font-medium text-muted-foreground",
+    stickyStartCellClassName(header.column.columnDef.meta)
+  )}
+>
+```
+
+**Filas:** `TableRow` con `className="group h-14"` — `TableRow` usa hover opaco en mobile (`max-md:hover:bg-muted`); la celda sticky usa `max-md:group-hover:bg-muted` para igualar la fila (sin alpha).
+
+**No confundir con:** `enableHiding: false` (“columna fija” = no ocultable en “Ver columnas”).
+
+**No incluir (por ahora):** sticky de la columna `actions` a la derecha.
 
 ---
 
@@ -2953,7 +3068,7 @@ Selector de período mensual (ej. "Abril 2026") para filtrar tablas, KPIs o cual
 que dependa de un período activo. Siempre en el header de la sección que controla.
 
 ### Cuándo NO usar
-- Selector de rango temporal en charts (1M / 3M / 6M) → usar `TabsForBlocks`
+- Selector de rango temporal en bar charts (1M / 3M / 6M / 1A / TODO) → usar `TabsForBlocks` + `CHART_RANGE_TABS`. Densidad: `lib/chart-bar-density.ts` (tooltip off si >6 barras en mobile o >12 en desktop; labels top solo ≤6 barras).
 - Filtros multi-selección → usar Checkbox
 - Navegación entre vistas → usar Sidebar o `TabsForBlocks`
 
@@ -3045,6 +3160,51 @@ const [period, setPeriod] = useState("Abril 2026")
 
 ---
 
+## SocioAccessView
+
+**Archivo:** `/components/gdcv/SocioAccessView.tsx`  
+**Estado:** ✅ Aprobado (prototipo v1 — Agro Sur)  
+**Dependencias:** `InputOTP`, `InputOTPGroup`, `InputOTPSlot` (`/components/ui/input-otp`), `Label`, `Card`, `Button`, `lib/gdcv-socio-auth`
+
+### Cuándo usar
+
+- Pantalla de verificación previa al flujo socio GDCV (`/gdcv/socio/acceso`).
+- Primera visita o sesión no verificada antes de mostrar Mi Espacio / El Parque.
+
+### Cuándo NO usar
+
+- Dentro de vistas ya autenticadas del socio.
+- Como sustituto de login global HINS o AGC.
+- Para otros roles (Dueño GDD, AGC admin).
+
+### Spec visual
+
+| Elemento | Reglas |
+|---|---|
+| Contenedor | `min-h-[60vh]`, centrado, fondo hereda del shell socio |
+| Card | `rounded-xl bg-white shadow-sm p-6 max-w-md` |
+| H1 | `text-2xl font-semibold` — "Verificá tu acceso" |
+| Subtítulo | `text-sm text-muted-foreground` |
+| Label OTP | `text-sm font-medium text-muted-foreground` |
+| Slots OTP | 4 dígitos, `size-11`, `rounded-md`, `border-input`, `gap-2` |
+| Botón | Primary, `w-full shadow-sm`, disabled si OTP &lt; 4 |
+| Error | `text-sm text-destructive`, `role="alert"` |
+
+### Validación (mock v1)
+
+- Solo socio `AS` (Agro Sur Industrial).
+- Últimos 4 dígitos del medidor en `gdcv-mock` (`354904` → `4904`).
+- Sesión en `sessionStorage` vía `setSocioVerified()` / `isSocioVerified()`.
+
+### Notas para el agente
+
+- Gate en `SocioAuthGate` — no duplicar lógica en cada página socio.
+- No mostrar el medidor completo en UI.
+- Documentar en `flows/GDCV-socio/GDCV_socio_flow.md` pantalla `GDCV_socio_00`.
+- Link compartido desde `SociosTable` → Compartir (solo fila `AS`).
+
+---
+
 ## Índice actualizado
 
 1. [TabsForBlocks](#tabsforblocks)
@@ -3062,7 +3222,8 @@ const [period, setPeriod] = useState("Abril 2026")
 13. [SectionHeader](#sectionheader)
 14. [PageHeader](#pageheader)
 15. [PeriodSelector](#periodselector)
-16. [HinsAlert](#hinsalert)
+16. [SocioAccessView](#socioaccessview)
+17. [HinsAlert](#hinsalert)
 
 ---
 

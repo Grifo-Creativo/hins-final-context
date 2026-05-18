@@ -5,7 +5,7 @@ import { useMemo, useState } from "react"
 
 import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTable"
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
-import { CHART_RANGE_CHIP_OPTIONS } from "@/components/gdd/chart-range-options"
+import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithContent } from "@/components/ui/card-with-content"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
@@ -38,7 +38,7 @@ export function ParkPerformanceView() {
           <CardWithContent
             title="Energía Generada del Parque"
             subtitle={chartSubtitle}
-            tabs={CHART_RANGE_CHIP_OPTIONS.map((o) => ({ value: o.id, label: o.label }))}
+            tabs={CHART_RANGE_TABS}
             defaultTab="6m"
             onTabChange={(v) => setPeriod(v as PerformancePeriod)}
             className="h-full"

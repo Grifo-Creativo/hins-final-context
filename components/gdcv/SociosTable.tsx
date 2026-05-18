@@ -33,12 +33,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { SocioRow } from "@/data/gdcv-mock"
+import { stickyStartCellClassName } from "@/lib/table-utils"
+import { cn } from "@/lib/utils"
+import {
+  GDCV_SOCIO_DEMO_ID,
+  getSocioShareUrl,
+} from "@/lib/gdcv-socio-auth"
 import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
   MoreHorizontalIcon,
   PlusIcon,
+  ShareIcon,
   TableIcon,
 } from "lucide-react"
 
@@ -109,7 +116,7 @@ const columns: ColumnDef<SocioRow>[] = [
     accessorKey: "nombre",
     enableHiding: false,
     enableSorting: false,
-    meta: { label: "Socio" },
+    meta: { label: "Socio", sticky: "start", stickyWidth: "wide" },
     header: "Socio",
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
@@ -199,7 +206,7 @@ const columns: ColumnDef<SocioRow>[] = [
               <MoreHorizontalIcon className="size-4" aria-hidden />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuContent align="end" className="w-44">
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation()
@@ -207,6 +214,18 @@ const columns: ColumnDef<SocioRow>[] = [
             >
               Ver detalle
             </DropdownMenuItem>
+            {row.original.id === GDCV_SOCIO_DEMO_ID ? (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const url = getSocioShareUrl(window.location.origin)
+                  void navigator.clipboard.writeText(url)
+                }}
+              >
+                <ShareIcon className="size-4 mr-2" aria-hidden />
+                Compartir
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -243,7 +262,7 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
   const toRow = Math.min((pageIndex + 1) * pageSize, totalRows)
 
   return (
-    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs">
 
       {/* Section header */}
       <div className="flex items-center justify-between p-6 pb-0">
@@ -302,7 +321,10 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="text-sm font-medium text-muted-foreground"
+                    className={cn(
+                      "text-sm font-medium text-muted-foreground",
+                      stickyStartCellClassName(header.column.columnDef.meta)
+                    )}
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -318,11 +340,14 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="h-14 cursor-pointer"
+                  className="group h-14 cursor-pointer"
                   onClick={() => onRowClick(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={stickyStartCellClassName(cell.column.columnDef.meta)}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

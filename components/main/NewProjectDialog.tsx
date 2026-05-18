@@ -14,8 +14,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { InputWithIconButton } from "@/components/ui/input-with-icon-button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { PROJECT_TYPES, type NewProjectFormData, type ProjectType } from "@/data/new-project-mock"
+import { ParkingMeter } from "lucide-react"
 
 interface NewProjectDialogProps {
   open: boolean
@@ -122,18 +124,20 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
 
           {/* N° de Medidor (condicional - GDD) */}
           {formData.tipo === "GDD" && (
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                N° de Medidor
-              </label>
-              <Input
-                placeholder="Ingresar..."
-                value={formData.medidor || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, medidor: e.target.value })
-                }
-              />
-            </div>
+            <InputWithIconButton
+              label="N° de Medidor"
+              icon={ParkingMeter}
+              iconButtonLabel="Buscar medidor"
+              iconTooltip="N° de medidor del parque"
+              placeholder="Ingresar..."
+              value={formData.medidor || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, medidor: e.target.value })
+              }
+              onIconClick={() => {
+                // Prototipo: acción de búsqueda/validación de medidor
+              }}
+            />
           )}
 
           {/* Cantidad de Socios (condicional - GDCV) */}

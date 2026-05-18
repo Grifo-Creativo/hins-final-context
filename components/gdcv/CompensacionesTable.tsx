@@ -47,8 +47,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
 import { type CompensacionRow } from "@/data/gdcv-socio-mock"
+import { stickyStartCellClassName } from "@/lib/table-utils"
+import { cn } from "@/lib/utils"
 
 function SortIcon({ sorted }: { sorted: false | "asc" | "desc" }) {
   if (sorted === "asc")  return <ArrowUp   className="ml-2 size-4 text-muted-foreground" aria-label="Ascendente" />
@@ -61,7 +62,7 @@ const columns: ColumnDef<CompensacionRow>[] = [
     accessorKey: "periodo",
     enableHiding: false,
     enableSorting: false,
-    meta: { label: "Período" },
+    meta: { label: "Período", sticky: "start" },
     header: "Período",
     cell: ({ row }) => (
       <span className="text-sm font-medium text-muted-foreground">
@@ -223,7 +224,7 @@ export function CompensacionesTable({ data }: CompensacionesTableProps) {
   })
 
   return (
-    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h3 className="text-lg font-semibold text-foreground">
@@ -259,7 +260,7 @@ export function CompensacionesTable({ data }: CompensacionesTableProps) {
       </div>
 
       {/* Table */}
-      <div className="p-6 pt-4 space-y-6 overflow-x-auto">
+      <div className="p-6 pt-4 space-y-6">
         <Table aria-label="Historial de compensaciones del socio">
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
@@ -269,7 +270,8 @@ export function CompensacionesTable({ data }: CompensacionesTableProps) {
                     key={header.id}
                     className={cn(
                       "text-sm font-medium text-muted-foreground",
-                      header.column.getCanSort() && "cursor-pointer select-none"
+                      header.column.getCanSort() && "cursor-pointer select-none",
+                      stickyStartCellClassName(header.column.columnDef.meta)
                     )}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -280,9 +282,12 @@ export function CompensacionesTable({ data }: CompensacionesTableProps) {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="h-14">
+              <TableRow key={row.id} className="group h-14">
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    className={stickyStartCellClassName(cell.column.columnDef.meta)}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

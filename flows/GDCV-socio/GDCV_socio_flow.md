@@ -10,6 +10,31 @@ Socio GDCV — Participante del parque comunitario con cuotaparte porcentual.
 
 ## Pantallas
 
+### GDCV_socio_00 — Verificación de acceso (OTP medidor)
+Ruta: `/gdcv/socio/acceso?socio=AS`
+Ocurre **antes** de cualquier vista del socio. Sin wireframe — patrón estándar OTP.
+
+**Cuándo:** Primera visita (o sesión sin verificar) hasta validación exitosa.
+
+**Contenido:**
+- Card centrada sobre fondo shell (`bg-[#F2ECE9]/36`)
+- Contexto: nombre del parque + nombre del socio (v1: **Agro Sur Industrial**)
+- H1: "Verificá tu acceso"
+- Subtítulo: últimos 4 dígitos del N° de medidor
+- Input OTP: 4 slots (`input-otp` shadcn, variante outlined)
+- Botón primary "Continuar" (disabled hasta 4 dígitos)
+- Error inline si OTP incorrecto
+
+**Validación (prototipo):**
+- Socio demo: `AS` (Agro Sur Industrial), medidor `354904` → OTP correcto: `4904`
+- Sesión: `sessionStorage` clave `hins:gdcv-socio-verified`
+- Tras éxito → redirect `/gdcv/socio`
+
+**Origen del link:**
+- AGC en tabla Socios del Parque → ⋮ → **Compartir** (solo fila Agro Sur) copia URL de acceso
+
+---
+
 ### GDCV_socio_01 — Vista: Mi Espacio Personal (landing)
 Ruta: `/gdcv/socio`
 Vista por defecto al ingresar al flow.
@@ -142,6 +167,10 @@ Referencia visual: GDCV__socio_02.png
 
 ## Interacciones definidas
 
+- AGC → Socios del Parque → ⋮ Agro Sur → **Compartir** → copia `/gdcv/socio/acceso?socio=AS`
+- Socio abre link → pantalla OTP (socio_00) → ingresa últimos 4 del medidor → `/gdcv/socio`
+- Visitas posteriores a `/gdcv/socio` o `/gdcv/socio/parque` con sesión verificada → sin OTP
+- Visitas sin sesión → redirect a `/gdcv/socio/acceso?socio=AS`
 - Tab "Agro Sur Industrial" (socio_01) → `/gdcv/socio` (actual)
 - Tab "Performance del Parque" (socio_02) → `/gdcv/socio/parque`
 - Chips período 1M / 3M / 6M en bloque 1 (socio_01) → actualiza SOLO ese chart

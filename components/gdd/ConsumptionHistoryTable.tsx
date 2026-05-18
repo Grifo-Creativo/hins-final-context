@@ -48,6 +48,8 @@ import {
 } from "lucide-react"
 
 import { type ConsumptionHistoryRow } from "@/data/gdd-performance-mock"
+import { stickyStartCellClassName } from "@/lib/table-utils"
+import { cn } from "@/lib/utils"
 
 function parseKwhDisplay(value: string): number {
   const m = value.match(/[\d]+(?:[.,][\d]+)?/)
@@ -99,7 +101,7 @@ const columns: ColumnDef<ConsumptionHistoryRow>[] = [
     accessorKey: "period",
     enableHiding: false,
     enableSorting: false,
-    meta: { label: "Período" },
+    meta: { label: "Período", sticky: "start" },
     header: "Período",
     cell: ({ row }) => (
       <span className="text-sm font-medium text-muted-foreground">
@@ -226,7 +228,7 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
   })
 
   return (
-    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h3 className="text-lg font-semibold text-foreground">
@@ -270,7 +272,10 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
                 {hg.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="text-sm font-medium text-muted-foreground"
+                    className={cn(
+                      "text-sm font-medium text-muted-foreground",
+                      stickyStartCellClassName(header.column.columnDef.meta)
+                    )}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
@@ -280,9 +285,12 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="h-14">
+              <TableRow key={row.id} className="group h-14">
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    className={stickyStartCellClassName(cell.column.columnDef.meta)}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

@@ -1,5 +1,9 @@
 // data/gdd-performance-mock.ts
 
+import {
+  getChartRangeSubtitle,
+  sliceChartRangeSeries,
+} from "@/lib/chart-range-resolve"
 import type { ChartRangeChip } from "@/types/chart-range"
 
 export type PerformancePeriod = ChartRangeChip
@@ -9,20 +13,14 @@ export type ParkEnergyRow = {
   generated: number
 }
 
-export interface ConsumptionHistoryRow {
-  period: string
-  energyGenerated: string
-  energyPurchased: string
-  coveragePercent: string
-  totalConsumption: string
-  coverageMoney: string
-}
+/** Inicio de operaciones — Parque General Roca (GDD). */
+export const gddOperationsStartLabel = "Mayo 2025"
 
 /**
- * Serie mensual canónica (cronológico; el punto más reciente es el último).
- * 3M / 6M derivan por slice desde aquí con longitudes distintas (§5 UX).
+ * Serie mensual canónica desde inicio de operaciones (May 25 → Abr 26).
+ * 3M / 6M / 1A / TODO derivan por slice desde aquí.
  */
-const PARK_ENERGY_MONTHLY_BASE_FROM_OLDEST: ParkEnergyRow[] = [
+const PARK_ENERGY_MONTHLY: ParkEnergyRow[] = [
   { label: "May 25", generated: 410 },
   { label: "Jun 25", generated: 450 },
   { label: "Jul 25", generated: 490 },
@@ -37,23 +35,14 @@ const PARK_ENERGY_MONTHLY_BASE_FROM_OLDEST: ParkEnergyRow[] = [
   { label: "Abr 26", generated: 830 },
 ]
 
-/** Últimos N meses hacia la punta derecha del chart. */
-function latestMonthlySeries(monthCount: 3 | 6): ParkEnergyRow[] {
-  const total = PARK_ENERGY_MONTHLY_BASE_FROM_OLDEST.length
-  return PARK_ENERGY_MONTHLY_BASE_FROM_OLDEST.slice(total - monthCount).map((r) => ({
-    ...r,
-  }))
-}
-
-/** 1M: semanal, ~4 puntos; ventana reciente dentro de abril (vértice más nuevo a la derecha). */
-const PARK_ENERGY_WEEKLY_LATEST_MONTH: ParkEnergyRow[] = [
+/** 1M: semanal — ventana reciente dentro de abril. */
+const PARK_ENERGY_WEEKLY: ParkEnergyRow[] = [
   { label: "1–7 Abr", generated: 198 },
   { label: "8–14 Abr", generated: 205 },
   { label: "15–21 Abr", generated: 192 },
   { label: "22–30 Abr", generated: 235 },
 ]
 
-/** Métrica destacada fija (GDD_01.png) — no depende del filtro del chart. */
 export const highlightAprilCardMock = {
   title: "Generada en Abril",
   kwh: 830.17,
@@ -62,34 +51,12 @@ export const highlightAprilCardMock = {
 
 export const parkName = "Parque General Roca"
 
-export function getParkEnergySeries(
-  period: PerformancePeriod
-): ParkEnergyRow[] {
-  switch (period) {
-    case "1m":
-      return PARK_ENERGY_WEEKLY_LATEST_MONTH.map((r) => ({ ...r }))
-    case "3m":
-      return latestMonthlySeries(3)
-    case "6m":
-      return latestMonthlySeries(6)
-    default:
-      return []
-  }
+export function getParkEnergySeries(period: PerformancePeriod): ParkEnergyRow[] {
+  return sliceChartRangeSeries(period, PARK_ENERGY_MONTHLY, PARK_ENERGY_WEEKLY)
 }
 
-/** Descripción bajo el título del chart — coherente con granularidad del chip (§5). */
-export function getParkEnergyChartSubtitle(
-  period: PerformancePeriod
-): string {
-  switch (period) {
-    case "1m":
-      return "Períodos semanales"
-    case "3m":
-    case "6m":
-      return "Períodos mensuales"
-    default:
-      return ""
-  }
+export function getParkEnergyChartSubtitle(period: PerformancePeriod): string {
+  return getChartRangeSubtitle(period, gddOperationsStartLabel)
 }
 
 export const generationSparklinePoints = [
@@ -114,6 +81,15 @@ export const tariffCardMock = {
   value: "$80",
   unit: "/ kWh",
   deltaBadge: "+ 1.6% Mes",
+}
+
+export interface ConsumptionHistoryRow {
+  period: string
+  energyGenerated: string
+  energyPurchased: string
+  coveragePercent: string
+  totalConsumption: string
+  coverageMoney: string
 }
 
 export const consumptionHistoryMock: ConsumptionHistoryRow[] = [

@@ -19,14 +19,8 @@ import { PeriodSelectorLocal } from "@/components/ui/period-selector"
 import { SectionHeader } from "@/components/ui/section-header"
 import { SoftBadge } from "@/components/ui/soft-badge"
 import { StatList, type StatListItem } from "@/components/ui/stat-list"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTable"
+import { InputWithIconButton } from "@/components/ui/input-with-icon-button"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import {
   generationSparklineConfig,
@@ -42,7 +36,10 @@ import {
   ROI_INVERSION_META,
   roiProjectionData,
 } from "@/data/gdcv-roi-mock"
-import { generationSparklinePoints } from "@/data/gdd-performance-mock"
+import {
+  consumptionHistoryMock,
+  generationSparklinePoints,
+} from "@/data/gdd-performance-mock"
 import Link from "next/link"
 import {
   DownloadIcon,
@@ -51,6 +48,7 @@ import {
   PlusCircleIcon,
   SearchIcon,
   SunIcon,
+  ParkingMeter,
   ZapIcon,
 } from "lucide-react"
 
@@ -218,15 +216,32 @@ export default function DevComponentsPage() {
             </div>
           </Showcase>
 
+          <Showcase
+            title="InputWithIconButton"
+            file="components/ui/input-with-icon-button.tsx"
+          >
+            <div className="max-w-xs">
+              <InputWithIconButton
+                label="N° de Medidor"
+                icon={ParkingMeter}
+                iconButtonLabel="Buscar medidor"
+                iconTooltip="N° de medidor del parque"
+                placeholder="Ingresar..."
+              />
+            </div>
+          </Showcase>
+
           <Showcase title="TabsForBlocks" file="components/ui/tabs-for-blocks.tsx">
             <div className="h-10 max-w-md">
               <TabsForBlocks
                 tabs={[
-                  { value: "1M", label: "1M" },
-                  { value: "3M", label: "3M" },
-                  { value: "6M", label: "6M" },
+                  { value: "1m", label: "1M" },
+                  { value: "3m", label: "3M" },
+                  { value: "6m", label: "6M" },
+                  { value: "1a", label: "1A" },
+                  { value: "todo", label: "TODO" },
                 ]}
-                defaultValue="6M"
+                defaultValue="6m"
               />
             </div>
           </Showcase>
@@ -344,25 +359,17 @@ export default function DevComponentsPage() {
             </div>
           </Showcase>
 
-          <Showcase title="Table" file="components/ui/table.tsx">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Columna</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Fila 1</TableCell>
-                  <TableCell className="text-right tabular-nums">128</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Fila 2</TableCell>
-                  <TableCell className="text-right tabular-nums">256</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+          <Showcase
+            title="Table — sticky first column (mobile)"
+            file="components/gdd/ConsumptionHistoryTable.tsx + lib/table-utils.ts"
+          >
+            <p className="text-sm text-muted-foreground">
+              En viewports &lt; 640px la primera columna (Período) queda fija al
+              hacer scroll horizontal. Contenedor de prueba a 360px:
+            </p>
+            <div className="max-w-[360px] border border-dashed border-border rounded-lg overflow-hidden">
+              <ConsumptionHistoryTable data={consumptionHistoryMock} />
+            </div>
           </Showcase>
 
           <section className="scroll-mt-8 rounded-xl border border-dashed border-border/80 bg-muted/20 p-6">
@@ -481,6 +488,10 @@ export default function DevComponentsPage() {
               <li>
                 <span className="font-mono text-foreground">Form Elements</span> —{" "}
                 <span className="font-mono">Input, Select, Textarea</span>
+              </li>
+              <li>
+                <span className="font-mono text-foreground">InputWithIconButton</span> —{" "}
+                <span className="font-mono">components/ui/input-with-icon-button.tsx</span>
               </li>
               <li>
                 <span className="font-mono text-foreground">KpiSecondaryCompact</span> —{" "}

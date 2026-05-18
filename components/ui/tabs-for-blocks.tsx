@@ -24,14 +24,14 @@ export function TabsForBlocks({
       onValueChange={onValueChange}
       className={cn("h-full w-full min-w-0 sm:w-auto", className)}
     >
-      <TabsList className="h-full w-full min-w-0 justify-stretch gap-1 rounded-md bg-stone-200/75 p-1 sm:inline-flex sm:w-fit">
+      <TabsList className="h-full w-full min-w-0 max-md:overflow-x-auto max-md:flex-nowrap justify-stretch gap-1 rounded-md bg-stone-200/75 p-1 sm:inline-flex sm:w-fit">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.value}
             value={tab.value}
             className="
-              h-full min-w-0 flex-1 rounded-md px-2 py-2 text-center text-sm font-medium
-              sm:flex-initial sm:px-5 sm:py-2.5
+              h-full min-w-0 flex-1 shrink-0 rounded-md px-2 py-2 text-center text-sm font-medium
+              sm:flex-initial sm:shrink sm:px-5 sm:py-2.5
               data-[state=active]:bg-white
               data-[state=active]:shadow-xs
               data-[state=inactive]:text-muted-foreground

@@ -1,4 +1,9 @@
 // data/gdcv-socio-mock.ts
+import {
+  getChartRangeSubtitle,
+  sliceChartRangeSeries,
+} from "@/lib/chart-range-resolve"
+import { GDCV_ENERGY_MONTHLY_CANONICAL } from "@/data/gdcv-mock"
 import type { ChartRangeChip } from "@/types/chart-range"
 import type { RoiCurvePoint } from "@/data/gdd-roi-mock"
 import type { StatListItem } from "@/components/ui/stat-list"
@@ -10,18 +15,54 @@ export const socioNombre = "Agro Sur Industrial"
 export const socioPorcentaje = 15
 export const socioParkName = "Parque Río Cuarto"
 
+/** Mismo inicio de operaciones que el parque GDCV. */
+export const socioOperationsStartLabel = "Marzo 2024"
+
+const AHORRO_PER_KWH = 599
+const PARQUE_KWH_FACTOR = 1.79
+
+/** Cola mensual conocida (flow) — prioridad sobre derivación. */
+const SOCIO_AHORRO_TAIL: Record<string, number> = {
+  "Nov 25": 82600,
+  "Dic 25": 72200,
+  "Ene 26": 60400,
+  "Feb 26": 51200,
+  "Mar 26": 47200,
+  "Abr 26": 74400,
+}
+
+const SOCIO_PARQUE_TAIL: Record<string, number> = {
+  "Nov 25": 247.1,
+  "Dic 25": 91.2,
+  "Ene 26": 250,
+  "Feb 26": 182.6,
+  "Mar 26": 240.4,
+  "Abr 26": 204.59,
+}
+
+function buildSocioAhorroMonthly(): SocioAhorroRow[] {
+  return GDCV_ENERGY_MONTHLY_CANONICAL.map((row) => ({
+    label: row.label,
+    generated:
+      SOCIO_AHORRO_TAIL[row.label] ??
+      Math.round(row.generated * AHORRO_PER_KWH),
+  }))
+}
+
+function buildSocioParqueMonthly(): SocioParqueRow[] {
+  return GDCV_ENERGY_MONTHLY_CANONICAL.map((row) => ({
+    label: row.label,
+    generated:
+      SOCIO_PARQUE_TAIL[row.label] ??
+      Math.round(row.generated * PARQUE_KWH_FACTOR * 10) / 10,
+  }))
+}
+
 // ─── Mi Ahorro Chart ────────────────────────────────────────────────────────
 
 export type SocioAhorroRow = { label: string; generated: number }
 
-const SOCIO_AHORRO_MONTHLY: readonly SocioAhorroRow[] = [
-  { label: "Nov 25", generated: 82600 },
-  { label: "Dic 25", generated: 72200 },
-  { label: "Ene 26", generated: 60400 },
-  { label: "Feb 26", generated: 51200 },
-  { label: "Mar 26", generated: 47200 },
-  { label: "Abr 26", generated: 74400 },
-]
+const SOCIO_AHORRO_MONTHLY = buildSocioAhorroMonthly()
 
 const SOCIO_AHORRO_WEEKLY: readonly SocioAhorroRow[] = [
   { label: "1–7 Abr", generated: 18000 },
@@ -30,27 +71,12 @@ const SOCIO_AHORRO_WEEKLY: readonly SocioAhorroRow[] = [
   { label: "22–30 Abr", generated: 18800 },
 ]
 
-function latestAhorroMonths(count: 3 | 6): SocioAhorroRow[] {
-  const arr = SOCIO_AHORRO_MONTHLY as SocioAhorroRow[]
-  return arr.slice(arr.length - count).map((r) => ({ ...r }))
-}
-
 export function getSocioAhorroSeries(range: ChartRangeChip): SocioAhorroRow[] {
-  switch (range) {
-    case "1m": return SOCIO_AHORRO_WEEKLY.map((r) => ({ ...r }))
-    case "3m": return latestAhorroMonths(3)
-    case "6m": return latestAhorroMonths(6)
-    default:   return []
-  }
+  return sliceChartRangeSeries(range, SOCIO_AHORRO_MONTHLY, SOCIO_AHORRO_WEEKLY)
 }
 
 export function getSocioAhorroChartSubtitle(range: ChartRangeChip): string {
-  switch (range) {
-    case "1m": return "Períodos semanales"
-    case "3m":
-    case "6m": return "Períodos mensuales"
-    default:   return ""
-  }
+  return getChartRangeSubtitle(range, socioOperationsStartLabel)
 }
 
 /** KPI resumido (abril) — alineado al bloque "Mi Ahorro en abril" del flow. */
@@ -200,43 +226,21 @@ export const compensacionesMock: CompensacionRow[] = [
 
 export type SocioParqueRow = { label: string; generated: number }
 
-const SOCIO_PARQUE_MONTHLY: readonly SocioParqueRow[] = [
-  { label: "Nov 25", generated: 247.1 },
-  { label: "Dic 25", generated: 91.2 },
-  { label: "Ene 26", generated: 250 },
-  { label: "Feb 26", generated: 182.6 },
-  { label: "Mar 26", generated: 240.4 },
-  { label: "Abr 26", generated: 204.59 },
-]
+const SOCIO_PARQUE_MONTHLY = buildSocioParqueMonthly()
 
 const SOCIO_PARQUE_WEEKLY: readonly SocioParqueRow[] = [
-  { label: "1–7 Abr",  generated: 48.3 },
+  { label: "1–7 Abr", generated: 48.3 },
   { label: "8–14 Abr", generated: 52.1 },
-  { label: "15–21 Abr",generated: 50.7 },
-  { label: "22–30 Abr",generated: 53.49 },
+  { label: "15–21 Abr", generated: 50.7 },
+  { label: "22–30 Abr", generated: 53.49 },
 ]
 
-function latestParqueMonths(count: 3 | 6): SocioParqueRow[] {
-  const arr = SOCIO_PARQUE_MONTHLY as SocioParqueRow[]
-  return arr.slice(arr.length - count).map((r) => ({ ...r }))
-}
-
 export function getSocioParqueSeries(range: ChartRangeChip): SocioParqueRow[] {
-  switch (range) {
-    case "1m": return SOCIO_PARQUE_WEEKLY.map((r) => ({ ...r }))
-    case "3m": return latestParqueMonths(3)
-    case "6m": return latestParqueMonths(6)
-    default:   return []
-  }
+  return sliceChartRangeSeries(range, SOCIO_PARQUE_MONTHLY, SOCIO_PARQUE_WEEKLY)
 }
 
 export function getSocioParqueChartSubtitle(range: ChartRangeChip): string {
-  switch (range) {
-    case "1m": return "Períodos semanales"
-    case "3m":
-    case "6m": return "Períodos mensuales"
-    default:   return ""
-  }
+  return getChartRangeSubtitle(range, socioOperationsStartLabel)
 }
 
 // ─── KPI Parque ───────────────────────────────────────────────────────────────

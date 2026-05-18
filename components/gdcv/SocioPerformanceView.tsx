@@ -29,14 +29,9 @@ import {
   socioPotenciaAcople,
   participacionSocios,
 } from "@/data/gdcv-socio-mock"
+import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { CircleDollarSignIcon, XIcon, ZapIcon } from "lucide-react"
-
-const PERIOD_TABS = [
-  { value: "1m", label: "1M" },
-  { value: "3m", label: "3M" },
-  { value: "6m", label: "6M" },
-]
 
 export function SocioPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
@@ -62,7 +57,7 @@ export function SocioPerformanceView() {
         <CardWithContent
           title="Energía generada del parque"
           subtitle={chartSubtitle}
-          tabs={PERIOD_TABS}
+          tabs={CHART_RANGE_TABS}
           defaultTab="6m"
           onTabChange={(v) => setChartRange(v as ChartRangeChip)}
           className="h-full"

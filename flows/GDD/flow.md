@@ -15,7 +15,7 @@ Referencia visual: GDD_01.png
 
 Bloques (orden vertical):
 1. Header: nombre del parque ("Parque General Roca") + badge GDD + TabsForBlocks de navegación (Performance / Retorno de Inversión) + botón export. El heading vive dentro del main, no en el header sticky.
-2. Card izquierda: chart de barras "Energía Generada del Parque" con chips 1M (semanal) / 3M / 6M (mensual) y copy de granularidad acorde — ver ux-guidelines §5.
+2. Card izquierda: chart de barras "Energía Generada del Parque" con chips 1M (semanal) / 3M / 6M / 1A / TODO (mensual) y copy de granularidad acorde — ver ux-guidelines §5. TODO = desde inicio de operaciones del parque (GDD: Mayo 2025).
 3. Card derecha superior: KpiPrimary fijo "Generada en Abril — 830.17 kWh" + sparkline + SoftBadge "+220 kWh vs mes anterior". No depende del filtro del chart.
 4. Cards derechas inferiores:
    - KpiSecondary "Ahorro acumulado en Abril" — sin tooltip
@@ -32,7 +32,7 @@ Bloques (orden vertical):
    
 Interacciones definidas:
 - Tab "Retorno de Inversión" → navega a GDD_02 (/gdd/roi)
-- Filter chips 1M / 3M / 6M → actualizan SOLO el chart de barras. Por defecto: 6M seleccionado. 6M = meses Nov 25–Abr 26.
+- Filter chips 1M / 3M / 6M / 1A / TODO → actualizan SOLO el chart de barras. Por defecto: 6M. 6M = Nov 25–Abr 26; 1A = últimos 12 meses; TODO = desde Mayo 2025 (inicio operaciones GDD).
 - KPIs y tabla NO se ligan al filtro del chart.
 
 ---

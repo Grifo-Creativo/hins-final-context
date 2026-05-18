@@ -1,17 +1,44 @@
 // data/gdcv-mock.ts
 
+import {
+  getChartRangeSubtitle,
+  sliceChartRangeSeries,
+} from "@/lib/chart-range-resolve"
 import type { ChartRangeChip } from "@/types/chart-range"
 
 // ─── Park ──────────────────────────────────────────────────────────────────
 
 export const gdcvParkName = "Parque Río Cuarto"
 
+/** Inicio de operaciones — Parque Río Cuarto (GDCV). */
+export const gdcvOperationsStartLabel = "Marzo 2024"
+
 // ─── Energy chart ──────────────────────────────────────────────────────────
 
 export type GdcvEnergyRow = { label: string; generated: number }
 
-/** Canonical monthly series (oldest → newest). */
-const GDCV_ENERGY_MONTHLY: readonly GdcvEnergyRow[] = [
+/** Serie mensual desde Mar 24 → Abr 26 (mock realista; cola Nov 25+ alineada al flow). */
+export const GDCV_ENERGY_MONTHLY_CANONICAL: readonly GdcvEnergyRow[] = [
+  { label: "Mar 24", generated: 38 },
+  { label: "Abr 24", generated: 44 },
+  { label: "May 24", generated: 51 },
+  { label: "Jun 24", generated: 48 },
+  { label: "Jul 24", generated: 55 },
+  { label: "Ago 24", generated: 62 },
+  { label: "Sep 24", generated: 58 },
+  { label: "Oct 24", generated: 64 },
+  { label: "Nov 24", generated: 68 },
+  { label: "Dic 24", generated: 72 },
+  { label: "Ene 25", generated: 76 },
+  { label: "Feb 25", generated: 82 },
+  { label: "Mar 25", generated: 88 },
+  { label: "Abr 25", generated: 92 },
+  { label: "May 25", generated: 96 },
+  { label: "Jun 25", generated: 100 },
+  { label: "Jul 25", generated: 105 },
+  { label: "Ago 25", generated: 110 },
+  { label: "Sep 25", generated: 115 },
+  { label: "Oct 25", generated: 120 },
   { label: "Nov 25", generated: 138 },
   { label: "Dic 25", generated: 121 },
   { label: "Ene 26", generated: 101 },
@@ -27,34 +54,14 @@ const GDCV_ENERGY_WEEKLY: readonly GdcvEnergyRow[] = [
   { label: "22–30 Abr", generated: 34 },
 ]
 
-function latestMonths(count: 3 | 6): GdcvEnergyRow[] {
-  const arr = GDCV_ENERGY_MONTHLY as GdcvEnergyRow[]
-  return arr.slice(arr.length - count).map((r) => ({ ...r }))
-}
+const GDCV_ENERGY_MONTHLY = GDCV_ENERGY_MONTHLY_CANONICAL
 
 export function getGdcvEnergySeries(range: ChartRangeChip): GdcvEnergyRow[] {
-  switch (range) {
-    case "1m":
-      return GDCV_ENERGY_WEEKLY.map((r) => ({ ...r }))
-    case "3m":
-      return latestMonths(3)
-    case "6m":
-      return latestMonths(6)
-    default:
-      return []
-  }
+  return sliceChartRangeSeries(range, GDCV_ENERGY_MONTHLY, GDCV_ENERGY_WEEKLY)
 }
 
 export function getGdcvEnergyChartSubtitle(range: ChartRangeChip): string {
-  switch (range) {
-    case "1m":
-      return "Períodos semanales"
-    case "3m":
-    case "6m":
-      return "Períodos mensuales"
-    default:
-      return ""
-  }
+  return getChartRangeSubtitle(range, gdcvOperationsStartLabel)
 }
 
 // ─── KPIs (performance) ────────────────────────────────────────────────────
