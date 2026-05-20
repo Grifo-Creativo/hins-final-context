@@ -24,7 +24,7 @@ export const projectsMock: Project[] = [
     id: "marcos-juarez",
     name: "Parque Solar Marcos Juarez",
     type: "GDC",
-    href: null,
+    href: "/gdc/mantenimiento",
     coverImageUrl:
       "https://hins.com.ar/wp-content/uploads/2026/01/Render-2.webp",
   },

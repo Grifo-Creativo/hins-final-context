@@ -113,10 +113,82 @@ El neteo es el mecanismo central de los modelos GDC y GDCV.
 | Medidor N° | Número de medidor | Todos — identificador del punto de consumo |
 | Socios / Cesionarios | Usuarios, clientes, cuotapartistas | GDC / GDCV — participantes del parque |
 | AGC | Admin, gestor | GDC / GDCV — Administrador del Generador Comunitario |
+| Mantenimiento / Mantención | O&M, service, reparación | Módulo administrativo — registro de tareas y costos del parque |
+| Historial de Mantenimiento | Log de servicios | Vista por período — cantidad de mantenciones y costos asociados |
 
 ---
 
-## 5. Arquitectura de Datos (Jerarquía)
+## 5. Módulo Mantenimiento (transversal)
+
+### Descripción funcional
+
+Capacidad de **visibilidad y registro** de las actividades de mantenimiento de un parque fotovoltaico: tareas realizadas, periodicidad por mes y costos asociados.
+
+**Objetivo de negocio:** Permitir a los administradores del parque **llevar y consultar el historial de la mantención** de esa instalación — qué se hizo, cuántas intervenciones hubo por período y cuánto costó — sin ejecutar operaciones sobre la red ni reemplazar un CMMS externo.
+
+**Naturaleza en HINS:** Módulo de **solo lectura + registro documental** (prototipo: visualización con mock data; flujo de alta “Nueva mantención” pendiente). No implica control operativo de equipos ni despacho de cuadrillas.
+
+### Alcance transversal (modelo de parque)
+
+El módulo **Mantenimiento** aplica a los tres modelos de negocio:
+
+| Modelo | Disponibilidad del módulo |
+|---|---|
+| **GDD** | ✅ Sí — Dueño del parque (sidebar administrativo) |
+| **GDC** | ✅ Sí — AGC (sidebar administrativo) |
+| **GDCV** | ✅ Sí — AGC (sidebar administrativo); prototipo construido en `/gdcv/mantenimiento` |
+
+La **lógica de negocio energética** (generación, neteo, crédito, ROI) es distinta por modelo; el **registro de mantenimiento** es común a todos los parques porque es inherente a la instalación física, no al modelo tarifario.
+
+### Quién tiene acceso
+
+| Rol | Acceso a Mantenimiento |
+|---|---|
+| **HINS Admin Global** | ✅ Ver y gestionar (transversal a cartera; entra vía detalle de cada parque) |
+| **Dueño del Parque GDD** | ✅ Ver y gestionar mantenimiento de su parque |
+| **AGC (GDC / GDCV)** | ✅ Ver y gestionar mantenimiento de su parque |
+
+### Quién NO tiene acceso
+
+| Rol | Restricción |
+|---|---|
+| **Socio / Cesionario** | ❌ Sin acceso bajo ningún concepto |
+| **Cualquier usuario read-only cliente final** | ❌ Sin acceso |
+
+El socio **no debe visualizar** — ni por ruta directa, ni por sidebar, ni por enlaces compartidos, ni por métricas embebidas en otras vistas:
+
+- Sección o ítem de navegación “Mantenimiento”
+- Historial de mantenimiento, tablas o KPIs de mantención
+- Acciones “Nueva mantención” o detalle administrativo de tareas
+- Costos operativos del parque atribuibles a mantenimiento
+
+### Vista del Socio (alcance exclusivo)
+
+El flow del Socio permanece **exclusivamente** orientado a:
+
+- Performance y generación/asignación en su contexto
+- Neteo, crédito y impacto en factura
+- ROI y seguimiento financiero personal
+- Historial de compensaciones (propias)
+
+**Mantenimiento no forma parte del flow del Socio** (`flows/GDCV-socio/`).
+
+### Navegación (reglas)
+
+- **Con sidebar administrativo** (HINS Admin, Dueño GDD, AGC): ítem **Mantenimiento** en sidebar del parque, junto a Performance y ROI (o equivalentes).
+- **Sin sidebar** (Socio GDCV): **no** existe ítem Mantenimiento; solo tabs internos de su espacio personal.
+- Rutas de referencia (prototipo GDCV AGC): `/gdcv/mantenimiento` — **no** expuesta en `/gdcv/socio/*`.
+
+### Contenido de referencia (prototipo GDCV)
+
+- Tabla **Historial de Mantenimiento**: Período | Cantidad de Mantenciones | Costos Asociados
+- Período en curso (ej. Abril 2026) identificado con badge **En Curso**
+- Botón **Nuevo** (placeholder — flujo de alta pendiente)
+- Click en fila → Sheet de detalle (contenido pendiente)
+
+---
+
+## 6. Arquitectura de Datos (Jerarquía)
 
 ```
 HINS (Admin Global — superadministrador)
@@ -138,7 +210,18 @@ HINS (Admin Global — superadministrador)
 ---
 ---
 
-## 6. Usuarios
+## 7. Usuarios y Permisos (RBAC)
+
+### Matriz resumida — Módulo Mantenimiento
+
+| Rol | Mantenimiento |
+|---|---|
+| HINS Admin Global | ✅ |
+| Dueño GDD | ✅ |
+| AGC GDC / GDCV | ✅ |
+| Socio / Cesionario | ❌ **Prohibido** |
+
+---
 
 ### HINS — Admin Global
 **Descripción:** Dueño de la solución. Instala y gestiona todos los proyectos.
@@ -150,8 +233,11 @@ HINS (Admin Global — superadministrador)
 **Objetivos:**
 - Acceder a todos los proyectos en cartera.
 - Monitorear el desempeño general de cada parque.
+- Consultar el historial de mantenimiento de cualquier parque al entrar a su dashboard administrativo.
 - [WIP] Crear, configurar y editar proyectos y sus características.
 - [WIP] Acceder a la vista de cualquier usuario o rol dentro de los proyectos.
+
+**Mantenimiento:** ✅ Acceso completo al módulo en cada parque (GDD, GDC, GDCV).
 
 ---
 
@@ -170,6 +256,9 @@ HINS (Admin Global — superadministrador)
 - Ver un estimado de cuándo recupera la inversión (ROI / Payback).
 - Cargar y/o modificar su cuadro tarifario.
 - Ver el historial de generación a lo largo del tiempo.
+- Consultar y registrar (futuro) el historial de mantenimiento del parque.
+
+**Mantenimiento:** ✅ Acceso vía sidebar del parque (ruta prototipo futura: `/gdd/mantenimiento`).
 
 ---
 
@@ -188,11 +277,14 @@ HINS (Admin Global — superadministrador)
 - Identificar los socios del parque, su participación y tipo (con/sin cargo de potencia).
 - Acceder al detalle individual de cualquier socio.
 - Ver el ROI del parque completo.
+- Consultar el historial de mantenimiento del parque (tareas y costos por período).
+
+**Mantenimiento:** ✅ Acceso vía sidebar — ruta prototipo: `/gdcv/mantenimiento` (GDCV); equivalente en GDC cuando exista el flow.
 
 **Fuera de scope (actual):**
 - Cargar o modificar socios y % de participación.
 - Configurar tipo de socio (con/sin cargo de potencia).
-- Operación y mantenimiento del parque.
+- Ejecución operativa de mantenimiento en campo (despacho, OT, integración SCADA).
 
 ---
 
@@ -213,9 +305,16 @@ HINS (Admin Global — superadministrador)
 - Ver el detalle histórico de compensaciones por período.
 - Ver su ROI: crédito acumulado vs. inversión inicial, Payback estimado, TIR.
 
+**Mantenimiento:** ❌ **Sin acceso.** No aparece en navegación, rutas ni datos visibles. Cualquier implementación que exponga mantenimiento al socio es un **bug de permisos**.
+
+**Restricciones explícitas:**
+- ❌ Sin ítem “Mantenimiento” en UI
+- ❌ Sin rutas `/gdcv/mantenimiento` ni equivalentes bajo `/gdcv/socio`
+- ❌ Sin métricas, tablas ni acciones de mantenimiento en sus vistas
+
 ---
 
-## 7. Actores Externos (no usuarios de la plataforma)
+## 8. Actores Externos (no usuarios de la plataforma)
 
 ### EPEC
 - Empresa de Energía Eléctrica Estatal de Córdoba.
@@ -230,7 +329,7 @@ HINS (Admin Global — superadministrador)
 
 ---
 
-## 8. Reglas de Negocio
+## 9. Reglas de Negocio
 
 - Un parque pertenece a un único modelo (GDD, GDC o GDCV). No son mixtos.
 - Los tres modelos inyectan 100% de la energía generada a la red. GD Autoconsumo (fuera de scope) es el único que no sigue este patrón.
@@ -243,9 +342,19 @@ HINS (Admin Global — superadministrador)
 - El neteo en GDCV opera sobre asignación virtual previa; en GDC sobre vínculo físico directo.
 - GDC puede migrar normativamente a GDCV. Pendiente de confirmación con el cliente.
 
+### Reglas — Módulo Mantenimiento
+
+- El módulo **Mantenimiento** es **transversal a GDD, GDC y GDCV** pero **restringido por rol** — no es transversal a todos los usuarios.
+- Solo roles **administrativos / gestión del parque** (HINS Admin Global, Dueño GDD, AGC) pueden ver el módulo.
+- El **Socio / Cesionario** y cualquier perfil **read-only cliente final** tienen **ocultamiento total**: sin navegación, sin rutas, sin datos de mantenimiento en sus vistas.
+- Mantenimiento forma parte de los **dashboards administrativos con sidebar**; **no** forma parte del flow del Socio (sin sidebar, solo tabs de performance/finanzas personales).
+- Los datos de mantenimiento son **del parque**, no del socio: no se distribuyen por participación ni cuotaparte.
+- HINS es visibilidad de registros: no ejecuta mantenimiento en la red eléctrica ni reemplaza sistemas de tickets/OT externos.
+- Consistencia cross-model: misma semántica de columnas (Período, Cantidad de Mantenciones, Costos Asociados) en todos los parques que expongan el módulo.
+
 ---
 
-## 9. Estructura de Flows
+## 10. Estructura de Flows
 
 Cada flow tiene su propio archivo `flow.md` dentro de su carpeta,
 junto con las referencias visuales (.png) correspondientes.
@@ -283,12 +392,12 @@ flows/
 | GDD | Dueño del Parque GDD | GDD_01, GDD_02 | ✅ Construido |
 | main | HINS Admin Global | Main_00 | ⏳ Pendiente |
 | GDC | AGC + Socios GDC | — | ⏳ Pendiente |
-| GDCV | AGC + Socios GDCV | — | ⏳ Pendiente |
-| socio | Socio GDC / GDCV | — | ⏳ Pendiente |
+| GDCV-agc | AGC GDCV | admin_01, admin_03, **mantenimiento** | ✅ Performance + ROI + Mantenimiento |
+| GDCV-socio | Socio GDCV | socio_00, socio_01, socio_02 | ✅ Construido — **sin** Mantenimiento |
 
 ---
 
-## 10. Scope del Prototipo
+## 11. Scope del Prototipo
 
 **Estado actual:**
 - ✅ Flow GDD completo (GDD_01 Performance + GDD_02 ROI)
@@ -296,6 +405,7 @@ flows/
 - ✅ Design system documentado en `/context/design-system.md`
 - ✅ Componentes documentados en `/context/components.md`
 - ✅ Transiciones entre vistas con Framer Motion
+- ✅ Módulo Mantenimiento (GDCV AGC) — `/gdcv/mantenimiento` con historial mock
 - ⏳ Flow main — HINS Admin vista de cartera (próximo)
 - ⏳ Flow GDC — pendiente de wireframes
 - ⏳ Flow GDCV — pendiente de wireframes
@@ -307,10 +417,17 @@ flows/
 - Mock data representativa del dominio para todos los flows.
 - Autenticación mockeada (sin backend real).
 
+**Incluido en scope (Mantenimiento):**
+- Vista administrativa de historial por período (prototipo GDCV).
+- Restricción documentada: Socio sin acceso al módulo.
+
 **Fuera de scope:**
 - Gestión de socios (agregar/quitar) por parte del AGC.
 - Configuración de tipo de socio (con/sin cargo de potencia).
 - Modelo GD Autoconsumo.
-- Operación y mantenimiento del parque.
+- **Ejecución operativa** de mantenimiento en campo (OT, cuadrillas, integración con proveedores).
+- Flujo completo “Nueva mantención” (formulario y persistencia).
 - Autenticación real con backend.
 - Notificaciones en tiempo real.
+
+> **Nota:** “Operación y mantenimiento del parque” como **ejecución en campo** sigue fuera de scope. El **registro y visualización** de mantenimiento para roles administrativos **sí** está en scope del producto.

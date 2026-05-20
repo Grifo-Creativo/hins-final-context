@@ -4,6 +4,8 @@
 Dueño GDD — Usuario accede únicamente a su parque.
 Pregunta clave: ¿Cuánto me está ahorrando el parque y cuándo recupero la inversión?
 
+**Mantenimiento:** ✅ Acceso vía sidebar administrativo (módulo transversal GDD/GDC/GDCV). Ruta: `/gdd/mantenimiento`. Misma semántica que GDCV: historial por período, costos, sin exposición al Socio (no aplica en GDD).
+
 ---
 
 ## Pantallas

@@ -6,6 +6,8 @@ Socio GDCV — Participante del parque comunitario con cuotaparte porcentual.
 
 **Restricción importante:** Sin Sidebar. Solo navega 2 tabs internos. No sale de aquí.
 
+**Mantenimiento:** ❌ **Fuera de scope de este flow.** El socio no ve ni accede al módulo Mantenimiento del parque (historial, costos, navegación ni acciones). Ver `product-context.md` §5 y §9.
+
 ---
 
 ## Pantallas
@@ -179,6 +181,7 @@ Referencia visual: GDCV__socio_02.png
 - StatList tabs "Inyección" | "Energía" → cambian items dentro de StatList (controlado por estado)
 - Botón "Ver Todos" en "Participación por Socio" → acción no implementada (placeholder)
 - Row actions (⋮) en tablas → acciones estándar tabla (Descargar, Copiar, Compartir)
+- ❌ Sin acceso a `/gdcv/mantenimiento` ni equivalente bajo rutas `/gdcv/socio/*`
 
 ---
 

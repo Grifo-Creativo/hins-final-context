@@ -272,3 +272,10 @@ export function getGdcvCurveSubtitle(range: ChartRangeChip): string {
 }
 
 export const gdcvInvestmentReference = 4270
+
+// ─── Mantenimiento (AGC) — re-export desde mock compartido ─────────────────
+
+export type { MantenimientoHistorialRow } from "@/data/mantenimiento-mock"
+export {
+  gdcvMantenimientoHistorialMock as mantenimientoHistorialMock,
+} from "@/data/mantenimiento-mock"

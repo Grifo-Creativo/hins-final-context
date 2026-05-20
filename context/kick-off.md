@@ -75,6 +75,13 @@ flows/GDD/flow.md
 flows/GDCV-agc/flow.md
   → /gdcv/performance      (GDCV_admin_01 — Performance del Parque)
   → /gdcv/roi              (GDCV_admin_03 — ROI del Parque)
+  → /gdcv/mantenimiento    (GDCV_admin — Mantenimiento — solo roles admin)
+
+flows/GDD/flow.md
+  → /gdd/performance       (GDD_01)
+  → /gdd/roi               (GDD_02)
+  → /gdd/mantenimiento     (Dueño GDD — Mantenimiento)
+  → /gdc/mantenimiento     (AGC GDC — Mantenimiento, ej. Marcos Juárez)
 
 flows/GDCV-socio/flow.md
   → /gdcv/socio            (GDCV_socio_01 — Mi Espacio Personal - landing)
@@ -236,21 +243,30 @@ Estos patterns se usan en múltiples vistas. Están documentados una sola vez, s
 
 ## 8. Rutas y Sidebar
 
-### CON Sidebar (Usuarios admin/dueño):
+### CON Sidebar (Usuarios admin / gestión del parque):
 ```
 /gdd/performance         ← SidebarProvider
 /gdd/roi                 ← SidebarProvider
+/gdd/mantenimiento       ← SidebarProvider (Dueño GDD) — ítem sidebar "Mantenimiento"
+/gdc/mantenimiento       ← SidebarProvider (AGC GDC) — ítem sidebar "Mantenimiento"
+
 /gdcv/performance        ← SidebarProvider (AGC admin)
 /gdcv/roi                ← SidebarProvider (AGC admin)
+/gdcv/mantenimiento      ← SidebarProvider (AGC admin) — ítem sidebar "Mantenimiento"
 ```
+
+**Módulo Mantenimiento:** transversal GDD / GDC / GDCV; **solo** en rutas con sidebar administrativo.
 
 ### SIN Sidebar (Usuarios Socio):
 ```
 /gdcv/socio              ← Sin SidebarProvider, solo tabs internos
 /gdcv/socio/parque       ← Sin SidebarProvider, solo tabs internos
+/gdcv/socio/acceso       ← OTP — sin Mantenimiento
 ```
 
 **El Socio navega solo entre sus 2 tabs. No necesita salir de ahí.**
+
+**El Socio NO tiene:** `/gdcv/mantenimiento`, ítem sidebar Mantenimiento, ni datos de mantenimiento en ninguna vista.
 
 ---
 
@@ -273,6 +289,7 @@ Socio/Cesionario — Participante del parque GDCV con cuotaparte porcentual (ej:
 - ❌ Información de otros socios
 - ❌ Administración del parque
 - ❌ Datos globales del parque (solo con su contexto)
+- ❌ **Mantenimiento** — sección, navegación, historial, costos ni acciones de mantención
 
 ### Acceso
 - ✅ Read-only — visualización pura
@@ -286,7 +303,8 @@ Socio/Cesionario — Participante del parque GDCV con cuotaparte porcentual (ej:
 | Navegación | 2 tabs internos | Sidebar + múltiples vistas |
 | Permisos | Read-only | Admin del parque |
 | Sidebar | ❌ No | ✅ Sí |
-| Rutas | `/gdcv/socio` y `/gdcv/socio/parque` | `/gdcv/performance` y `/gdcv/roi` |
+| Rutas | `/gdcv/socio` y `/gdcv/socio/parque` | `/gdcv/performance`, `/gdcv/roi`, `/gdcv/mantenimiento` |
+| Mantenimiento | ❌ Prohibido | ✅ Sidebar |
 
 ### Rutas específicas del Socio
 ```

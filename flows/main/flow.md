@@ -7,6 +7,9 @@ Pregunta clave: ¿Cómo está rindiendo cada parque de la cartera?
 Acciones principales:
 - Ver todos los proyectos en cartera
 - Monitorear el desempeño general de cada proyecto
+- Al entrar a un parque (dashboard administrativo), acceder también al **Mantenimiento** del parque (módulo transversal GDD/GDC/GDCV)
+
+**Mantenimiento:** ✅ HINS Admin tiene acceso al módulo en cada parque que gestiona. No aplica en vista Socio.
 
 ---
 

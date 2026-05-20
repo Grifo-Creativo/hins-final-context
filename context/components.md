@@ -3202,6 +3202,46 @@ const [period, setPeriod] = useState("Abril 2026")
 - No mostrar el medidor completo en UI.
 - Documentar en `flows/GDCV-socio/GDCV_socio_flow.md` pantalla `GDCV_socio_00`.
 - Link compartido desde `SociosTable` → Compartir (solo fila `AS`).
+- El flow Socio **nunca** incluye Mantenimiento — ver `product-context.md` §5 (RBAC).
+
+---
+
+## MantenimientoHistorialTable
+
+**Archivo:** `/components/gdcv/MantenimientoHistorialTable.tsx`  
+**Vista:** `/components/gdcv/GdcvMantenimientoView.tsx` — ruta `/gdcv/mantenimiento`  
+**Estado:** ✅ Prototipo GDCV AGC  
+**Dependencias:** TanStack Table, `MantenimientoDetailSheet`, mock `mantenimientoHistorialMock`
+
+### Cuándo usar
+
+- Dashboard **administrativo** del parque (AGC GDCV, Dueño GDD, HINS Admin al entrar al parque).
+- Historial de mantenciones por período con costos.
+
+### Cuándo NO usar
+
+- Flow **Socio** — prohibido por RBAC.
+- Dentro de `Card` shadcn — usar contenedor `bg-white rounded-xl shadow-xs` (patrón Table §).
+
+### Acceso por rol
+
+| Rol | Acceso |
+|---|---|
+| HINS Admin, Dueño GDD, AGC | ✅ |
+| Socio / Cesionario | ❌ |
+
+### Spec (resumen)
+
+- Título sección: **Historial de Mantenimiento**
+- Botón **Nuevo** (estilo Main `ProjectsView`) — placeholder
+- Columnas ordenables: Período | Cantidad de Mantenciones | Costos Asociados
+- Badge **En Curso** en período activo (verde, igual que `CompensacionesTable`)
+- Click fila → `MantenimientoDetailSheet` (contenido pendiente)
+
+### Notas para el agente
+
+- No agregar Mantenimiento al sidebar Socio ni a `GdcvPageHeading` tabs.
+- Documentación de negocio: `product-context.md` §5, `flows/GDCV-agc/GDCV_flow.md`.
 
 ---
 
@@ -3223,7 +3263,8 @@ const [period, setPeriod] = useState("Abril 2026")
 14. [PageHeader](#pageheader)
 15. [PeriodSelector](#periodselector)
 16. [SocioAccessView](#socioaccessview)
-17. [HinsAlert](#hinsalert)
+17. [MantenimientoHistorialTable](#mantenimientohistorialtable)
+18. [HinsAlert](#hinsalert)
 
 ---
 

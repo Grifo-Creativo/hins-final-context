@@ -19,9 +19,11 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, TrendingUpIcon, ZapIcon } from "lucide-react"
-
-import { parkName } from "@/data/gdd-performance-mock"
+import {
+  LayoutDashboardIcon,
+  TrendingUpIcon,
+  WrenchIcon,
+} from "lucide-react"
 
 const gddUser = {
   name: "Cooperativa Eléctrica",
@@ -31,7 +33,7 @@ const gddUser = {
 
 const nav = [
   {
-    title: "Dashboard",
+    title: "Performance",
     href: "/gdd/performance",
     icon: LayoutDashboardIcon,
   },
@@ -39,6 +41,11 @@ const nav = [
     title: "Retorno de inversión",
     href: "/gdd/roi",
     icon: TrendingUpIcon,
+  },
+  {
+    title: "Mantenimiento",
+    href: "/gdd/mantenimiento",
+    icon: WrenchIcon,
   },
 ] as const
 

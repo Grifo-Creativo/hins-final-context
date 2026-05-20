@@ -30,6 +30,8 @@
 ## 9. Anti-patterns
 
 - ❌ Mostrar datos de otros usuarios al Socio
+- ❌ Exponer el módulo **Mantenimiento** al Socio / Cesionario (sidebar, rutas, tablas, KPIs o acciones de mantención)
+- ❌ Incluir ítem “Mantenimiento” en navegación del flow Socio (`/gdcv/socio/*`)
 - ❌ Usar `--primary` en charts
 - ❌ Usar colores de chart en botones, badges o navegación
 - ❌ Confiar SOLO en color para diferenciar series — siempre acompañar con patrón visual (sólido/punteado/grosor)

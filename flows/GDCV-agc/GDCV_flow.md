@@ -4,6 +4,9 @@
 AGC — Administrador del parque comunitario tipo GDCV.
 Pregunta clave: ¿El parque está generando lo esperado y están llegando bien las compensaciones a cada socio?
 
+**Acceso Mantenimiento:** ✅ Sí — módulo administrativo vía sidebar.  
+**No confundir con el flow Socio** (`flows/GDCV-socio/`) — el socio no ve Mantenimiento.
+
 ---
 
 ## Pantallas
@@ -194,4 +197,32 @@ curvaRecuperacionInversion: 38000,
 - Timeline: NO es slider, NO es stepper. Solo visual estático + HinsTooltip en nodo Hoy.
 - HinsTooltip: siempre click/tap — NUNCA hover (regla del design system).
 - Reutilizar RoiRecoveryLineChart existente sin modificarlo.
-- Rutas: `/gdcv/performance` (default) y `/gdcv/roi`.
+- Rutas: `/gdcv/performance` (default), `/gdcv/roi`, `/gdcv/mantenimiento`.
+
+---
+
+### GDCV_admin_mantenimiento — Vista: Mantenimiento del Parque
+Ruta: `/gdcv/mantenimiento`  
+Acceso: **solo sidebar AGC** (no aparece en header TabsForBlocks Performance | ROI).  
+Sin wireframe dedicado — prototipo funcional.
+
+**Header de página:**
+- H1: nombre del parque + badge GDCV (sin subtítulo “Mantenimiento” — la tabla define el contenido)
+
+**Bloque — Historial de Mantenimiento:**
+- Contenedor tabla (`bg-white rounded-xl shadow-xs`)
+- Título sección: **Historial de Mantenimiento**
+- Acción header: botón **Nuevo** (primary + `PlusCircleIcon`) — placeholder hasta flow “Nueva mantención”
+- Columnas: Período | Cantidad de Mantenciones | Costos Asociados
+- Ordenamiento por header (3 estados: off → asc → desc)
+- Período **Abril 2026** (en curso): badge verde **En Curso** junto al período (mismo patrón que compensaciones)
+- Click en fila → **Sheet** lateral (título compacto ej. `Mant. Abr 2026`; contenido detalle pendiente)
+
+**Mock data:** 10 períodos Jul 2025 – Abr 2026 — alineados a ventana operativa del parque (`data/gdcv-mock.ts` → `mantenimientoHistorialMock`).
+
+**Interacciones:**
+- Sidebar “Mantenimiento” → esta vista
+- Botón Nuevo → sin flujo (pendiente)
+- Fila → abre Sheet vacío / placeholder
+
+**Roles sin acceso:** Socio GDCV — no ruta, no sidebar, no datos.

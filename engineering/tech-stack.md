@@ -203,6 +203,7 @@ No construir ninguna página fuera de este shell.
 | Estado global | **Context API** por ahora; revisar más adelante |
 | Validación de formularios | **Zod** (con React Hook Form) |
 | Auth del prototipo | **Mock** — sin backend |
+| Módulo Mantenimiento | Transversal GDD/GDC/GDCV; solo roles admin (sidebar). Socio sin acceso — ver `product-context.md` §5 |
 | shadcn/ui | Tras `init`, **`components.json`** y aliases según estructura real; Cursor/CLI lo alinean automáticamente |
 
 ### Pendientes
