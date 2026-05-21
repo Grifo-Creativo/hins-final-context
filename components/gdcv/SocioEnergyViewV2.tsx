@@ -6,16 +6,14 @@ import { useMemo, useState } from "react"
 import { MonetaryBarChart } from "@/components/charts/MonetaryBarChart"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithContent } from "@/components/ui/card-with-content"
-import { IconBadge } from "@/components/ui/icon-badge"
-import { KpiSecondary } from "@/components/ui/kpi-secondary"
+import { FeatureItem } from "@/components/ui/feature-item"
 import { SoftBadge } from "@/components/ui/soft-badge"
 import { StatList } from "@/components/ui/stat-list"
-import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   getSocioAhorroSeries,
   getSocioAhorroEnergiaSeries,
   getSocioAhorroChartSubtitle,
-  socioAhorroKpi,
   socioAhorroEnergiaKpi,
   socioStatListInyeccion,
   socioStatListAhorroEnergia,
@@ -35,8 +33,8 @@ const ahorroChartConfig = {
 }
 
 const MAIN_TABS = [
-  { value: "dinero", label: "Dinero 💵" },
-  { value: "energia", label: "Energía ⚡" },
+  { value: "dinero", icon: DollarSignIcon, ariaLabel: "Dinero" },
+  { value: "energia", icon: ZapIcon, ariaLabel: "Energía" },
 ]
 
 const STAT_TABS = [
@@ -59,45 +57,67 @@ export function SocioEnergyViewV2() {
     [ahorroBarRange, mainTab]
   )
 
+  const chartTitle = useMemo(
+    () =>
+      mainTab === "dinero" ? "Mi Ahorro Generado" : "Mi Energía Generada",
+    [mainTab]
+  )
+
   const ahorroSubtitle =
     ahorroRange === "1d"
       ? getSocioAhorroChartSubtitle("6m")
       : getSocioAhorroChartSubtitle(ahorroRange)
 
-  const kpi = mainTab === "dinero" ? socioAhorroKpi : socioAhorroEnergiaKpi
   const statItems =
     mainTab === "dinero" ? socioStatListInyeccion : socioStatListAhorroEnergia
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
-      {/* LEFT CARD: Mi Ahorro with main tabs and range tabs */}
+      {/* LEFT CARD: Mi Ahorro with dynamic title, icon tabs, and chart */}
       <CardWithContent
-        title="Mi Ahorro en Abril"
-        tabs={CHART_RANGE_TABS}
-        activeTab={ahorroRange}
-        defaultTab="6m"
-        onTabChange={(v) => setAhorroRange(v as ChartRangeChip)}
+        title={chartTitle}
         className="h-full"
       >
         <div className="flex flex-col gap-4">
-          {/* Main tabs: Dinero / Energía */}
-          <div className="flex flex-col gap-2">
-            <TabsForBlocks
-              tabs={MAIN_TABS}
+          {/* Tabs Row: Main tabs (icon-only) + Range tabs in same row */}
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+            {/* Main tabs: Icon-only perspective switcher */}
+            <Tabs
               value={mainTab}
               onValueChange={(v) => setMainTab(v as "dinero" | "energia")}
-            />
-          </div>
+              className="shrink-0"
+            >
+              <TabsList className="grid w-auto grid-cols-2 gap-1">
+                {MAIN_TABS.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="px-2 py-1.5"
+                    aria-label={tab.ariaLabel}
+                  >
+                    <tab.icon className="h-5 w-5" />
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
 
-          {/* KPI display */}
-          <div className="flex flex-col gap-2 md:-mt-1">
-            <p className="text-4xl font-bold text-foreground">
-              {kpi.value}
-              {mainTab === "energia" && (
-                <span className="text-xl font-semibold ml-2">{kpi.unit}</span>
-              )}
-            </p>
-            <SoftBadge>{kpi.delta}</SoftBadge>
+            {/* Divider for visual separation */}
+            <div className="hidden h-6 w-px bg-border/50 md:block" />
+
+            {/* Range tabs: Chart range selector */}
+            <Tabs
+              value={ahorroRange}
+              onValueChange={(v) => setAhorroRange(v as ChartRangeChip)}
+              className="flex-1"
+            >
+              <TabsList className="w-full justify-start overflow-x-auto md:w-auto">
+                {CHART_RANGE_TABS.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* Chart */}
@@ -108,27 +128,25 @@ export function SocioEnergyViewV2() {
         </div>
       </CardWithContent>
 
-      {/* RIGHT CARD: KPIs + Stats breakdown */}
+      {/* RIGHT CARD: KPIs (side-by-side) + Stats breakdown */}
       <CardWithContent title="" noPadding className="h-full">
         <div className="flex flex-col gap-4 p-4">
           {/* Badge "Abril 2026" */}
           <SoftBadge>Abril 2026</SoftBadge>
 
-          {/* KPI Grid: 2 items (Ahorro + Energía) */}
-          <div className="grid grid-cols-1 gap-3">
-            <KpiSecondary
+          {/* KPI Grid: 2 items side-by-side (Ahorro + Energía) */}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <FeatureItem
               icon={DollarSignIcon}
               label="Ahorro en Dinero"
               value="$74.400"
-              delta="Abril 2026"
-              layout="horizontal"
+              orientation="horizontal"
             />
-            <KpiSecondary
+            <FeatureItem
               icon={ZapIcon}
               label="Energía Generada"
               value="830 kWh"
-              delta="Abril 2026"
-              layout="horizontal"
+              orientation="horizontal"
             />
           </div>
 
