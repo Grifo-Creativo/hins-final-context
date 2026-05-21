@@ -129,30 +129,34 @@ export function SocioEnergyViewV2() {
       </CardWithContent>
 
       {/* RIGHT CARD: KPIs (side-by-side) + Stats breakdown */}
-      <CardWithContent title="" noPadding className="h-full">
+      <CardWithContent title="Abril 2026" noPadding className="h-full">
         <div className="flex flex-col gap-4 p-4">
-          {/* Badge "Abril 2026" */}
-          <SoftBadge>Abril 2026</SoftBadge>
+          {/* Badge "En Curso" */}
+          <SoftBadge>En Curso</SoftBadge>
 
-          {/* KPI Grid: 2 items side-by-side (Ahorro + Energía) */}
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <FeatureItem
-              icon={DollarSignIcon}
-              label="Ahorro en Dinero"
-              value="$74.400"
-              orientation="horizontal"
-            />
-            <FeatureItem
-              icon={ZapIcon}
-              label="Energía Generada"
-              value="830 kWh"
-              orientation="horizontal"
-            />
+          {/* KPI Grid: 2 items centered, side-by-side (Ahorro + Energía) */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex justify-center">
+              <FeatureItem
+                icon={DollarSignIcon}
+                label="Ahorro"
+                value="$74.400"
+                orientation="vertical"
+              />
+            </div>
+            <div className="flex justify-center">
+              <FeatureItem
+                icon={ZapIcon}
+                label="Energía Gen"
+                value="830 kWh"
+                orientation="vertical"
+              />
+            </div>
           </div>
 
           {/* Desglose / Stats breakdown */}
           <StatList
-            title="Desglose"
+            title="Desglose ahorro"
             items={statItems}
             tabs={STAT_TABS}
             defaultTab={mainTab}
