@@ -141,7 +141,7 @@ export function SocioEnergyView() {
       <CardWithContent
         title={socioV2PanelKpis.periodLabel}
         headerActions={<StatusBadge status="current">En Curso</StatusBadge>}
-        className="h-full lg:order-1 shadow-none"
+        className="h-full lg:order-1"
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">

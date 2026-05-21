@@ -36,9 +36,10 @@ export function KpiPrimaryCompact({
   return (
     <Card
       className={cn(
-        "h-full overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0",
+        "h-full overflow-hidden rounded-xl bg-white py-0 ring-0",
         className
       )}
+      style={{ boxShadow: 'inset 0 -30px 25px -15px rgba(0, 0, 0, 0.08)' }}
     >
       <div className="flex h-full flex-col gap-3 p-4">
         <div className="flex min-w-0 items-start gap-3">
