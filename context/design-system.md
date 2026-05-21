@@ -242,6 +242,8 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 | `SoftBadge` | `/components/ui/soft-badge.tsx` | → `components.md` |
 | `TabsForBlocks` | `/components/ui/tabs-for-blocks.tsx` | → `components.md` |
 | `CardWithContent` | `/components/ui/card-with-content.tsx` | → `components.md` |
+| `DatePicker` | `/components/ui/date-picker.tsx` | → `components.md` |
+| `PeriodSelector` | `/components/ui/period-selector.tsx` | → `components.md` |
 | `Table` | `/components/ui/data-table.tsx` | ⏳ Refactor pendiente |
 | `Sheet` | shadcn/ui nativo | ver `ux-guidelines.md` §3 |
 | `Button` | shadcn/ui nativo | ver reglas abajo |
@@ -323,8 +325,30 @@ Ciertos charts requieren semántica financiera que va más allá de la rampa ver
 
 ### Componentes de charts disponibles
 - `GenerationSparkline` → sparkline de tendencia en KpiPrimary — **Spec completo:** `components.md`
-- `ParkEnergyBarChart` → bar chart de generación del parque — **Spec completo:** `components.md`
+- `ParkEnergyBarChart` → bar chart de generación del parque (rangos 1M–TODO) — **Spec completo:** `components.md`
+- `DailyGenerationChart` → area chart horario kW (vista 1D) — **Spec completo:** `components.md`
+- `DailyGenerationChartBlock` → bloque UI completo vista 1D (DatePicker + KPIs + nav + chart) — **Spec completo:** `components.md`
 - `ROIProjectionChart` → proyección financiera multi-escenario — **Paleta:** Zinc + Green + Rose
+
+### Formato de horas en charts diarios
+
+Convención fija para vista **1D / DIARIO** — helpers en `/lib/chart-day-format.ts`:
+
+| Contexto | Formato | Ejemplo |
+|---|---|---|
+| Inline / KPI pico | `N Hrs` | `12 Hrs` |
+| Tooltip chart | `HH:MM Hrs` | `12:00 Hrs` |
+| Pico compuesto | `value · N Hrs` | `1,4 kW · 12 Hrs` |
+
+❌ No usar `"12h"` ni omitir `Hrs` en tooltips.
+
+### Animación en charts
+
+| Chart | Comportamiento |
+|---|---|
+| `ParkEnergyBarChart` | Recharts default al cambiar `data` (cambio de chip 1M/3M/6M…) |
+| `DailyGenerationChart` | Morph Recharts: **800ms** al montar tab 1D, **500ms** al cambiar día |
+| Reduced motion | Desactivar animación si `prefers-reduced-motion: reduce` |
 
 ---
 
@@ -335,6 +359,8 @@ Ciertos charts requieren semántica financiera que va más allá de la rampa ver
 | **Tipo** | Web App |
 | **Estrategia** | Desktop-first, full responsive |
 | **Breakpoints** | Desktop → Tablet → Mobile |
+| **CardWithContent subtitle** | Oculto en mobile (`hidden md:block`) — ver `components.md` § CardWithContent |
+| **FeatureItem con ícono** | Mobile: ícono arriba + texto abajo (`gap-4`) para grid 2×2 — ver `components.md` § FeatureItem |
 | **Color mode** | Light Mode prioritario |
 | **Dark mode** | Compatible vía tokens (valor agregado) |
 

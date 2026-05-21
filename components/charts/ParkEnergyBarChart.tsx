@@ -1,7 +1,15 @@
 // components/charts/ParkEnergyBarChart.tsx
 "use client"
 
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 import {
   ChartContainer,
@@ -12,10 +20,12 @@ import {
 import { useIsMobile } from "@/hooks/use-is-mobile"
 import { getChartBarDensity } from "@/lib/chart-bar-density"
 import { formatChartPeriodTooltipLabel } from "@/lib/format-chart-period-tooltip"
+import { cn } from "@/lib/utils"
 
 type ParkEnergyBarChartProps = {
   data: { label: string; generated: number }[]
   chartConfig: ChartConfig
+  className?: string
 }
 
 function barFill(index: number, total: number): string {
@@ -28,20 +38,22 @@ function barFill(index: number, total: number): string {
 export function ParkEnergyBarChart({
   data,
   chartConfig,
+  className,
 }: ParkEnergyBarChartProps) {
   const isMobile = useIsMobile()
   const n = data.length
   const density = getChartBarDensity(n, isMobile)
 
-  const dataWithDelta = data.map((item, index) => ({
-    ...item,
-    deltaVsPrevious: index > 0 ? item.generated - data[index - 1].generated : 0,
-  }))
-
   return (
-    <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
+    <ChartContainer
+      config={chartConfig}
+      className={cn(
+        "aspect-auto h-[300px] min-h-[300px] w-full [&_.recharts-responsive-container]:!h-full",
+        className
+      )}
+    >
       <BarChart
-        data={dataWithDelta}
+        data={data}
         margin={{
           left: 4,
           right: 8,
@@ -74,6 +86,7 @@ export function ParkEnergyBarChart({
         />
         {density.showTooltip ? (
           <ChartTooltip
+            cursor={{ fill: "transparent" }}
             content={
               <ChartTooltipContent
                 labelFormatter={(value) =>
@@ -82,9 +95,13 @@ export function ParkEnergyBarChart({
                 formatter={(value, _name, item) => {
                   const numericValue =
                     typeof value === "number" ? value : Number(value)
+                  const index =
+                    typeof item?.payload?.label === "string"
+                      ? data.findIndex((d) => d.label === item.payload?.label)
+                      : -1
                   const delta =
-                    typeof item.payload?.deltaVsPrevious === "number"
-                      ? item.payload.deltaVsPrevious
+                    index > 0
+                      ? numericValue - (data[index - 1]?.generated ?? 0)
                       : 0
 
                   return (
@@ -107,7 +124,13 @@ export function ParkEnergyBarChart({
             }
           />
         ) : null}
-        <Bar dataKey="generated" radius={[6, 6, 0, 0]} barSize={density.barSize}>
+        <Bar
+          dataKey="generated"
+          radius={n <= 12 ? [6, 6, 0, 0] : 0}
+          barSize={density.barSize}
+          background={false}
+          minPointSize={0}
+        >
           {data.map((_, index) => (
             <Cell key={`cell-${index}`} fill={barFill(index, n)} />
           ))}

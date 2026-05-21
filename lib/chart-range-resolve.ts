@@ -14,10 +14,10 @@ export function sliceChartRangeSeries<T>(
   weekly: readonly T[]
 ): T[] {
   switch (range) {
+    case "1d":
+      return []
     case "1m":
       return weekly.map((r) => ({ ...r }))
-    case "3m":
-      return monthly.slice(-3).map((r) => ({ ...r }))
     case "6m":
       return monthly.slice(-6).map((r) => ({ ...r }))
     case "1a":
@@ -34,9 +34,10 @@ export function getChartRangeSubtitle(
   operationsStartLabel: string
 ): string {
   switch (range) {
+    case "1d":
+      return "Generación por hora"
     case "1m":
       return "Períodos semanales"
-    case "3m":
     case "6m":
       return "Períodos mensuales"
     case "1a":

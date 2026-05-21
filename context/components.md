@@ -24,7 +24,9 @@
 13. [Table](#table)
 14. [GenerationSparkline](#generationsparkline)
 15. [ParkEnergyBarChart](#parkenergybarchar)
-16. [HinsTooltip](#hinstooltip)
+16. [DailyGenerationChart](#dailygenerationchart)
+17. [DailyGenerationChartBlock](#dailygenerationchartblock)
+18. [HinsTooltip](#hinstooltip)
 
 ---
 
@@ -124,7 +126,7 @@ Usar `gap-2` entre label e input cuando estén en columna:
 
 ### Cuándo NO usar
 
-- Sustituir `Select`, `PeriodSelector` o `TabsForBlocks`.
+- Sustituir `Select`, `PeriodSelector`, `DatePicker` o `TabsForBlocks`.
 - Acción primaria del formulario → usar `Button` aparte.
 - Solo decoración sin acción → no agregar botón; usar `Input` simple.
 
@@ -655,8 +657,9 @@ export { CardWire }
 
 | Prop | Layout | Uso |
 |---|---|---|
-| `orientation="horizontal"` | label izquierda · value derecha | Totales al cierre de un desglose (default) |
+| `orientation="horizontal"` | label izquierda · value derecha | Totales al cierre de un desglose (default, sin ícono) |
 | `orientation="vertical"` | label arriba · value abajo | Datos únicos en grid (Medidor, Participación) |
+| `icon` (prop opcional) | ícono + label/value | KPIs de soporte en grid 2×2 (ej. Potencia Instalada) |
 
 ### Spec
 
@@ -664,14 +667,21 @@ export { CardWire }
 |---|---|---|
 | Background | Shell background | `bg-[#F2ECE9]/36` |
 | Border radius | 8px | `rounded-md` |
-| Padding | 16px | `p-4` |
-| Font label | 14px medium | `text-sm font-medium text-muted-foreground` |
-| Font value | 20px semibold | `text-xl font-semibold text-[#0A0A0A]` |
+| Padding | 12px mobile · 16px desktop | `p-3 md:p-4` |
+| Font label (sin ícono) | 14px medium | `text-sm font-medium text-foreground` |
+| Font label (con ícono) | 12px mobile · 14px desktop | `text-xs md:text-sm font-medium` |
+| Font value | 18px mobile · 20px desktop | `text-lg md:text-xl font-semibold text-[#0A0A0A]` |
 
-**Horizontal (default):**
-- Layout: `flex items-center justify-between gap-4`
+**Horizontal (default, sin ícono):**
+- Layout: `flex items-center justify-between gap-3 md:gap-4`
 
-**Vertical:**
+**Con ícono (`icon` prop):**
+- Mobile: `flex-col gap-4` — IconBadge arriba, label + value abajo
+- Desktop (`md+`): `flex-row items-center` — ícono izquierda, texto derecha
+- IconBadge: `size-9 md:size-12`, `bg-white text-green-600`
+- Grid contenedor recomendado: `grid grid-cols-2 gap-4`
+
+**Vertical (`orientation="vertical"`):**
 - Layout: `flex flex-col gap-1`
 - Label: `text-xs font-medium text-muted-foreground` (más pequeño — es un caption)
 - Value: `text-xl font-semibold` (igual que horizontal)
@@ -684,6 +694,8 @@ interface FeatureItemProps {
   label: string
   value: string
   orientation?: "horizontal" | "vertical"
+  icon?: LucideIcon
+  className?: string
 }
 
 export function FeatureItem({
@@ -720,10 +732,17 @@ export function FeatureItem({
   <FeatureItem orientation="vertical" label="Nº de Medidor" value="3551118" />
   <FeatureItem orientation="vertical" label="Participación (%)" value="25%" />
 </div>
+
+// Con ícono — grid 2×2 bajo chart diario (Socio Performance)
+<div className="grid grid-cols-2 gap-4">
+  <FeatureItem label="Potencia Instalada" value="380 kWp" icon={ZapIcon} />
+  <FeatureItem label="Potencia de Acople" value="310 kWp" icon={CircleDollarSignIcon} />
+</div>
 ```
 
 ### Notas para el agente
 - `orientation` default es `"horizontal"` — no hace falta declararlo para el caso estándar
+- Con `icon`, en mobile el layout colapsa a columna (ícono arriba) para permitir `grid-cols-2` sin overflow
 - En `"vertical"` el label usa `text-xs` (12px) — es un caption, no un título
 - En `"vertical"` el value usa `text-[#0A0A0A]` — mismo que KpiSecondary para consistencia
 - `tabular-nums` en value siempre — alineación correcta de números
@@ -1386,7 +1405,7 @@ Card [p-0, overflow-hidden]
 | Header | `flex items-start justify-between p-6 pb-0` |
 | Title block | `flex flex-col gap-1 flex-1` |
 | Title (H3) | `text-lg font-semibold text-foreground` |
-| Subtitle | `text-sm font-normal text-muted-foreground` |
+| Subtitle | `text-sm font-normal text-muted-foreground` — **oculto en mobile** (`hidden md:block`) |
 | TabsForBlocks | `ml-auto` |
 | Content | `p-6 pt-0` |
 
@@ -1466,7 +1485,7 @@ export function CardWithContent({
 - `py-0 ring-0` obligatorios — neutralizan defaults del shadcn nativo.
 - Content slot acepta cualquier componente: Chart, List, etc.
 - TabsForBlocks es opcional.
-- Subtitle es opcional.
+- Subtitle es opcional — en mobile se oculta (`hidden md:block`); la granularidad se comunica vía tabs o controles internos (ej. DatePicker en vista 1D).
 - Nunca agregar padding al children directamente — el `p-6 pt-0` ya lo cubre.
 
 ---
@@ -2277,6 +2296,135 @@ export function ParkEnergyBarChart({ data, chartConfig }: ParkEnergyBarChartProp
 
 ---
 
+## DailyGenerationChart
+
+**Archivo:** `/components/charts/DailyGenerationChart.tsx`
+**Estado:** ✅ Aprobado
+**Usado en:** `DailyGenerationChartBlock` — vista **1D / DIARIO** de generación horaria
+
+### Cuándo usar
+Area chart de generación intradiaria (kW por hora). Render puro — siempre dentro de `DailyGenerationChartBlock`, nunca directo en la vista.
+
+### Cuándo NO usar
+- Rangos agregados (1M / 3M / 6M / 1A / TODO) → `ParkEnergyBarChart`
+- Sparkline en KPI → `GenerationSparkline`
+
+### Spec
+
+| Propiedad | Valor |
+|---|---|
+| Tipo | Recharts AreaChart |
+| Altura mínima | `min-h-[300px]` — crece con `flex-1` del contenedor padre |
+| Stroke / fill | `var(--color-kw)` desde `dailyGenerationChartConfig` |
+| Gradiente fill | `--color-kw` @ 15% → 0% opacidad |
+| Eje X | ticks fijos: 06:00, 09:00, 12:00, 15:00, 18:00 |
+| Eje Y | oculto |
+| Tooltip label | `formatChartHourTooltip` → `"12:00 Hrs"` |
+| Tooltip value | kW con 1 decimal (`es-AR`) |
+| Animación montaje (tab 1D) | 800ms morph Recharts |
+| Animación cambio de día | 500ms morph Recharts |
+| Reduced motion | `isAnimationActive={false}` vía `usePrefersReducedMotion` |
+
+### Props
+
+```tsx
+interface DailyGenerationChartProps {
+  data: { hour: string; kw: number }[]
+  className?: string
+  animationDuration?: number  // default: 500 — el Block pasa 800 en primer montaje
+}
+```
+
+### Notas para el agente
+- Separación obligatoria: `data` desde mock (`getDailyGenerationData24`), config desde `/data/chart-config`.
+- Formato de horas: helpers en `/lib/chart-day-format.ts` — nunca `"12h"`; usar `"12 Hrs"` (inline) o `"12:00 Hrs"` (tooltip).
+- No usar `key` en el día — morph entre series, no remount.
+- Constantes exportadas: `DAILY_CHART_MOUNT_ANIMATION_MS`, `DAILY_CHART_DAY_CHANGE_ANIMATION_MS`.
+
+---
+
+## DailyGenerationChartBlock
+
+**Archivo:** `/components/charts/DailyGenerationChartBlock.tsx`
+**Estado:** ✅ Aprobado
+**Usado en:** GDD / GDCV AGC / GDCV Socio — `CardWithContent` "Energía Generada del Parque" cuando tab activo es **`1d`**
+
+### Cuándo usar
+Bloque completo de vista diaria: DatePicker + KPIs inline + nav prev/next + `DailyGenerationChart`.
+
+### Cuándo NO usar
+- Rangos distintos de 1D → wrapper con `ParkEnergyBarChart`
+- Navegación de día fuera del chart → no duplicar; este bloque ya incluye DatePicker y nav
+
+### Anatomía
+
+```
+[-mx-4 contenedor flex-1]
+├── Header
+│   ├── Row 1 mobile / izquierda desktop → DatePicker
+│   └── Row 2 mobile (grid 2 cols) / derecha desktop → Acumulado + Pico (inline)
+└── Chart area (relative, min-h-[300px], flex-1)
+    ├── DailyGenerationChart (full width)
+    ├── Button prev (absolute, centrado vertical, overlay)
+    └── Button next (absolute, centrado vertical, overlay)
+```
+
+### Spec visual
+
+| Elemento | Mobile | Desktop (`md+`) |
+|---|---|---|
+| Contenedor | `-mx-4 flex-1` — edge-to-edge en card | igual |
+| Header | `flex-col gap-4` — picker centrado, KPIs grid 2×50% | `flex-row` — picker izq, KPIs inline derecha |
+| KPI labels | `Acumulado:` · `Pico:` | igual |
+| KPI peak | `formatDailyPeakLabel` → `"1,4 kW · 12 Hrs"` | igual |
+| Nav buttons | solo ícono (`max-md:size-8`), texto en `sr-only` | ícono + fecha corta (`May 4`) |
+| Nav position | `absolute left-3/right-3 top-1/2` sobre el chart | igual |
+| Chart height | `min-h-[300px] flex-1` — igual que bar chart | igual |
+
+### Props
+
+```tsx
+interface DailyGenerationChartBlockProps {
+  activeDay: Date
+  today: Date
+  onActiveDayChange: (day: Date) => void
+  data: DailyPoint[]
+  totalLabel: string
+  peakLabel: string   // usar formatDailyPeakLabel(value, hour)
+  className?: string
+}
+```
+
+### Uso en vista
+
+```tsx
+{chartRange === "1d" ? (
+  <div className="min-h-[300px] w-full flex-1">
+    <DailyGenerationChartBlock
+      activeDay={activeDay}
+      today={MOCK_TODAY}
+      onActiveDayChange={setActiveDay}
+      data={dailyChartData}
+      totalLabel={dailyTotal}
+      peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
+      className="h-full min-h-[300px]"
+    />
+  </div>
+) : (
+  <div className="min-h-[300px] w-full flex-1">
+    <ParkEnergyBarChart ... />
+  </div>
+)}
+```
+
+### Notas para el agente
+- El wrapper `min-h-[300px] flex-1` en la vista es obligatorio — paridad de altura con `ParkEnergyBarChart`.
+- Socio Performance: debajo del block van `FeatureItem` en `grid grid-cols-2 gap-4` — no dentro del block.
+- DatePicker: `/components/ui/date-picker.tsx` — no reimplementar Popover inline.
+- `ChartDayNavigator` existe pero **no** se usa en esta vista — preferir `DailyGenerationChartBlock`.
+
+---
+
 ## HinsTooltip
 
 **Archivo:** `/components/ui/hins-tooltip.tsx`
@@ -3069,6 +3217,7 @@ que dependa de un período activo. Siempre en el header de la sección que contr
 
 ### Cuándo NO usar
 - Selector de rango temporal en bar charts (1M / 3M / 6M / 1A / TODO) → usar `TabsForBlocks` + `CHART_RANGE_TABS`. Densidad: `lib/chart-bar-density.ts` (tooltip off si >6 barras en mobile o >12 en desktop; labels top solo ≤6 barras).
+- Selección de día calendario en vista 1D → `DatePicker` dentro de `DailyGenerationChartBlock`
 - Filtros multi-selección → usar Checkbox
 - Navegación entre vistas → usar Sidebar o `TabsForBlocks`
 
@@ -3157,6 +3306,63 @@ const [period, setPeriod] = useState("Abril 2026")
 - Sin lógica de negocio adentro — solo UI y estado local.
 - `align="end"` en el dropdown para alinearse al borde derecho del trigger.
 - Usar siempre `variant="outline"` — nunca primario, nunca ghost para este control.
+
+---
+
+## DatePicker
+
+**Archivo:** `/components/ui/date-picker.tsx`
+**Estado:** ✅ Aprobado
+**Dependencias:** `Calendar`, `Popover`, `Button` (shadcn), `formatChartDayPicker` (`/lib/chart-day-format.ts`)
+
+### Cuándo usar
+- Selección de **día calendario** en vista diaria (1D) de generación.
+- Siempre controlado: el padre provee `value: Date` y `onValueChange`.
+
+### Cuándo NO usar
+- Filtro de período mensual agregado (Abril 2026) → `PeriodSelector`
+- Rango temporal en bar charts (1M / 3M / 6M) → `TabsForBlocks`
+- Navegación prev/next sola → los botones del `DailyGenerationChartBlock` complementan al picker, no lo reemplazan
+
+### Spec Visual
+
+| Elemento | Tailwind |
+|---|---|
+| Trigger | `Button variant="outline" h-8 justify-start gap-2 px-2.5 text-base font-normal shadow-xs` |
+| Ícono izquierdo | `CalendarIcon size-4 text-muted-foreground` |
+| Label | fecha activa — default `formatChartDayPicker` → `"Mayo 20, 2026"` |
+| Chevron | `ChevronDownIcon size-4 text-muted-foreground ml-auto` |
+| Popover | `PopoverContent w-auto p-0` |
+| Calendar | shadcn `Calendar mode="single"`, locale `es` |
+
+### Props
+
+```tsx
+interface DatePickerProps {
+  value: Date
+  onValueChange: (date: Date) => void
+  disabled?: (date: Date) => boolean
+  formatLabel?: (date: Date) => string
+  className?: string
+  align?: "start" | "center" | "end"
+}
+```
+
+### Implementación
+
+```tsx
+<DatePicker
+  value={activeDay}
+  onValueChange={setActiveDay}
+  disabled={(date) => date > today}
+/>
+```
+
+### Notas para el agente
+- Patrón visual alineado a `PeriodSelector` (outline + CalendarIcon + chevron) pero con `Calendar` en Popover, no DropdownMenu.
+- `rounded-md` en trigger — **no** `rounded-full`.
+- Fechas futuras: deshabilitar vía prop `disabled` — el Block pasa `date > today`.
+- Formato de fecha: extender en `/lib/chart-day-format.ts`, no hardcodear en el componente.
 
 ---
 
@@ -3257,14 +3463,17 @@ const [period, setPeriod] = useState("Abril 2026")
 8. [Table](#table)
 9. [GenerationSparkline](#generationsparkline)
 10. [ParkEnergyBarChart](#parkenergybarchar)
-11. [HinsTooltip](#hinstooltip)
-12. [StatList](#statlist)
-13. [SectionHeader](#sectionheader)
-14. [PageHeader](#pageheader)
-15. [PeriodSelector](#periodselector)
-16. [SocioAccessView](#socioaccessview)
-17. [MantenimientoHistorialTable](#mantenimientohistorialtable)
-18. [HinsAlert](#hinsalert)
+11. [DailyGenerationChart](#dailygenerationchart)
+12. [DailyGenerationChartBlock](#dailygenerationchartblock)
+13. [HinsTooltip](#hinstooltip)
+14. [StatList](#statlist)
+15. [SectionHeader](#sectionheader)
+16. [PageHeader](#pageheader)
+17. [PeriodSelector](#periodselector)
+18. [DatePicker](#datepicker)
+19. [SocioAccessView](#socioaccessview)
+20. [MantenimientoHistorialTable](#mantenimientohistorialtable)
+21. [HinsAlert](#hinsalert)
 
 ---
 

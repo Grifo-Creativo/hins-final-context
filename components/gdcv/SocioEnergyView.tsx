@@ -39,8 +39,17 @@ export function SocioEnergyView() {
   const [ahorroRange, setAhorroRange] = useState<ChartRangeChip>("6m")
   const [statTab, setStatTab] = useState("inyeccion")
 
-  const ahorroData = useMemo(() => getSocioAhorroSeries(ahorroRange), [ahorroRange])
-  const ahorroSubtitle = getSocioAhorroChartSubtitle(ahorroRange)
+  const ahorroBarRange: ChartRangeChip =
+    ahorroRange === "1d" ? "6m" : ahorroRange
+
+  const ahorroData = useMemo(
+    () => getSocioAhorroSeries(ahorroBarRange),
+    [ahorroBarRange]
+  )
+  const ahorroSubtitle =
+    ahorroRange === "1d"
+      ? getSocioAhorroChartSubtitle("6m")
+      : getSocioAhorroChartSubtitle(ahorroRange)
   const statItems =
     statTab === "inyeccion" ? socioStatListInyeccion : socioStatListEnergia
   const sparkline = useMemo(
@@ -55,6 +64,7 @@ export function SocioEnergyView() {
         title="Mi Ahorro en abril"
         subtitle={ahorroSubtitle}
         tabs={CHART_RANGE_TABS}
+        activeTab={ahorroRange}
         defaultTab="6m"
         onTabChange={(v) => setAhorroRange(v as ChartRangeChip)}
         className="h-full"

@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from "react"
 
+import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationChartBlock"
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { GenerationSparkline } from "@/components/charts/GenerationSparkline"
 import { ParticipacionDonutChart } from "@/components/charts/ParticipacionDonutChart"
@@ -23,6 +24,10 @@ import { gdcvEnergyBarChartConfig, generationSparklineConfig } from "@/data/char
 import {
   getSocioParqueSeries,
   getSocioParqueChartSubtitle,
+  getSocioParqueDailySeries,
+  getSocioParqueDailyTotal,
+  getSocioParqueDailyPeak,
+  socioMockToday,
   socioEnergiaPark,
   socioEnergiaParkSparkline,
   socioPotenciaInstalada,
@@ -30,15 +35,42 @@ import {
   participacionSocios,
 } from "@/data/gdcv-socio-mock"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
+import { formatChartDayLong, formatDailyPeakLabel } from "@/lib/chart-day-format"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { CircleDollarSignIcon, XIcon, ZapIcon } from "lucide-react"
 
+const TODAY = socioMockToday
+
 export function SocioPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
+  const [activeDay, setActiveDay] = useState<Date>(TODAY)
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  const chartData = useMemo(() => getSocioParqueSeries(chartRange), [chartRange])
-  const chartSubtitle = getSocioParqueChartSubtitle(chartRange)
+  const chartData = useMemo(
+    () => (chartRange === "1d" ? [] : getSocioParqueSeries(chartRange)),
+    [chartRange]
+  )
+
+  const dailyChartData = useMemo(
+    () => getSocioParqueDailySeries(activeDay),
+    [activeDay]
+  )
+
+  const dailyTotal = useMemo(
+    () => getSocioParqueDailyTotal(activeDay),
+    [activeDay]
+  )
+
+  const dailyPeak = useMemo(
+    () => getSocioParqueDailyPeak(activeDay),
+    [activeDay]
+  )
+
+  const chartSubtitle =
+    chartRange === "1d"
+      ? formatChartDayLong(activeDay)
+      : getSocioParqueChartSubtitle(chartRange)
+
   const parkSparkline = useMemo(
     () => socioEnergiaParkSparkline.map((d, i) => ({ i, value: d.value })),
     []
@@ -53,57 +85,70 @@ export function SocioPerformanceView() {
   return (
     <>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
-        {/* Left — Energía generada del parque */}
         <CardWithContent
           title="Energía generada del parque"
           subtitle={chartSubtitle}
           tabs={CHART_RANGE_TABS}
+          activeTab={chartRange}
           defaultTab="6m"
           onTabChange={(v) => setChartRange(v as ChartRangeChip)}
           className="h-full"
         >
-          <div className="flex flex-1 flex-col gap-4">
-            <ParkEnergyBarChart data={chartData} chartConfig={gdcvEnergyBarChartConfig} />
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            {chartRange === "1d" ? (
+              <DailyGenerationChartBlock
+                activeDay={activeDay}
+                today={TODAY}
+                onActiveDayChange={setActiveDay}
+                data={dailyChartData}
+                totalLabel={dailyTotal}
+                peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
+                className="min-h-[300px] flex-1"
+              />
+            ) : (
+              <div className="min-h-[300px] w-full flex-1">
+                <ParkEnergyBarChart
+                  data={chartData}
+                  chartConfig={gdcvEnergyBarChartConfig}
+                  className="h-full min-h-[300px]"
+                />
+              </div>
+            )}
 
-            <div className="flex flex-1 gap-4">
-              <div className="flex-1">
-                <FeatureItem
-                  label="Potencia Instalada"
-                  value={socioPotenciaInstalada}
-                  icon={CircleDollarSignIcon}
-                />
-              </div>
-              <div className="flex-1">
-                <FeatureItem
-                  label="Potencia de Acople"
-                  value={socioPotenciaAcople}
-                  icon={ZapIcon}
-                />
-              </div>
+            <div className="grid shrink-0 grid-cols-2 gap-4">
+              <FeatureItem
+                label="Potencia Instalada"
+                value={socioPotenciaInstalada}
+                icon={CircleDollarSignIcon}
+              />
+              <FeatureItem
+                label="Potencia de Acople"
+                value={socioPotenciaAcople}
+                icon={ZapIcon}
+              />
             </div>
 
-            <div className="flex flex-1 gap-4">
-              <div className="flex-1">
-                <FeatureItem label="--" value="--" icon={CircleDollarSignIcon} />
-              </div>
-              <div className="flex-1">
-                <FeatureItem label="--" value="--" icon={ZapIcon} />
-              </div>
+            <div className="grid shrink-0 grid-cols-2 gap-4">
+              <FeatureItem label="--" value="--" icon={CircleDollarSignIcon} />
+              <FeatureItem label="--" value="--" icon={ZapIcon} />
             </div>
           </div>
         </CardWithContent>
 
-        {/* Right — Resumen del Parque */}
         <div className="flex flex-col gap-4">
-          <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden">
+          <Card className="overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
             <div className="flex flex-col gap-4 p-4">
               <div className="flex items-start gap-4">
                 <IconBadge icon={ZapIcon} size="lg" />
-                <div className="flex flex-col gap-1 flex-1">
-                  <p className="text-lg font-semibold text-[#0A0A0A]">Generada en Abril</p>
+                <div className="flex flex-1 flex-col gap-1">
+                  <p className="text-lg font-semibold text-[#0A0A0A]">
+                    Generada en Abril
+                  </p>
                   <p className="text-4xl font-bold text-[#0A0A0A]">
                     {socioEnergiaPark.value}
-                    <span className="ml-1 text-xl font-semibold">{socioEnergiaPark.unit}</span>
+                    <span className="ml-1 text-xl font-semibold">
+                      {socioEnergiaPark.unit}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -118,7 +163,6 @@ export function SocioPerformanceView() {
             </div>
           </Card>
 
-          {/* Participación por Socio */}
           <CardWithContent
             title="Participación por Socio"
             className="h-fit"
@@ -220,7 +264,9 @@ export function SocioPerformanceView() {
                           {socio.nombre}
                         </span>
                         {socio.isCurrent ? (
-                          <span className="text-xs text-muted-foreground">(tú)</span>
+                          <span className="text-xs text-muted-foreground">
+                            (tú)
+                          </span>
                         ) : null}
                       </div>
                       <span className="text-xs font-semibold tabular-nums text-muted-foreground">

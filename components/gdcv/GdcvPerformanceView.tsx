@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from "react"
 
+import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationChartBlock"
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { SocioDetailSheet } from "@/components/gdcv/SocioDetailSheet"
 import { SociosTable } from "@/components/gdcv/SociosTable"
@@ -22,15 +23,46 @@ import {
 } from "@/data/gdcv-mock"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import type { ChartRangeChip } from "@/types/chart-range"
+import {
+  getDailyGenerationData24,
+  getDailyPeak,
+  getDailyTotal,
+  MOCK_TODAY,
+  toDateKey,
+} from "@/data/gdcv-daily-mock"
+import { formatChartDayLong, formatDailyPeakLabel } from "@/lib/chart-day-format"
 import { DollarSignIcon, ZapIcon } from "lucide-react"
 
 export function GdcvPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
+  const [activeDay, setActiveDay] = useState<Date>(MOCK_TODAY)
   const [selectedSocio, setSelectedSocio] = useState<SocioRow | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
 
-  const chartData = useMemo(() => getGdcvEnergySeries(chartRange), [chartRange])
-  const chartSubtitle = getGdcvEnergyChartSubtitle(chartRange)
+  const chartData = useMemo(
+    () => (chartRange === "1d" ? [] : getGdcvEnergySeries(chartRange)),
+    [chartRange]
+  )
+
+  const dailyChartData = useMemo(
+    () => getDailyGenerationData24(toDateKey(activeDay)),
+    [activeDay]
+  )
+
+  const dailyTotal = useMemo(
+    () => getDailyTotal(dailyChartData),
+    [dailyChartData]
+  )
+
+  const dailyPeak = useMemo(
+    () => getDailyPeak(dailyChartData),
+    [dailyChartData]
+  )
+
+  const chartSubtitle =
+    chartRange === "1d"
+      ? formatChartDayLong(activeDay)
+      : getGdcvEnergyChartSubtitle(chartRange)
 
   function handleRowClick(socio: SocioRow) {
     setSelectedSocio(socio)
@@ -48,14 +80,32 @@ export function GdcvPerformanceView() {
           title="Energía Generada del Parque"
           subtitle={chartSubtitle}
           tabs={CHART_RANGE_TABS}
+          activeTab={chartRange}
           defaultTab="6m"
           onTabChange={(v) => setChartRange(v as ChartRangeChip)}
           className="h-full"
         >
-          <ParkEnergyBarChart
-            data={chartData}
-            chartConfig={gdcvEnergyBarChartConfig}
-          />
+          {chartRange === "1d" ? (
+            <div className="min-h-[300px] w-full flex-1">
+              <DailyGenerationChartBlock
+                activeDay={activeDay}
+                today={MOCK_TODAY}
+                onActiveDayChange={setActiveDay}
+                data={dailyChartData}
+                totalLabel={dailyTotal}
+                peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
+                className="h-full min-h-[300px]"
+              />
+            </div>
+          ) : (
+            <div className="min-h-[300px] w-full flex-1">
+              <ParkEnergyBarChart
+                data={chartData}
+                chartConfig={gdcvEnergyBarChartConfig}
+                className="h-full min-h-[300px]"
+              />
+            </div>
+          )}
         </CardWithContent>
 
         {/* Right column — KPI primary + 2× secondary */}

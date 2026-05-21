@@ -4,6 +4,14 @@ import {
   sliceChartRangeSeries,
 } from "@/lib/chart-range-resolve"
 import { GDCV_ENERGY_MONTHLY_CANONICAL } from "@/data/gdcv-mock"
+import {
+  getDailyGenerationData24,
+  getDailyPeak,
+  getDailyTotal,
+  MOCK_TODAY,
+  toDateKey,
+  type DailyPoint,
+} from "@/data/gdcv-daily-mock"
 import type { ChartRangeChip } from "@/types/chart-range"
 import type { RoiCurvePoint } from "@/data/gdd-roi-mock"
 import type { StatListItem } from "@/components/ui/stat-list"
@@ -235,6 +243,18 @@ const SOCIO_PARQUE_WEEKLY: readonly SocioParqueRow[] = [
   { label: "22–30 Abr", generated: 53.49 },
 ]
 
+export function getSocioParqueDailySeries(day: Date): DailyPoint[] {
+  return getDailyGenerationData24(toDateKey(day))
+}
+
+export function getSocioParqueDailyTotal(day: Date): string {
+  return getDailyTotal(getSocioParqueDailySeries(day))
+}
+
+export function getSocioParqueDailyPeak(day: Date): { value: string; hour: string } {
+  return getDailyPeak(getSocioParqueDailySeries(day))
+}
+
 export function getSocioParqueSeries(range: ChartRangeChip): SocioParqueRow[] {
   return sliceChartRangeSeries(range, SOCIO_PARQUE_MONTHLY, SOCIO_PARQUE_WEEKLY)
 }
@@ -242,6 +262,8 @@ export function getSocioParqueSeries(range: ChartRangeChip): SocioParqueRow[] {
 export function getSocioParqueChartSubtitle(range: ChartRangeChip): string {
   return getChartRangeSubtitle(range, socioOperationsStartLabel)
 }
+
+export { MOCK_TODAY as socioMockToday }
 
 // ─── KPI Parque ───────────────────────────────────────────────────────────────
 

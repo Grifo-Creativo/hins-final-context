@@ -76,8 +76,6 @@ export function getRoiCurveSeries(range: ChartRangeChip): RoiCurvePoint[] {
   switch (range) {
     case "1m":
       return ROI_CURVE_WEEKLY_TRAILING.map((p) => ({ ...p }))
-    case "3m":
-      return sliceLastMonths(ROI_CURVE_MONTHLY_CANONICAL, 3)
     case "6m":
       return sliceLastMonths(ROI_CURVE_MONTHLY_CANONICAL, 6)
     default:
@@ -97,8 +95,6 @@ export function getRoiRecoveryChartSubtitle(range: ChartRangeChip): string {
   switch (range) {
     case "1m":
       return "Agregación semanal (cuatro semanas sobre crédito acumulado observado)."
-    case "3m":
-      return "Agregación mensual — últimos 3 meses hasta la proyección."
     case "6m":
       return "Agregación mensual — últimos 6 meses hasta la proyección."
     default:

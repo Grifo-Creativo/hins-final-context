@@ -28,11 +28,12 @@ export function getChartBarDensity(
     : barCount <= CHART_BAR_TOOLTIP_MAX_DESKTOP
 
   return {
-    barSize: barCount <= 6 ? 56 : barCount <= 12 ? 28 : 14,
+    barSize:
+      barCount <= 6 ? 56 : barCount <= 12 ? 28 : barCount <= 20 ? 14 : 8,
     showTooltip,
     showBarLabels: barCount <= CHART_BAR_LABELS_MAX,
     xAxisAngle: barCount > 8 ? -40 : 0,
     xAxisHeight: barCount > 8 ? 56 : 32,
-    xAxisInterval: barCount > 16 ? 1 : 0,
+    xAxisInterval: barCount > 24 ? 2 : barCount > 16 ? 1 : 0,
   }
 }

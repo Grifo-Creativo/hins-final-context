@@ -242,8 +242,6 @@ export function getGdcvCurveSeries(range: ChartRangeChip): GdcvCurvePoint[] {
   switch (range) {
     case "1m":
       return GDCV_CURVE_WEEKLY.map((p) => ({ ...p }))
-    case "3m":
-      return GDCV_CURVE_CANONICAL.slice(-3).map((p) => ({ ...p }))
     case "6m":
       return GDCV_CURVE_CANONICAL.slice(-6).map((p) => ({ ...p }))
     default:
@@ -262,8 +260,6 @@ export function getGdcvCurveSubtitle(range: ChartRangeChip): string {
   switch (range) {
     case "1m":
       return "Agregación semanal (cuatro semanas sobre crédito acumulado observado)."
-    case "3m":
-      return "Agregación mensual — últimos 3 meses hasta la proyección."
     case "6m":
       return "Agregación mensual — últimos 6 meses hasta la proyección."
     default:

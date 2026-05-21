@@ -36,23 +36,36 @@ export function FeatureItem({
   return (
     <div
       className={cn(
-        "flex min-h-0 items-center justify-between gap-4 rounded-md bg-[#F2ECE9]/36 p-4",
+        "flex w-full min-w-0 rounded-md bg-[#F2ECE9]/36 p-3 md:p-4",
+        Icon
+          ? "flex-col gap-4 md:flex-row md:items-center"
+          : "items-center justify-between gap-3 md:gap-4",
         className
       )}
     >
       {!Icon ? (
         <>
-          <p className="text-sm font-medium text-foreground">{label}</p>
-          <p className="text-xl font-semibold tabular-nums text-[#0A0A0A]">{value}</p>
+          <p className="min-w-0 text-sm font-medium text-foreground">{label}</p>
+          <p className="shrink-0 text-lg font-semibold tabular-nums text-[#0A0A0A] md:text-xl">
+            {value}
+          </p>
         </>
       ) : (
-        <div className="flex min-w-0 flex-1 items-center gap-4">
-          <IconBadge icon={Icon} size="lg" className="bg-white text-green-600" />
-          <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-sm font-medium text-foreground">{label}</p>
-            <p className="text-xl font-semibold tabular-nums text-[#0A0A0A]">{value}</p>
+        <>
+          <IconBadge
+            icon={Icon}
+            size="lg"
+            className="size-9 shrink-0 bg-white text-green-600 md:size-12 [&_svg]:size-5 md:[&_svg]:size-6"
+          />
+          <div className="flex min-w-0 flex-col gap-0.5 md:flex-1 md:gap-1">
+            <p className="text-xs font-medium leading-snug text-foreground md:text-sm">
+              {label}
+            </p>
+            <p className="text-lg font-semibold tabular-nums text-[#0A0A0A] md:text-xl">
+              {value}
+            </p>
           </div>
-        </div>
+        </>
       )}
     </div>
   )

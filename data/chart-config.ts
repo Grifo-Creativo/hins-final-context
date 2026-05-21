@@ -44,6 +44,13 @@ export const gdcvEnergyBarChartConfig = {
   },
 } satisfies ChartConfig
 
+export const dailyGenerationChartConfig = {
+  kw: {
+    label: "Generación",
+    color: "var(--chart-1)",
+  },
+} satisfies ChartConfig
+
 /** Alias del mismo preset que `roiRecoveryChartConfig` para GDCV/agc/socio */
 export const gdcvRoiRecoveryChartConfig = roiRecoveryChartConfig
 

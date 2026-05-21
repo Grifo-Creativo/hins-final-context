@@ -13,6 +13,8 @@ interface CardWithContentProps {
   subtitle?: string
   tabs?: Tab[]
   defaultTab?: string
+  /** Tab activo controlado — sincroniza chips con el estado del chart. */
+  activeTab?: string
   onTabChange?: (value: string) => void
   children: React.ReactNode
   className?: string
@@ -27,6 +29,7 @@ export function CardWithContent({
   subtitle,
   tabs,
   defaultTab,
+  activeTab,
   onTabChange,
   children,
   className,
@@ -54,7 +57,7 @@ export function CardWithContent({
                   </h3>
                 ) : null}
                 {subtitle ? (
-                  <p className="text-sm font-normal text-muted-foreground">
+                  <p className="hidden text-sm font-normal text-muted-foreground md:block">
                     {subtitle}
                   </p>
                 ) : null}
@@ -62,7 +65,8 @@ export function CardWithContent({
               {tabs && (
                 <TabsForBlocks
                   tabs={tabs}
-                  defaultValue={defaultTab}
+                  value={activeTab}
+                  defaultValue={activeTab ? undefined : defaultTab}
                   onValueChange={onTabChange}
                   className="w-full min-w-0 shrink-0 sm:ml-auto sm:w-auto"
                 />
@@ -95,7 +99,7 @@ export function CardWithContent({
               {title}
             </h3>
             {subtitle && (
-              <p className="text-sm font-normal text-muted-foreground">
+              <p className="hidden text-sm font-normal text-muted-foreground md:block">
                 {subtitle}
               </p>
             )}
@@ -103,7 +107,8 @@ export function CardWithContent({
           {tabs && (
             <TabsForBlocks
               tabs={tabs}
-              defaultValue={defaultTab}
+              value={activeTab}
+              defaultValue={activeTab ? undefined : defaultTab}
               onValueChange={onTabChange}
               className="w-full min-w-0 shrink-0 sm:ml-auto sm:w-auto"
             />
@@ -111,7 +116,7 @@ export function CardWithContent({
         </div>
         <div
           className={cn(
-            "flex flex-col p-4 pt-0",
+            "flex min-h-0 flex-1 flex-col p-4 pt-0",
             allowTooltipOverflow && "overflow-visible"
           )}
         >
