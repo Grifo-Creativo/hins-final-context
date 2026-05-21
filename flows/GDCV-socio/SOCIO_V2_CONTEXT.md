@@ -11,12 +11,17 @@
 | Archivo | Rol |
 |---|---|
 | `app/gdcv/socio-v2/page.tsx` | Ruta Next.js — compone los bloques de la página |
-| `components/gdcv/SocioEnergyViewV2.tsx` | Componente principal — la sección de ahorro interactiva |
+| `components/gdcv/SocioEnergyViewV2.tsx` | Layout 2 columnas — orquesta el bloque interactivo |
+| `components/gdcv/SocioV2BarChart.tsx` | Bar chart simple (mint, labels top) — solo V2 |
+| `components/ui/tabs-for-blocks-icons.tsx` | Toggle $ / ⚡ — variante icon-only de TabsForBlocks |
+| `components/gdcv/SocioV2FeatureKpi.tsx` | KPI híbrida FeatureItem + KpiPrimary (sparkline) — panel derecho |
+| `components/gdcv/SocioV2BreakdownList.tsx` | Desglose con tabs `$` / `⚡` controlados — solo V2 |
+| `components/gdcv/socio-v2-constants.ts` | Chips DIA/6M/1A/TODO + copy de subtítulos mockup |
 
 ### Modificado (solo adición, sin tocar exports existentes)
 | Archivo | Qué se agregó |
 |---|---|
-| `data/gdcv-socio-mock.ts` | Series kWh (`SOCIO_AHORRO_ENERGIA_MONTHLY/WEEKLY`), función `getSocioAhorroEnergiaSeries()`, KPI `socioAhorroEnergiaKpi`, stats `socioStatListAhorroEnergia` |
+| `data/gdcv-socio-mock.ts` | Series kWh, `socioStatListV2Dinero/Energia`, `socioV2PanelKpis` |
 
 ### NO modificados (reutilizados tal cual)
 - `components/gdcv/SocioPageHeading.tsx`
@@ -41,27 +46,24 @@ Solo `SocioEnergyViewV2` difiere del flujo original.
 
 ## 3. Diseño de `SocioEnergyViewV2`
 
-### Layout 2 columnas (responsive)
+### Layout 2 columnas (responsive) — alineado a `GDCV__SocioV2-Performance_01/02.png`
 
 ```
 ┌─────────────────────────────────────────┬────────────────┐
-│  LEFT CARD (CardWithContent)            │  RIGHT CARD    │
-│                                         │  (Card manual) │
-│  Title: "Mi Ahorro Generado"            │  Abril 2026    │
-│          o "Mi Energía Generada"        │  [En Curso]    │
-│          (dinámico según tab activo)    │                │
-│                                         │  ┌──────┬─────┐│
-│  [💵] [⚡]  |  DIARIO  1M  6M  1A  TODO │  │  $   │  ⚡ ││
-│  (tabs icono solo + range tabs, 1 fila) │  │Ahorro│En.G ││
-│                                         │  │$74.4 │830kW││
-│  ████████ MonetaryBarChart              │  └──────┴─────┘│
-│  ████ verde=autoconsumo                 │                │
-│  ████ naranja=inyectada                 │  Desglose      │
-│                                         │  ahorro        │
-│                                         │  [Dinero][Ener]│
+│  LEFT CARD (Card manual)                │  RIGHT CARD    │
+│                                         │                │
+│  Title + "Weekly overview"    [DIA 6M  │  Abril 2026    │
+│  1A TODO] [$ ⚡]                        │  [En Curso] ⋮  │
+│                                         │                │
+│  ████████ SocioV2BarChart               │  ┌──────┬─────┐│
+│  mint simple + label encima             │  │Wallet│ ⚡  ││
+│  ($ o kWh según toggle)                 │  │Ahorro│Gen. ││
+│                                         │  └──────┴─────┘│
+│                                         │  Desglose Ahorro│
+│                                         │  [$][⚡]        │
 │                                         │  · Autoconsumo │
 │                                         │  · Inyectada   │
-│                                         │  · Total       │
+│                                         │  · Total Abril │
 └─────────────────────────────────────────┴────────────────┘
 ```
 
@@ -121,9 +123,10 @@ Ambas funciones usan `sliceChartRangeSeries()` de `@/lib/chart-range-resolve`.
 | `Badge` | `@/components/ui/badge` | `className="bg-green-100 text-green-700 border-transparent"` |
 | `FeatureItem` | `@/components/ui/feature-item` | `icon`, `label`, `value`, `orientation="vertical"` |
 | `StatList` | `@/components/ui/stat-list` | `title`, `items`, `tabs`, `defaultTab`, `onTabChange` |
-| `MonetaryBarChart` | `@/components/charts/MonetaryBarChart` | `data`, `chartConfig` — funciona igual para $ y kWh |
-| `Tabs/TabsList/TabsTrigger` | `@/components/ui/tabs` | Para tabs icono-only (main) y range chips |
-| `CHART_RANGE_TABS` | `@/components/gdd/chart-range-options` | Array de tabs de rango predefinidos |
+| `SocioV2BarChart` | `@/components/gdcv/SocioV2BarChart` | Barras simples mint + labels top |
+| `TabsForBlocksIcons` | `@/components/ui/tabs-for-blocks-icons` | Variante icon-only de TabsForBlocks ($ / ⚡) |
+| `SocioV2BreakdownList` | `@/components/gdcv/SocioV2BreakdownList` | Desglose + tabs `$` / `⚡` |
+| `TabsForBlocks` | `@/components/ui/tabs-for-blocks` | Chips DIA / 6M / 1A / TODO |
 
 ### Nota sobre `FeatureItem` con `orientation="vertical"`
 Renderiza: icono (IconBadge verde) arriba, label debajo, valor grande abajo. Full-width dentro del grid.
@@ -147,11 +150,14 @@ const [mainTab, setMainTab] = useState<"dinero" | "energia">("dinero")
 
 ## 8. Qué falta / posibles continuaciones
 
-- [ ] El right card tiene el mes hardcodeado ("Abril 2026" y badge "En Curso") — deberá venir de datos dinámicos cuando el backend esté integrado
-- [ ] `MonetaryBarChart` muestra tooltip con formato $ incluso en perspectiva kWh — considerar variante de tooltip para kWh
-- [ ] El tab "DIARIO" en range chips usa `"1d"` que se mapea a `"6m"` como fallback (ver `ahorroBarRange` en el componente) — pendiente implementar vista diaria real
-- [ ] Cuando el cliente valide esta vista, decidir si reemplaza `/gdcv/socio` o convive
-- [ ] `SocioPageHeading` no activa ningún nav item en `/gdcv/socio-v2` (no coincide con rutas de nav) — aceptable para prototipo
+- [ ] Tooltip accesible en `SocioV2BarChart` (opcional; mock no lo exige)
+- [ ] El right card tiene el mes en `socioV2PanelKpis` — dinámico con backend
+- [ ] Chip **DIA** usa rango interno `1m` (semanas de abril) — vista diaria real pendiente
+- [ ] Menú ⋮ — eliminado del prototipo V2 (no requerido por ahora)
+- [ ] Cuando el cliente valide, decidir si reemplaza `/gdcv/socio` o convive
+- [ ] `SocioPageHeading` no activa nav en `/gdcv/socio-v2` — aceptable para prototipo
+
+**Referencia visual:** `flows/GDCV-socio/GDCV__SocioV2-Performance_01.png` (dinero) y `_02.png` (energía).
 
 ---
 

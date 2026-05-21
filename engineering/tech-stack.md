@@ -152,7 +152,7 @@ Referencia: [sidebar-05 — shadcn/ui](https://ui.shadcn.com/blocks/sidebar#side
       <Sidebar />
       <SidebarInset className="flex flex-col">
         <Header /> {/* sticky */}
-        <main className="flex-1 bg-[#F2ECE9]/36 p-6 overflow-y-auto">
+        <main className="flex-1 bg-background-subtle p-6 overflow-y-auto">
           {children}
         </main>
       </SidebarInset>

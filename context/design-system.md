@@ -14,7 +14,7 @@
 | Token | Valor | Descripción |
 |---|---|---|
 | `--background` | `#FFFFFF` | Blanco puro — superficie de cards y contenido |
-| `--background-subtle` | `#F2ECE9` @ 36% | Fondo del shell (Main content / body del layout) |
+| `--background-subtle` | `lab(91 2.48 3.22 / 0.36)` | Fondo del shell (Main content / body del layout) |
 | `--foreground` | `#09090B` | Zinc 950 — texto principal |
 | `--primary` | `#18181B` | Zinc 900 — fondo de botones y CTAs |
 | `--primary-foreground` | `#FAFAFA` | Zinc 50 — texto sobre botones primarios |
@@ -44,6 +44,8 @@
 |---|---|---|
 | `--chart-1` | `#22C55E` | Green 500 — serie optimista/favorable |
 | `--chart-1-muted` | `#22C55E` @ 55% | Green 500 con opacidad — series pasadas |
+| `--chart-stack-autoconsumo` | `var(--chart-1)` | Segmento base de bar chart apilado (autoconsumo virtual) |
+| `--chart-stack-inyectada` | `rgb(251 191 36 / 0.9)` | Segmento superior apilado — `amber-400` @ 90% (energía inyectada) |
 | `--chart-2` | `#16A34A` | Green 600 — serie base/referencia |
 | `--chart-3` | `#15803D` | Green 700 — serie crítica/datos reales |
 | `--chart-4` | `#4ADE80` | Green 400 — hover states o serie adicional |
@@ -160,9 +162,14 @@ Colores semánticos propios del negocio energético. No son chart colors ni UI c
 |---|---|---|
 | 4px | `gap-1` / `p-1` | Micro gaps inline |
 | 8px | `gap-2` / `p-2` | Spacing interno de badges y chips |
-| 16px | `p-4` | Padding interno de KPIs |
+| 16px | `p-4` / `gap-4` | Padding interno de KPIs; gap entre items hermanos en grid 2×N |
 | 24px | `p-6` / `gap-6` | Padding de CardWithContent, gap entre secciones |
 | 32px | `gap-8` / `p-8` | Márgenes de layout principal |
+
+**Jerarquía de gaps (obligatoria):**
+- `gap-6` → separación **entre bloques/secciones** (chart ↔ sidebar, header ↔ KPIs ↔ desglose).
+- `gap-4` → separación **entre items del mismo grupo** en grid 2×N (`KpiPrimaryCompact`, `FeatureItem`, wire de `KpiPrimary`).
+- ❌ No usar `gap-3 sm:gap-4` responsive en grids de KPIs — un solo token (`gap-4`) en mobile y desktop.
 
 ### Elementos de formulario — Tamaño estándar
 
@@ -215,7 +222,7 @@ Colores semánticos propios del negocio energético. No son chart colors ni UI c
 ```
 HD_UI_Hins
   Sidebar                    ← nativo, no tocar
-  Main content               ← bg: #F2ECE9 @ 36%
+  Main content               ← bg: lab(91 2.48 3.22 / 0.36)
     Navbar                   ← nativo, no tocar
     body
       heading                ← H1 + badge + tabs/acciones
@@ -238,6 +245,7 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 | `Card` | `/components/ui/card.tsx` | → `components.md` |
 | `IconBadge` | `/components/ui/icon-badge.tsx` | → `components.md` |
 | `KpiPrimary` | `/components/ui/kpi-primary.tsx` | → `components.md` |
+| `KpiPrimaryCompact` | `/components/ui/kpi-primary-compact.tsx` | → `components.md` |
 | `KpiSecondary` | `/components/ui/kpi-secondary.tsx` | → `components.md` |
 | `SoftBadge` | `/components/ui/soft-badge.tsx` | → `components.md` |
 | `TabsForBlocks` | `/components/ui/tabs-for-blocks.tsx` | → `components.md` |
@@ -257,9 +265,10 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 - **Spec completo:** `components.md`
 
 ### KPIs — resumen
-- `KpiPrimary` → dato principal, 1 por vista, sparkline edge-to-edge
-- `KpiSecondary` → datos de soporte, N por vista, sin borde especial
-- Ambos viven dentro de `Card`
+- `KpiPrimary` → dato héroe, **1 por vista**, tipografía 4xl, sparkline edge-to-edge
+- `KpiPrimaryCompact` → variante compacta con sparkline, **N por vista** en grid (misma Card + `shadow-xs`)
+- `KpiSecondary` → datos de soporte sin sparkline (o layout alternativo), N por vista
+- Todos viven dentro de `Card`
 - **Spec completo:** `components.md`
 
 ### TabsForBlocks — resumen
@@ -270,7 +279,7 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 
 ### SoftBadge — resumen
 - Shape: `rounded-full`
-- Background: `bg-[#F2ECE9]/36`
+- Background: `bg-background-subtle` (token `--background-subtle`)
 - Text: `--foreground`
 - Ícono izquierdo: opcional
 - **Spec completo:** `components.md`
@@ -302,6 +311,7 @@ chartComponent → renderizado puro
 ### Reglas generales para charts
 - ❌ No usar `--primary` en gráficos
 - ✅ Usar `--chart-1` a `--chart-5` (Green ramp) para charts estándar
+- ✅ Bar charts apilados de ahorro (autoconsumo + inyectada) → `--chart-stack-autoconsumo` + `--chart-stack-inyectada` (ver `MonetaryBarChart` en `components.md`)
 - ⚠️ Excepción: Charts financieros pueden usar Zinc (neutral) + Rose (riesgo) si está documentado
 - CartesianGrid con `strokeDasharray` y opacidad reducida
 - Ejes sin línea visible (`axisLine: false`, `tickLine: false`)
@@ -324,7 +334,8 @@ Ciertos charts requieren semántica financiera que va más allá de la rampa ver
 **Regla:** Esta paleta extendida está documentada y es revisable cuando se defina color de marca.
 
 ### Componentes de charts disponibles
-- `GenerationSparkline` → sparkline de tendencia en KpiPrimary — **Spec completo:** `components.md`
+- `GenerationSparkline` → sparkline en `KpiPrimary` / `KpiPrimaryCompact` — **Spec completo:** `components.md`
+- `MonetaryBarChart` → bar chart apilado de ahorro (autoconsumo + inyectada) — **Spec completo:** `components.md`
 - `ParkEnergyBarChart` → bar chart de generación del parque (rangos 1M–TODO) — **Spec completo:** `components.md`
 - `DailyGenerationChart` → area chart horario kW (vista 1D) — **Spec completo:** `components.md`
 - `DailyGenerationChartBlock` → bloque UI completo vista 1D (DatePicker + KPIs + nav + chart) — **Spec completo:** `components.md`
@@ -375,7 +386,7 @@ Convención fija para vista **1D / DIARIO** — helpers en `/lib/chart-day-forma
 - `--chart-*` exclusivamente en visualizaciones de datos
 - Usar paleta extendida (Zinc + Rose) SOLO en charts financieros documentados
 - `Card` siempre con `p-0` — padding lo define el contenido
-- `KpiPrimary` solo 1 por vista
+- `KpiPrimary` solo 1 por vista (héroe); `KpiPrimaryCompact` permitido en grid 2×N
 - `TabsForBlocks` con `bg-stone-200/75` — único componente de tabs
 - Todos los botones de acción con `shadow-sm`
 - Respetar estructura `heading → container → [cards]` en toda vista
@@ -389,7 +400,7 @@ Convención fija para vista **1D / DIARIO** — helpers en `/lib/chart-day-forma
 - Hardcodear hex de colores en componentes
 - Crear variantes de Card con padding o borde propios
 - Crear variantes de TabsForBlocks fuera del spec
-- Más de una `KpiPrimary` por vista
+- Más de una `KpiPrimary` héroe por vista
 - Botones sin `shadow-sm`
 - Modificar estructura del Sidebar o Navbar (son nativos)
 - Confiar SOLO en color para diferenciar series en charts (usar patrón visual también)

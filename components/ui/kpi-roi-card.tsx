@@ -32,7 +32,7 @@ export function KpiRoiCard({ items, sparklineData }: KpiRoiCardProps) {
               className="flex items-start justify-between gap-3"
             >
               <div className="flex min-w-0 flex-1 items-start gap-3">
-                <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-[#F2ECE9]/36 text-green-600">
+                <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-background-subtle text-green-600">
                   <Icon className="size-5" aria-hidden />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">

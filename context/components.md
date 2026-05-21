@@ -18,15 +18,17 @@
 7. [FeatureItem](#featureitem)
 8. [IconBadge](#iconbadge)
 9. [KpiPrimary](#kpiprimary)
-10. [KpiSecondary](#kpisecondary)
-11. [SoftBadge](#softbadge)
-12. [CardWithContent](#cardwithcontent)
-13. [Table](#table)
-14. [GenerationSparkline](#generationsparkline)
-15. [ParkEnergyBarChart](#parkenergybarchar)
-16. [DailyGenerationChart](#dailygenerationchart)
-17. [DailyGenerationChartBlock](#dailygenerationchartblock)
-18. [HinsTooltip](#hinstooltip)
+10. [KpiPrimaryCompact](#kpiprimarycompact)
+11. [KpiSecondary](#kpisecondary)
+12. [SoftBadge](#softbadge)
+13. [CardWithContent](#cardwithcontent)
+14. [Table](#table)
+15. [GenerationSparkline](#generationsparkline)
+16. [ParkEnergyBarChart](#parkenergybarchar)
+17. [MonetaryBarChart](#monetarybarchar)
+18. [DailyGenerationChart](#dailygenerationchart)
+19. [DailyGenerationChartBlock](#dailygenerationchartblock)
+20. [HinsTooltip](#hinstooltip)
 
 ---
 
@@ -406,7 +408,9 @@ No crear variantes alternativas bajo ninguna circunstancia.
 | Tab activo — shadow | sm | `data-[state=active]:shadow-sm` |
 | Tab inactivo — texto | muted-foreground | nativo shadcn |
 | Height | Fill contenedor | `h-full` |
-| Has Icon | false | No incluir íconos |
+| Variant `text` (default) | Labels de texto | chips de rango, navegación |
+| Variant `icon` | Solo ícono + `ariaLabel` | toggle $ / ⚡ en chart GDCV Socio |
+| Variant `icon-label` | Ícono + label | reservado — uso explícito en flow |
 | Size | lg | `text-sm` |
 
 ```tsx
@@ -488,7 +492,8 @@ export function TabsForBlocks({
 - NUNCA tab activo con fondo negro, underline, o sin shadow.
 - NUNCA usar para navegación global.
 - El `defaultValue` lo define el flow que lo consume, no el componente.
-- No agregar íconos salvo instrucción explícita.
+- Variante `icon`: tabs con `{ value, icon, ariaLabel }` — ver `SOCIO_V2_UNIT_TABS` en `socio-v2-constants.ts`.
+- Orden en header de chart: **rango primero**, toggle unidad después (slot `headerActions` de `CardWithContent`).
 
 ---
 
@@ -499,7 +504,7 @@ export function TabsForBlocks({
 **Fuente:** shadcn/ui Card — sin variantes
 
 ### Cuándo usar
-Superficie neutral que contiene: KpiPrimary, KpiSecondary, CardWithContent.
+Superficie neutral que contiene: KpiPrimary, KpiPrimaryCompact, KpiSecondary, CardWithContent.
 
 ### Cuándo NO usar
 - Tablas → Table es independiente, sin Card
@@ -665,7 +670,7 @@ export { CardWire }
 
 | Propiedad | Valor | Tailwind |
 |---|---|---|
-| Background | Shell background | `bg-[#F2ECE9]/36` |
+| Background | Shell background | `bg-background-subtle` |
 | Border radius | 8px | `rounded-md` |
 | Padding | 12px mobile · 16px desktop | `p-3 md:p-4` |
 | Font label (sin ícono) | 14px medium | `text-sm font-medium text-foreground` |
@@ -705,7 +710,7 @@ export function FeatureItem({
 }: FeatureItemProps) {
   if (orientation === "vertical") {
     return (
-      <div className="flex flex-col gap-1 rounded-md bg-[#F2ECE9]/36 p-4">
+      <div className="flex flex-col gap-1 rounded-md bg-background-subtle p-4">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <p className="text-xl font-semibold tabular-nums text-[#0A0A0A]">{value}</p>
       </div>
@@ -713,7 +718,7 @@ export function FeatureItem({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-md bg-[#F2ECE9]/36 p-4">
+    <div className="flex items-center justify-between gap-4 rounded-md bg-background-subtle p-4">
       <p className="text-sm font-medium text-foreground">{label}</p>
       <p className="text-xl font-semibold tabular-nums text-[#0A0A0A]">{value}</p>
     </div>
@@ -746,7 +751,7 @@ export function FeatureItem({
 - En `"vertical"` el label usa `text-xs` (12px) — es un caption, no un título
 - En `"vertical"` el value usa `text-[#0A0A0A]` — mismo que KpiSecondary para consistencia
 - `tabular-nums` en value siempre — alineación correcta de números
-- `bg-[#F2ECE9]/36` — mismo fondo sutil del shell, consistente con SoftBadge
+- `bg-background-subtle` — mismo fondo sutil del shell, consistente con SoftBadge
 - Spacing en CardWire: `gap-6` entre rows, `gap-4` entre elementos internos
 
 ---
@@ -771,7 +776,7 @@ Comunica la categoría o naturaleza del dato. **No es interactivo.**
 | Propiedad | size="sm" (KpiSecondaryStacked) | size="md" (KpiSecondaryCompact) | size="lg" (KpiPrimary) |
 |---|---|---|---|
 | Contenedor | 24×24px → `size-6` | 36×36px → `size-9` | 48×48px → `size-12` |
-| Background | `bg-green-600` | `bg-[#F2ECE9]/36` | `bg-[#F2ECE9]/36` |
+| Background | `bg-green-600` | `bg-background-subtle` | `bg-background-subtle` |
 | Border radius | 6px → `rounded` | 8px → `rounded-md` | 8px → `rounded-md` |
 | Color ícono | `text-white` | `text-green-600` | `text-green-600` |
 | Tamaño ícono | 12px → `size-3` | 20px → `size-5` | 24px → `size-6` |
@@ -794,8 +799,8 @@ export function IconBadge({
 }: IconBadgeProps) {
   const sizeStyles = {
     sm: "size-6 rounded bg-green-600 text-white",
-    md: "size-9 rounded-md bg-[#F2ECE9]/36 text-green-600",
-    lg: "size-12 rounded-md bg-[#F2ECE9]/36 text-green-600",
+    md: "size-9 rounded-md bg-background-subtle text-green-600",
+    lg: "size-12 rounded-md bg-background-subtle text-green-600",
   }
 
   const iconSizes = {
@@ -927,6 +932,80 @@ export function KpiPrimary({
 - Sparkline es opcional — solo se renderiza si `sparklineData.length > 0`.
 - `unit` es opcional.
 - 1 por vista máximo. Si hay duda → KpiSecondary.
+
+---
+
+## KpiPrimaryCompact
+
+**Archivo:** `/components/ui/kpi-primary-compact.tsx`  
+**Estado:** ✅ Aprobado  
+**Familia:** variante compacta de `KpiPrimary` — misma superficie, sparkline y tooltip
+
+### Cuándo usar
+- KPIs de soporte **con tendencia** (sparkline) en grid 2×N
+- Panel lateral o bloques donde el dato no es el héroe único de la vista
+- Ejemplo producto: Ahorro + Energía Gen. del mes en curso (GDCV Socio)
+
+### Cuándo NO usar
+- El dato héroe de la vista → `KpiPrimary` (tipografía 4xl, 1 por vista)
+- KPI sin sparkline → `KpiSecondary` o `KpiSecondaryCompact`
+- Más de una fila de héroes → no reemplaza a `KpiPrimary`
+
+### Spec
+
+**Anatomía:**
+```
+Card [py-0, shadow-xs, ring-0, rounded-xl, overflow-hidden]
+  └── flex col, gap-3, p-4
+      ├── flex row, gap-3, items-start
+      │   ├── IconBadge size="lg"
+      │   └── flex col, gap-0.5, flex-1
+      │       ├── label → text-xs font-medium text-muted-foreground
+      │       └── value + unit → text-lg font-semibold sm:text-xl #0A0A0A
+      ├── Sparkline (opcional) → mx-[-16px], h-14, tooltip por punto (default GenerationSparkline)
+      └── SoftBadge (opcional, solo si delta tiene contenido)
+```
+
+| Elemento | Tailwind |
+|---|---|
+| Card wrapper | `bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full` |
+| Layout interno | `flex flex-col gap-3 p-4` |
+| Header row | `flex items-start gap-3` |
+| Label | `text-xs font-medium text-muted-foreground truncate` |
+| Value | `text-lg font-semibold tabular-nums text-[#0A0A0A] sm:text-xl` |
+| Unit | `text-sm font-semibold sm:text-base ml-1` |
+| Sparkline wrapper | `mx-[-16px] mt-auto` — edge-to-edge como KpiPrimary |
+| Sparkline | `GenerationSparkline` default (`showTooltip` true) |
+| Delta | `SoftBadge` condicional |
+
+```tsx
+// /components/ui/kpi-primary-compact.tsx
+import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
+import { WalletIcon, ZapIcon } from "lucide-react"
+
+<div className="grid grid-cols-2 gap-4">
+  <KpiPrimaryCompact
+    icon={WalletIcon}
+    label="Ahorro"
+    value="$74.400"
+    sparklineData={[{ value: 62 }, { value: 58 }, { value: 71 }]}
+  />
+  <KpiPrimaryCompact
+    icon={ZapIcon}
+    label="Energia Gen."
+    value="830"
+    unit="kWh"
+    sparklineData={[{ value: 42 }, { value: 58 }, { value: 74 }]}
+  />
+</div>
+```
+
+### Notas para el agente
+- **Sin** border fade, border-subtle ni máscaras — solo `Card` + `shadow-xs` como `KpiPrimary`.
+- Sparkline: **nunca** pasar `showTooltip={false}` — mismo comportamiento interactivo que `KpiPrimary`.
+- `delta` es opcional — omitir o string vacío si no hay comparativo.
+- Grid recomendado: `grid-cols-2 gap-4` — mismo token que grids 2×N de métricas (`FeatureItem`, `KpiPrimary` wire). No usar `gap-6` (reservado para separación entre secciones).
+- N instancias por vista permitidas (a diferencia de `KpiPrimary`).
 
 ---
 
@@ -1314,7 +1393,7 @@ export function KpiSecondaryCompact({
 | Propiedad | Valor | Tailwind |
 |---|---|---|
 | Shape | Round | `rounded-full` |
-| Background | #F2ECE9 @ 36% | `bg-[#F2ECE9]/36` |
+| Background | `lab(91 2.48 3.22 / 0.36)` | `bg-background-subtle` |
 | Text color | `--foreground` (#09090B) | `text-foreground` |
 | Icon color | `--foreground` (#09090B) | `text-foreground` |
 | Text style | XS / Regular | `text-xs font-normal` |
@@ -1340,7 +1419,7 @@ export function SoftBadge({ children, icon: Icon, className }: SoftBadgeProps) {
   return (
     <span className={cn(
       "inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5",
-      "bg-[#F2ECE9]/36 text-foreground text-xs font-normal",
+      "bg-background-subtle text-foreground text-xs font-normal",
       className
     )}>
       {Icon && <Icon className="size-3 text-foreground" />}
@@ -1360,7 +1439,7 @@ export function SoftBadge({ children, icon: Icon, className }: SoftBadgeProps) {
 ```
 
 ### Notas para el agente
-- Background siempre `bg-[#F2ECE9]/36`. No usar otros colores en estado Primary.
+- Background siempre `bg-background-subtle`. No usar otros colores en estado Primary.
 - Ícono opcional — no forzarlo si el contenido es claro sin él.
 - No implementar closable ni avatar.
 - Para estados semánticos usar Badge nativo de shadcn/ui sin modificar.
@@ -1393,7 +1472,9 @@ Card [p-0, overflow-hidden]
       │   ├── flex col, gap-1          (título + subtítulo)
       │   │   ├── h3 → title
       │   │   └── p  → subtitle (opcional)
-      │   └── TabsForBlocks (opcional, ml-auto)
+      │   └── Header controls (opcional, ml-auto)
+      │       ├── TabsForBlocks → tabs de rango (opcional)
+      │       └── headerActions → slot libre (ej. TabsForBlocks variant="icon")
       └── Content [p-6 pt-0]
           └── Chart / List / slot libre
 ```
@@ -1425,7 +1506,10 @@ interface CardWithContentProps {
   subtitle?: string
   tabs?: Tab[]
   defaultTab?: string
+  activeTab?: string
   onTabChange?: (value: string) => void
+  /** Controles extra en header — después de `tabs`. Opcional; no afecta cards sin este prop. */
+  headerActions?: React.ReactNode
   children: React.ReactNode
   className?: string
 }
@@ -1485,8 +1569,30 @@ export function CardWithContent({
 - `py-0 ring-0` obligatorios — neutralizan defaults del shadcn nativo.
 - Content slot acepta cualquier componente: Chart, List, etc.
 - TabsForBlocks es opcional.
+- `headerActions` es opcional — solo consumidores que lo pasen renderizan controles extra; el layout de cards existentes no cambia.
 - Subtitle es opcional — en mobile se oculta (`hidden md:block`); la granularidad se comunica vía tabs o controles internos (ej. DatePicker en vista 1D).
 - Nunca agregar padding al children directamente — el `p-6 pt-0` ya lo cubre.
+
+**GDCV Socio — chart con perspectiva dinero / energía:**
+```tsx
+<CardWithContent
+  title={getSocioV2ChartTitle(chartUnit)}
+  subtitle={getSocioV2ChartSubtitle(chartRange)}
+  tabs={CHART_RANGE_TABS}
+  activeTab={chartRange}
+  onTabChange={setChartRange}
+  headerActions={
+    <TabsForBlocks
+      variant="icon"
+      tabs={[...SOCIO_V2_UNIT_TABS]}
+      value={chartUnit}
+      onValueChange={(v) => setChartUnit(v as SocioV2Unit)}
+    />
+  }
+>
+  <MonetaryBarChart data={chartData} unit={chartUnit} ... />
+</CardWithContent>
+```
 
 ---
 
@@ -2142,15 +2248,15 @@ export const consumptionHistoryMock: ConsumptionHistoryRow[] = [
 
 **Archivo:** `/components/charts/GenerationSparkline.tsx`
 **Estado:** ✅ Aprobado
-**Usado en:** KpiPrimary
+**Usado en:** KpiPrimary, KpiPrimaryCompact
 
 ### Cuándo usar
-Sparkline de tendencia dentro de KpiPrimary.
-Muestra la evolución del dato principal en el tiempo.
+Sparkline de tendencia dentro de KPIs de la familia primary (`KpiPrimary`, `KpiPrimaryCompact`).
+Muestra la evolución del dato en el tiempo. Tooltip por punto al hover (default).
 
 ### Cuándo NO usar
 - Charts principales de una vista → ParkEnergyBarChart u otros
-- Fuera de KpiPrimary
+- Fuera de KPIs primary con sparkline
 
 ### Spec
 
@@ -2163,7 +2269,7 @@ Muestra la evolución del dato principal en el tiempo.
 | Fill | gradiente `var(--chart-1)` opacity 0.35 → 0 |
 | Dots | false |
 | Margin | `left: 0, right: 0, top: 4, bottom: 0` |
-| Tooltip | `ChartTooltipContent hideIndicator` |
+| Tooltip | `ChartTooltipContent hideLabel hideIndicator` — activo por default (`showTooltip` true) |
 
 ```tsx
 // /components/charts/GenerationSparkline.tsx
@@ -2209,7 +2315,8 @@ export function GenerationSparkline({ data, chartConfig, className }: Generation
 ```
 
 ### Notas para el agente
-- Siempre se consume desde KpiPrimary dentro de `<div className="mx-[-16px]">`.
+- Siempre se consume desde `KpiPrimary` o `KpiPrimaryCompact` dentro de `<div className="mx-[-16px]">`.
+- No desactivar tooltip salvo caso excepcional documentado en el flow.
 - `chartConfig` se importa desde `/data/chart-config` — nunca hardcodear colores.
 - `data` requiere `{ i: number; value: number }[]` — el índice `i` es necesario.
 
@@ -2293,6 +2400,57 @@ export function ParkEnergyBarChart({ data, chartConfig }: ParkEnergyBarChartProp
 - Barras pasadas siempre `--chart-1-muted`.
 - `chartConfig` desde `/data/chart-config` — nunca inline.
 - Los datos `{ label, generated }` los provee `/data/gdd-performance-mock.ts` via `getParkEnergySeries(period)`.
+
+---
+
+## MonetaryBarChart
+
+**Archivo:** `/components/charts/MonetaryBarChart.tsx`
+**Estado:** ✅ Aprobado
+**Usado en:** GDCV Socio — "Mi Ahorro Generado" / "Mi Energía Generada" (V1 y V2)
+
+### Cuándo usar
+Bar chart **apilado** de ahorro por período: autoconsumo virtual (base) + energía inyectada (tope).
+Soporta perspectiva en dinero (`unit="dinero"`) o kWh (`unit="energia"`).
+
+### Spec — colores apilados
+
+| Segmento | Token CSS | Valor | Notas |
+|---|---|---|---|
+| Autoconsumo virtual (base) | `--chart-stack-autoconsumo` | `var(--chart-1)` | Green 500 — serie principal del sistema |
+| Energía inyectada (tope) | `--chart-stack-inyectada` | `rgb(251 191 36 / 0.9)` | Tailwind `amber-400` @ 90% opacidad |
+
+**Reglas:**
+- Nunca hardcodear `#a8d976`, `#ffc872` u otros hex en el componente.
+- `chartConfig` desde `/data/chart-config.ts` → `socioAhorroStackChartConfig`.
+- Tooltip custom replica los mismos tokens en los swatches de color.
+
+### Spec — comportamiento
+
+| Propiedad | Valor |
+|---|---|
+| Tipo | Recharts BarChart apilado (`stackId="a"`) |
+| Altura default | `h-[260px]` — consumidor puede override |
+| Grid | vertical: false, `strokeDasharray="3 3"` |
+| Tooltip | Custom con desglose autoconsumo / inyectada / total |
+| Hover cursor | `rgba(0,0,0,0.05)` |
+| Densidad | `getChartBarDensity` — tooltip off si hay demasiadas barras |
+
+```tsx
+import { MonetaryBarChart } from "@/components/charts/MonetaryBarChart"
+import { socioAhorroStackChartConfig } from "@/data/chart-config"
+import { getSocioAhorroSeries } from "@/data/gdcv-socio-mock"
+
+<MonetaryBarChart
+  data={getSocioAhorroSeries("6m")}
+  chartConfig={socioAhorroStackChartConfig}
+  unit="dinero"
+/>
+```
+
+### Notas para el agente
+- Los tokens `--chart-stack-*` viven en `globals.css` — no confundir con `--energy-autoconsumo` / `--energy-inyectada` (dominio energético, no Recharts).
+- El segmento superior (`inyectada`) lleva `radius={[6,6,0,0}` cuando hay ≤16 barras.
 
 ---
 
@@ -2964,6 +3122,7 @@ Es el patrón unificado de header para todo el producto.
 
 **Slot `action` — acepta cualquier componente:**
 - `TabsForBlocks` — filtros de período o navegación
+- `Badge` — estado de período (ej. **En Curso** verde en panel socio GDCV)
 - `DropdownMenu` — acciones de tabla
 - `Button` — acción principal
 - `Select` — selector de período
@@ -3061,6 +3220,36 @@ export function SectionHeader({
 
 // Solo título, sin acción
 <SectionHeader size="md" title="Retorno de Inversión" />
+
+// Panel socio GDCV — período + badge estado (fuera de card, sobre shell)
+<SectionHeader
+  size="md"
+  title="Abril 2026"
+  action={
+    <Badge className="border-transparent bg-green-100 text-green-700 hover:bg-green-100">
+      En Curso
+    </Badge>
+  }
+/>
+```
+
+**Variante período + estado (`En Curso`):**
+- Título = label del mes en curso (`h3`, `size="md"`).
+- `action` = badge verde alineado a la derecha — **mismo token** que columna Estado en `CompensacionesTable`.
+- Layout: `justify-between` nativo del componente; título y badge en extremos opuestos.
+- Usar **fuera de `Card`** cuando el bloque siguiente son KPIs libres (`KpiPrimaryCompact`) + card de desglose.
+
+```tsx
+// GDCV Socio V2 — /components/gdcv/SocioEnergyViewV2.tsx
+<SectionHeader
+  size="md"
+  title={socioV2PanelKpis.periodLabel}
+  action={<SocioV2EnCursoBadge />}
+/>
+<div className="grid grid-cols-2 gap-4">
+  <KpiPrimaryCompact ... />
+  <KpiPrimaryCompact ... />
+</div>
 ```
 
 ### Notas para el agente
@@ -3457,7 +3646,8 @@ interface DatePickerProps {
 2. [Card](#card)
 3. [IconBadge](#iconbadge)
 4. [KpiPrimary](#kpiprimary)
-5. [KpiSecondary](#kpisecondary)
+5. [KpiPrimaryCompact](#kpiprimarycompact)
+6. [KpiSecondary](#kpisecondary)
 6. [SoftBadge](#softbadge)
 7. [CardWithContent](#cardwithcontent)
 8. [Table](#table)

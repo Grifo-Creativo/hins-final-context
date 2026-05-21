@@ -21,7 +21,7 @@ export function FeatureItem({
 }: FeatureItemProps) {
   if (orientation === "vertical") {
     return (
-      <div className={cn("flex flex-col gap-3 rounded-md bg-[#F2ECE9]/36 p-4", className)}>
+      <div className={cn("flex flex-col gap-3 rounded-md bg-background-subtle p-4", className)}>
         {Icon && (
           <IconBadge icon={Icon} size="lg" className="bg-white text-green-600" />
         )}
@@ -36,7 +36,7 @@ export function FeatureItem({
   return (
     <div
       className={cn(
-        "flex w-full min-w-0 rounded-md bg-[#F2ECE9]/36 p-3 md:p-4",
+        "flex w-full min-w-0 rounded-md bg-background-subtle p-3 md:p-4",
         Icon
           ? "flex-col gap-4 md:flex-row md:items-center"
           : "items-center justify-between gap-3 md:gap-4",

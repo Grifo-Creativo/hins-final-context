@@ -123,6 +123,37 @@ export function getSocioAhorroEnergiaSeries(range: ChartRangeChip): SocioAhorroE
   return sliceChartRangeSeries(range, SOCIO_AHORRO_ENERGIA_MONTHLY, SOCIO_AHORRO_ENERGIA_WEEKLY)
 }
 
+/** Serie simple kWh para `ParkEnergyBarChart` — total por período (sin stack). */
+export function getSocioEnergiaGeneradaSeries(
+  range: ChartRangeChip
+): { label: string; generated: number }[] {
+  return getSocioAhorroEnergiaSeries(range).map(({ label, autoconsumo, inyectada }) => ({
+    label,
+    generated: autoconsumo + inyectada,
+  }))
+}
+
+const SOCIO_ENERGIA_SHARE = socioPorcentaje / 100
+
+/** Generación horaria del socio (cuotaparte) — vista DIARIO en Mi Energía Generada. */
+export function getSocioEnergiaGeneradaDailySeries(day: Date): DailyPoint[] {
+  return getSocioParqueDailySeries(day).map(({ hour, kw }) => ({
+    hour,
+    kw: Math.round(kw * SOCIO_ENERGIA_SHARE * 100) / 100,
+  }))
+}
+
+export function getSocioEnergiaGeneradaDailyTotal(day: Date): string {
+  return getDailyTotal(getSocioEnergiaGeneradaDailySeries(day))
+}
+
+export function getSocioEnergiaGeneradaDailyPeak(day: Date): {
+  value: string
+  hour: string
+} {
+  return getDailyPeak(getSocioEnergiaGeneradaDailySeries(day))
+}
+
 /** KPI for energy perspective (abril) — "830 kWh" */
 export const socioAhorroEnergiaKpi = {
   value: "830",
@@ -175,6 +206,50 @@ export const socioStatListAhorroEnergia: StatListItem[] = [
     subtitle: "De mi 15% del parque",
   },
 ]
+
+/** StatList items — perspectiva V2 (mockup Desglose Ahorro) */
+export const socioStatListV2Dinero: StatListItem[] = [
+  { icon: DollarSignIcon, name: "Autoconsumo Virtual", value: "$54.200" },
+  { icon: DollarSignIcon, name: "Energía Inyectada", value: "$20.200" },
+  {
+    icon: WalletIcon,
+    name: "Total Ahorro Abril",
+    value: "$74.400",
+    subtitle: "De mi 15% del parque",
+  },
+]
+
+export const socioStatListV2Energia: StatListItem[] = [
+  { icon: ZapIcon, name: "Autoconsumo Virtual", value: "564 kWh" },
+  { icon: ZapIcon, name: "Energía Inyectada", value: "266 kWh" },
+  {
+    icon: WalletIcon,
+    name: "Total Ahorro Abril",
+    value: "830 kWh",
+    subtitle: "De mi 15% del parque",
+  },
+]
+
+/** Sparklines del panel derecho V2 (últimos 6 meses). */
+export const socioV2AhorroSparkline = SOCIO_AHORRO_MONTHLY.slice(-6).map(
+  (row) => ({ value: row.autoconsumo + row.inyectada })
+)
+
+export const socioV2EnergiaSparkline = [...socioEnergiaSparkline]
+
+/** KPIs fijos del panel derecho V2 (abril en curso) */
+export const socioV2PanelKpis = {
+  periodLabel: "Abril 2026",
+  ahorro: {
+    label: "Ahorro",
+    value: "$74.400",
+  },
+  energiaGen: {
+    label: "Energia Gen.",
+    value: "830",
+    unit: "kWh",
+  },
+} as const
 
 // ─── ROI Cards ───────────────────────────────────────────────────────────────
 

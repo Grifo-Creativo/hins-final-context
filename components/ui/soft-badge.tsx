@@ -13,7 +13,7 @@ export function SoftBadge({ children, icon: Icon, className }: SoftBadgeProps) {
     <span
       className={cn(
         "inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5",
-        "bg-[#F2ECE9]/36 text-foreground text-xs font-normal",
+        "bg-background-subtle text-foreground text-xs font-normal",
         className
       )}
     >

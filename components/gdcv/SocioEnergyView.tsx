@@ -3,120 +3,178 @@
 
 import { useMemo, useState } from "react"
 
+import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationChartBlock"
 import { MonetaryBarChart } from "@/components/charts/MonetaryBarChart"
-import { GenerationSparkline } from "@/components/charts/GenerationSparkline"
+import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
+import {
+  getSocioV2ChartTitle,
+  SOCIO_V2_UNIT_TABS,
+  type SocioV2Unit,
+} from "@/components/gdcv/socio-v2-constants"
+import { SocioV2EnCursoBadge } from "@/components/gdcv/socio-v2-en-curso-badge"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
+import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
-import { IconBadge } from "@/components/ui/icon-badge"
-import { SoftBadge } from "@/components/ui/soft-badge"
+import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
+import { SectionHeader } from "@/components/ui/section-header"
 import { StatList } from "@/components/ui/stat-list"
-import { generationSparklineConfig } from "@/data/chart-config"
+import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import {
+  parkEnergyBarChartConfig,
+  socioAhorroStackChartConfig,
+} from "@/data/chart-config"
 import {
   getSocioAhorroSeries,
-  getSocioAhorroChartSubtitle,
-  socioAhorroKpi,
-  socioEnergiaGenerada,
-  socioEnergiaSparkline,
+  getSocioEnergiaGeneradaDailyPeak,
+  getSocioEnergiaGeneradaDailySeries,
+  getSocioEnergiaGeneradaDailyTotal,
+  getSocioEnergiaGeneradaSeries,
+  socioMockToday,
   socioStatListInyeccion,
   socioStatListEnergia,
+  socioV2AhorroSparkline,
+  socioV2EnergiaSparkline,
+  socioV2PanelKpis,
 } from "@/data/gdcv-socio-mock"
+import { formatDailyPeakLabel } from "@/lib/chart-day-format"
 import type { ChartRangeChip } from "@/types/chart-range"
-import { ZapIcon } from "lucide-react"
+import { WalletIcon, ZapIcon } from "lucide-react"
 
-const ahorroChartConfig = {
-  autoconsumo: {
-    label: "Autoconsumo Virtual",
-    color: "#a8d976",
-  },
-  inyectada: {
-    label: "Energía Inyectada",
-    color: "#ffc872",
-  },
-}
+const ahorroChartConfig = socioAhorroStackChartConfig
 
 const STAT_TABS = [
   { value: "inyeccion", label: "En Dinero" },
   { value: "energia", label: "En Energía" },
 ]
 
+const DINERO_CHART_RANGE_TABS = CHART_RANGE_TABS.filter((tab) => tab.value !== "1d")
+
 export function SocioEnergyView() {
   const [ahorroRange, setAhorroRange] = useState<ChartRangeChip>("6m")
+  const [chartUnit, setChartUnit] = useState<SocioV2Unit>("dinero")
+  const [activeDay, setActiveDay] = useState<Date>(socioMockToday)
   const [statTab, setStatTab] = useState("inyeccion")
 
-  const ahorroBarRange: ChartRangeChip =
-    ahorroRange === "1d" ? "6m" : ahorroRange
+  const chartRangeTabs =
+    chartUnit === "dinero" ? DINERO_CHART_RANGE_TABS : CHART_RANGE_TABS
 
-  const ahorroData = useMemo(
-    () => getSocioAhorroSeries(ahorroBarRange),
-    [ahorroBarRange]
+  const ahorroStackData = useMemo(
+    () => getSocioAhorroSeries(ahorroRange === "1d" ? "6m" : ahorroRange),
+    [ahorroRange]
   )
-  const ahorroSubtitle =
-    ahorroRange === "1d"
-      ? getSocioAhorroChartSubtitle("6m")
-      : getSocioAhorroChartSubtitle(ahorroRange)
+
+  const energiaBarData = useMemo(
+    () => getSocioEnergiaGeneradaSeries(ahorroRange),
+    [ahorroRange]
+  )
+
+  const dailyChartData = useMemo(
+    () => getSocioEnergiaGeneradaDailySeries(activeDay),
+    [activeDay]
+  )
+
+  const dailyTotal = useMemo(
+    () => getSocioEnergiaGeneradaDailyTotal(activeDay),
+    [activeDay]
+  )
+
+  const dailyPeak = useMemo(
+    () => getSocioEnergiaGeneradaDailyPeak(activeDay),
+    [activeDay]
+  )
+
   const statItems =
     statTab === "inyeccion" ? socioStatListInyeccion : socioStatListEnergia
-  const sparkline = useMemo(
-    () => socioEnergiaSparkline.map((d, i) => ({ i, value: d.value })),
-    []
-  )
+
+  const handleChartUnitChange = (value: string) => {
+    const unit = value as SocioV2Unit
+    setChartUnit(unit)
+    if (unit === "dinero" && ahorroRange === "1d") {
+      setAhorroRange("6m")
+    }
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
-
+    <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[400px_minmax(0,1fr)] xl:grid-cols-[420px_minmax(0,1fr)]">
       <CardWithContent
-        title="Mi Ahorro en abril"
-        tabs={CHART_RANGE_TABS}
+        title={getSocioV2ChartTitle(chartUnit)}
+        tabs={chartRangeTabs}
         activeTab={ahorroRange}
         defaultTab="6m"
         onTabChange={(v) => setAhorroRange(v as ChartRangeChip)}
-        className="h-full"
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 md:-mt-3">
-            <p className="text-4xl font-bold text-foreground">$74.400,03</p>
-            <SoftBadge>{socioAhorroKpi.delta}</SoftBadge>
-          </div>
-
-          <MonetaryBarChart
-            data={ahorroData}
-            chartConfig={ahorroChartConfig}
+        headerActions={
+          <TabsForBlocks
+            variant="icon"
+            tabs={[...SOCIO_V2_UNIT_TABS]}
+            value={chartUnit}
+            onValueChange={handleChartUnitChange}
           />
+        }
+        className="h-full lg:order-2"
+      >
+        <div className="min-h-[260px] w-full flex-1">
+          {chartUnit === "dinero" ? (
+            <MonetaryBarChart
+              data={ahorroStackData}
+              chartConfig={ahorroChartConfig}
+              unit="dinero"
+              className="h-full min-h-[260px]"
+            />
+          ) : ahorroRange === "1d" ? (
+            <DailyGenerationChartBlock
+              activeDay={activeDay}
+              today={socioMockToday}
+              onActiveDayChange={setActiveDay}
+              data={dailyChartData}
+              totalLabel={dailyTotal}
+              peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
+              className="h-full min-h-[260px]"
+            />
+          ) : (
+            <ParkEnergyBarChart
+              data={energiaBarData}
+              chartConfig={parkEnergyBarChartConfig}
+              className="h-full min-h-[260px]"
+            />
+          )}
         </div>
       </CardWithContent>
 
-      <CardWithContent title="" noPadding className="h-full">
-        <div className="flex flex-col gap-4 p-4">
-          <div className="flex items-start gap-4">
-            <IconBadge icon={ZapIcon} size="lg" />
-            <div className="flex flex-col gap-1 flex-1">
-              <p className="text-lg font-semibold text-foreground">Mi Energía Generada</p>
-              <p className="text-4xl font-bold text-foreground">
-                {socioEnergiaGenerada.value}
-                <span className="text-xl font-semibold ml-1">{socioEnergiaGenerada.unit}</span>
-              </p>
-            </div>
-          </div>
+      <div className="flex flex-col gap-5 lg:order-1 lg:gap-6">
+        <SectionHeader
+          size="md"
+          title={socioV2PanelKpis.periodLabel}
+          action={<SocioV2EnCursoBadge />}
+        />
 
-          <div className="mx-[-16px]">
-            <GenerationSparkline
-              data={sparkline}
-              chartConfig={generationSparklineConfig}
-              className="aspect-auto h-14 w-full"
+        <div className="grid grid-cols-2 gap-4">
+          <KpiPrimaryCompact
+            icon={WalletIcon}
+            label={socioV2PanelKpis.ahorro.label}
+            value={socioV2PanelKpis.ahorro.value}
+            sparklineData={socioV2AhorroSparkline}
+          />
+          <KpiPrimaryCompact
+            icon={ZapIcon}
+            label={socioV2PanelKpis.energiaGen.label}
+            value={socioV2PanelKpis.energiaGen.value}
+            unit={socioV2PanelKpis.energiaGen.unit}
+            sparklineData={socioV2EnergiaSparkline}
+          />
+        </div>
+
+        <Card className="overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
+          <div className="p-4">
+            <StatList
+              title="Ahorro"
+              items={statItems}
+              tabs={STAT_TABS}
+              defaultTab="inyeccion"
+              onTabChange={setStatTab}
             />
           </div>
-
-          <SoftBadge>{socioEnergiaGenerada.period}</SoftBadge>
-
-          <StatList
-            title="Ahorro"
-            items={statItems}
-            tabs={STAT_TABS}
-            defaultTab="inyeccion"
-            onTabChange={setStatTab}
-          />
-        </div>
-      </CardWithContent>
+        </Card>
+      </div>
     </div>
   )
 }

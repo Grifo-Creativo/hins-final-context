@@ -15,8 +15,8 @@ export function IconBadge({
 }: IconBadgeProps) {
   const sizeStyles = {
     sm: "size-6 rounded bg-green-600 text-white",
-    md: "size-9 rounded-md bg-[#F2ECE9]/36 text-green-600",
-    lg: "size-12 rounded-md bg-[#F2ECE9]/36 text-green-600",
+    md: "size-9 rounded-md bg-background-subtle text-green-600",
+    lg: "size-12 rounded-md bg-background-subtle text-green-600",
   }
 
   const iconSizes = {

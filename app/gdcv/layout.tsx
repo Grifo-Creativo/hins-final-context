@@ -17,7 +17,7 @@ export default function GdcvLayout({ children }: { children: ReactNode }) {
   return (
     <Shell>
       <GdcvHeader />
-      <main className="flex-1 px-6 py-6 bg-[#F2ECE9]/36">
+      <main className="flex-1 px-6 py-6 bg-background-subtle">
         <PageTransition>{children}</PageTransition>
       </main>
     </Shell>

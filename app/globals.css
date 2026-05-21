@@ -26,11 +26,14 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-chart-1-muted: var(--chart-1-muted);
+  --color-chart-stack-autoconsumo: var(--chart-stack-autoconsumo);
+  --color-chart-stack-inyectada: var(--chart-stack-inyectada);
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -44,6 +47,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-background-subtle: var(--background-subtle);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -68,11 +72,14 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
+  --border-subtle: lab(96% -1.44 3.73);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   /* HINS design-system chart palette */
   --chart-1: #22C55E;
   --chart-1-muted: rgba(34, 197, 94, 0.4);
+  --chart-stack-autoconsumo: var(--chart-1);
+  --chart-stack-inyectada: rgb(251 191 36 / 0.9);
   --chart-2: #0d9488;
   --chart-3: #16a34a;
   --chart-4: #34d399;
@@ -90,6 +97,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --background-subtle: lab(91 2.48 3.22 / 0.36);
   /* Energía — sheet socio / breakdown (GDCV) */
   --energy-autoconsumo: #84cc16;
   --energy-inyectada: #6366f1;
@@ -117,10 +125,13 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
+  --border-subtle: lab(28% -1.44 3.73);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: #22C55E;
   --chart-1-muted: rgba(34, 197, 94, 0.4);
+  --chart-stack-autoconsumo: var(--chart-1);
+  --chart-stack-inyectada: rgb(251 191 36 / 0.9);
   --chart-2: #0d9488;
   --chart-3: #16a34a;
   --chart-4: #34d399;

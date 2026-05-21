@@ -68,13 +68,13 @@ Card: `h-full min-h-0 flex flex-col`
 Interior: `flex-1 flex-col gap-6 p-6`
 
 Fila 1 — Inversión Inicial:
-- Icon wrapper: `size-9 rounded-md bg-[#F2ECE9]/36 text-green-600`
+- Icon wrapper: `size-9 rounded-md bg-background-subtle text-green-600`
 - Icon: TrendingUpIcon
 - Label: "Inversión Inicial"
 - Value: `roiKpis.inversionInicial` (text-xl font-semibold)
 
 Fila 2 — Ahorrado Total Acumulado:
-- Icon wrapper: `size-9 rounded-md bg-[#F2ECE9]/36 text-green-600`
+- Icon wrapper: `size-9 rounded-md bg-background-subtle text-green-600`
 - Icon: DollarSignIcon
 - Label: "Ahorrado Total Acumulado"
 - Value: `roiKpis.ahorradoTotal` (text-xl font-semibold)

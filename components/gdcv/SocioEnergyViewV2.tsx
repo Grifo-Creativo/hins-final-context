@@ -4,167 +4,125 @@
 import { useMemo, useState } from "react"
 
 import { MonetaryBarChart } from "@/components/charts/MonetaryBarChart"
-import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { CardWithContent } from "@/components/ui/card-with-content"
-import { FeatureItem } from "@/components/ui/feature-item"
-import { StatList } from "@/components/ui/stat-list"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SocioV2BreakdownList } from "@/components/gdcv/SocioV2BreakdownList"
+import { SocioV2EnCursoBadge } from "@/components/gdcv/socio-v2-en-curso-badge"
 import {
-  getSocioAhorroSeries,
+  getSocioV2ChartSubtitle,
+  getSocioV2ChartTitle,
+  SOCIO_V2_RANGE_TABS,
+  SOCIO_V2_UNIT_TABS,
+  type SocioV2Unit,
+} from "@/components/gdcv/socio-v2-constants"
+import { Card } from "@/components/ui/card"
+import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
+import { SectionHeader } from "@/components/ui/section-header"
+import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import {
   getSocioAhorroEnergiaSeries,
-  getSocioAhorroChartSubtitle,
-  socioStatListInyeccion,
-  socioStatListAhorroEnergia,
+  getSocioAhorroSeries,
+  socioStatListV2Dinero,
+  socioStatListV2Energia,
+  socioV2AhorroSparkline,
+  socioV2EnergiaSparkline,
+  socioV2PanelKpis,
 } from "@/data/gdcv-socio-mock"
+import { socioAhorroStackChartConfig } from "@/data/chart-config"
 import type { ChartRangeChip } from "@/types/chart-range"
-import { DollarSignIcon, ZapIcon } from "lucide-react"
-
-const ahorroChartConfig = {
-  autoconsumo: {
-    label: "Autoconsumo Virtual",
-    color: "#a8d976",
-  },
-  inyectada: {
-    label: "Energía Inyectada",
-    color: "#ffc872",
-  },
-}
-
-const MAIN_TABS = [
-  { value: "dinero", icon: DollarSignIcon, ariaLabel: "Dinero" },
-  { value: "energia", icon: ZapIcon, ariaLabel: "Energía" },
-]
-
-const STAT_TABS = [
-  { value: "dinero", label: "Dinero" },
-  { value: "energia", label: "Energía" },
-]
+import { WalletIcon, ZapIcon } from "lucide-react"
 
 export function SocioEnergyViewV2() {
-  const [ahorroRange, setAhorroRange] = useState<ChartRangeChip>("6m")
-  const [mainTab, setMainTab] = useState<"dinero" | "energia">("dinero")
+  const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
+  const [chartUnit, setChartUnit] = useState<SocioV2Unit>("dinero")
+  const [breakdownUnit, setBreakdownUnit] = useState<SocioV2Unit>("dinero")
 
-  const ahorroBarRange: ChartRangeChip =
-    ahorroRange === "1d" ? "6m" : ahorroRange
+  const chartData = useMemo(() => {
+    return chartUnit === "dinero"
+      ? getSocioAhorroSeries(chartRange)
+      : getSocioAhorroEnergiaSeries(chartRange)
+  }, [chartRange, chartUnit])
 
-  const chartData = useMemo(
+  const breakdownItems = useMemo(
     () =>
-      mainTab === "dinero"
-        ? getSocioAhorroSeries(ahorroBarRange)
-        : getSocioAhorroEnergiaSeries(ahorroBarRange),
-    [ahorroBarRange, mainTab]
+      breakdownUnit === "dinero"
+        ? socioStatListV2Dinero
+        : socioStatListV2Energia,
+    [breakdownUnit]
   )
-
-  const chartTitle = useMemo(
-    () =>
-      mainTab === "dinero" ? "Mi Ahorro Generado" : "Mi Energía Generada",
-    [mainTab]
-  )
-
-  const ahorroSubtitle =
-    ahorroRange === "1d"
-      ? getSocioAhorroChartSubtitle("6m")
-      : getSocioAhorroChartSubtitle(ahorroRange)
-
-  const statItems =
-    mainTab === "dinero" ? socioStatListInyeccion : socioStatListAhorroEnergia
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
-      {/* LEFT CARD: Mi Ahorro with dynamic title, icon tabs, and chart */}
-      <CardWithContent
-        title={chartTitle}
-        className="h-full"
-      >
-        <div className="flex flex-col gap-4">
-          {/* Tabs Row: Main tabs (icon-only) + Range tabs in same row */}
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-            {/* Main tabs: Icon-only perspective switcher */}
-            <Tabs
-              value={mainTab}
-              onValueChange={(v) => setMainTab(v as "dinero" | "energia")}
-              className="shrink-0"
-            >
-              <TabsList className="grid w-auto grid-cols-2 gap-1">
-                {MAIN_TABS.map((tab) => (
-                  <TabsTrigger
-                    key={tab.value}
-                    value={tab.value}
-                    className="px-2 py-1.5"
-                    aria-label={tab.ariaLabel}
-                  >
-                    <tab.icon className="h-5 w-5" />
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-
-            {/* Divider for visual separation */}
-            <div className="hidden h-6 w-px bg-border/50 md:block" />
-
-            {/* Range tabs: Chart range selector */}
-            <Tabs
-              value={ahorroRange}
-              onValueChange={(v) => setAhorroRange(v as ChartRangeChip)}
-              className="flex-1"
-            >
-              <TabsList className="w-full justify-start overflow-x-auto md:w-auto">
-                {CHART_RANGE_TABS.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value}>
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Chart */}
-          <MonetaryBarChart
-            data={chartData as any}
-            chartConfig={ahorroChartConfig}
-          />
-        </div>
-      </CardWithContent>
-
-      {/* RIGHT CARD: header manual con badge inline + KPIs full width + Stats */}
-      <Card className="bg-white shadow-xs ring-0 rounded-xl overflow-hidden h-full">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_420px]">
+      {/* Left card — mockup: title/subtitle left, range + unit toggle right */}
+      <Card className="h-full overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
         <div className="flex flex-col gap-4 p-4">
-          {/* Header: título + badge "En Curso" en la misma línea */}
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold leading-snug text-foreground">Abril 2026</h3>
-            <Badge className="bg-green-100 text-green-700 border-transparent hover:bg-green-100">
-              En Curso
-            </Badge>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <div className="flex min-w-0 flex-col gap-1">
+              <h3 className="text-lg font-semibold leading-snug text-foreground">
+                {getSocioV2ChartTitle(chartUnit)}
+              </h3>
+              <p className="text-sm font-normal text-muted-foreground">
+                {getSocioV2ChartSubtitle(chartRange)}
+              </p>
+            </div>
+
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+              <TabsForBlocks
+                variant="icon"
+                tabs={[...SOCIO_V2_UNIT_TABS]}
+                value={chartUnit}
+                onValueChange={(v) => setChartUnit(v as SocioV2Unit)}
+              />
+              <TabsForBlocks
+                className="min-w-0 flex-1 sm:flex-initial"
+                tabs={SOCIO_V2_RANGE_TABS}
+                value={chartRange}
+                onValueChange={(v) => setChartRange(v as ChartRangeChip)}
+              />
+            </div>
           </div>
 
-          {/* KPI Grid: 2 items a todo el ancho, side-by-side */}
-          <div className="grid grid-cols-2 gap-3">
-            <FeatureItem
-              icon={DollarSignIcon}
-              label="Ahorro"
-              value="$74.400"
-              orientation="vertical"
-            />
-            <FeatureItem
-              icon={ZapIcon}
-              label="Energía Gen"
-              value="830 kWh"
-              orientation="vertical"
-            />
-          </div>
-
-          {/* Desglose / Stats breakdown */}
-          <StatList
-            title="Desglose ahorro"
-            items={statItems}
-            tabs={STAT_TABS}
-            defaultTab={mainTab}
-            onTabChange={(v) => setMainTab(v as "dinero" | "energia")}
+          <MonetaryBarChart
+            data={chartData}
+            chartConfig={socioAhorroStackChartConfig}
+            unit={chartUnit}
+            className="aspect-auto h-[280px] w-full [&_.recharts-responsive-container]:!h-full"
           />
         </div>
       </Card>
+
+      {/* Right panel — header + KPIs libres; card solo para desglose */}
+      <div className="flex flex-col gap-5 lg:gap-6">
+        <SectionHeader
+          size="md"
+          title={socioV2PanelKpis.periodLabel}
+          action={<SocioV2EnCursoBadge />}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <KpiPrimaryCompact
+            icon={WalletIcon}
+            label={socioV2PanelKpis.ahorro.label}
+            value={socioV2PanelKpis.ahorro.value}
+            sparklineData={socioV2AhorroSparkline}
+          />
+          <KpiPrimaryCompact
+            icon={ZapIcon}
+            label={socioV2PanelKpis.energiaGen.label}
+            value={socioV2PanelKpis.energiaGen.value}
+            unit={socioV2PanelKpis.energiaGen.unit}
+            sparklineData={socioV2EnergiaSparkline}
+          />
+        </div>
+
+        <Card className="overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
+          <div className="p-4 lg:p-6">
+            <SocioV2BreakdownList
+              items={breakdownItems}
+              unit={breakdownUnit}
+              onUnitChange={setBreakdownUnit}
+            />
+          </div>
+        </Card>
+      </div>
     </div>
   )
 }

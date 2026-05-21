@@ -16,6 +16,7 @@ import { FeatureItem } from "@/components/ui/feature-item"
 import { HinsTooltip } from "@/components/ui/hins-tooltip"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
+import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import { PeriodSelectorLocal } from "@/components/ui/period-selector"
 import { SectionHeader } from "@/components/ui/section-header"
@@ -51,6 +52,7 @@ import {
   SearchIcon,
   SunIcon,
   ParkingMeter,
+  WalletIcon,
   ZapIcon,
 } from "lucide-react"
 
@@ -341,6 +343,27 @@ export default function DevComponentsPage() {
                 value="31.0"
                 unit="kWh"
                 delta="+8% vs marzo"
+                sparklineData={sparkForKpi}
+              />
+            </div>
+          </Showcase>
+
+          <Showcase
+            title="KpiPrimaryCompact"
+            file="components/ui/kpi-primary-compact.tsx"
+          >
+            <div className="grid max-w-xl grid-cols-2 gap-4">
+              <KpiPrimaryCompact
+                icon={WalletIcon}
+                label="Ahorro"
+                value="$74.400"
+                sparklineData={sparkForKpi}
+              />
+              <KpiPrimaryCompact
+                icon={ZapIcon}
+                label="Energia Gen."
+                value="830"
+                unit="kWh"
                 sparklineData={sparkForKpi}
               />
             </div>

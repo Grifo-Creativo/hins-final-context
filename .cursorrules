@@ -42,7 +42,7 @@ Cuando hay conflicto entre documentos, el orden de autoridad es:
 - `--chart-1` a `--chart-5` → exclusivo para visualizaciones de datos.
 - Estados semánticos (success/warning/error/info) → solo cuando hay un estado real que comunicar.
 - Nunca hardcodear valores hex en componentes. Siempre referenciar tokens CSS.
-- El fondo del shell principal (Main content) usa `bg-[#F7F7F7]` o el token `--background-subtle`.
+- El fondo del shell principal (Main content) usa `bg-background-subtle` (token `--background-subtle`).
   Las cards usan `bg-white` (`--background`). Nunca invertir esto.
 
 ## Reglas de componentes

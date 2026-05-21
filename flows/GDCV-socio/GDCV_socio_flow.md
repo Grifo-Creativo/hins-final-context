@@ -19,7 +19,7 @@ Ocurre **antes** de cualquier vista del socio. Sin wireframe — patrón estánd
 **Cuándo:** Primera visita (o sesión sin verificar) hasta validación exitosa.
 
 **Contenido:**
-- Card centrada sobre fondo shell (`bg-[#F2ECE9]/36`)
+- Card centrada sobre fondo shell (`bg-background-subtle`)
 - Contexto: nombre del parque + nombre del socio (v1: **Agro Sur Industrial**)
 - H1: "Verificá tu acceso"
 - Subtítulo: últimos 4 dígitos del N° de medidor
