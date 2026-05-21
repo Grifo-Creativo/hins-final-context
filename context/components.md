@@ -22,14 +22,15 @@
 11. [KpiSecondary](#kpisecondary)
 12. [SoftBadge](#softbadge)
 13. [StatusBadge](#statusbadge)
-14. [CardWithContent](#cardwithcontent)
-15. [Table](#table)
-16. [GenerationSparkline](#generationsparkline)
-17. [ParkEnergyBarChart](#parkenergybarchar)
-18. [MonetaryBarChart](#monetarybarchar)
-19. [DailyGenerationChart](#dailygenerationchart)
-20. [DailyGenerationChartBlock](#dailygenerationchartblock)
-21. [HinsTooltip](#hinstooltip)
+14. [ModelBadge](#modelbadge)
+15. [CardWithContent](#cardwithcontent)
+16. [Table](#table)
+17. [GenerationSparkline](#generationsparkline)
+18. [ParkEnergyBarChart](#parkenergybarchar)
+19. [MonetaryBarChart](#monetarybarchar)
+20. [DailyGenerationChart](#dailygenerationchart)
+21. [DailyGenerationChartBlock](#dailygenerationchartblock)
+22. [HinsTooltip](#hinstooltip)
 
 ---
 
@@ -1528,6 +1529,91 @@ export function StatusBadge({ status, children, className }: StatusBadgeProps) {
 - Extender con nuevas variantes agregando entradas a `variantStyles`. No usar clases inline en consumidores.
 - El texto ("En Curso", etc.) siempre va como `children` — el componente no hardcodea strings.
 - Reemplaza el patrón anterior: `<Badge className="bg-green-100 text-green-700 border-transparent ...">`.
+
+---
+
+## ModelBadge
+
+**Archivo:** `/components/ui/model-badge.tsx`  
+**Estado:** ✅ Aprobado
+
+Badge de identificación del tipo de modelo de parque fotovoltaico. Reemplaza el patrón inline `<Badge className="bg-green-600 ...">GDD</Badge>` disperso en headings y vistas.
+
+### Cuándo usar
+- Junto al nombre del parque en headings (H1), para identificar qué modelo es (GDD, GDCV, GDC)
+- En selectors/toggles de tipo de proyecto (`NewProjectDialog`)
+- En vistas de mantenimiento que reciben `modelType` como prop
+
+### Cuándo NO usar
+- Estados live/vigente → `StatusBadge`
+- Deltas o períodos comparativos → `SoftBadge`
+- Categorías de membresía (ej. "Virtual") → `Badge` shadcn nativo por ahora
+
+### Variantes disponibles
+
+| `model` | Color | Tailwind |
+|---|---|---|
+| `GDD` | Verde sólido | `bg-green-600 text-white` |
+| `GDCV` | Azul sólido | `bg-blue-600 text-white` |
+| `GDC` | Ámbar sólido | `bg-amber-600 text-white` |
+
+### Spec
+
+| Propiedad | Valor |
+|---|---|
+| Base | `Badge` shadcn con `variant="secondary"` |
+| Texto | Siempre el nombre del modelo (no acepta `children`) |
+| Font | `font-medium` |
+| Border | `border-transparent` |
+| Hover | Sin cambio visual (`hover:bg-[mismo color]`) |
+| `shrink-0` | Siempre — evita que se comprima en flex containers |
+
+```tsx
+// /components/ui/model-badge.tsx
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+
+export type ParkModel = "GDD" | "GDCV" | "GDC"
+
+const modelStyles: Record<ParkModel, string> = {
+  GDD:  "border-transparent bg-green-600 text-white hover:bg-green-600",
+  GDCV: "border-transparent bg-blue-600  text-white hover:bg-blue-600",
+  GDC:  "border-transparent bg-amber-600 text-white hover:bg-amber-600",
+}
+
+export function ModelBadge({ model, className }: { model: ParkModel; className?: string }) {
+  return (
+    <Badge variant="secondary" className={cn("shrink-0 font-medium", modelStyles[model], className)}>
+      {model}
+    </Badge>
+  )
+}
+```
+
+### Uso
+
+```tsx
+// En un heading junto al nombre del parque
+<h1>{parkName}</h1>
+<ModelBadge model="GDD" />
+
+// Dinámico (prop recibida)
+<ModelBadge model={modelType} />
+```
+
+### Dónde se usa
+- `components/gdd/GddPageHeading.tsx`
+- `components/gdd/GddViewHeader.tsx`
+- `components/gdcv/GdcvPageHeading.tsx`
+- `components/mantenimiento/ParkMantenimientoView.tsx`
+- `components/main/NewProjectDialog.tsx`
+- `app/gdc/performance/page.tsx`
+- `app/gdc/roi/page.tsx`
+
+### Notas para el agente
+- `ParkModel` es el tipo exportado — usarlo en props de componentes que reciben modelo dinámico.
+- No acepta `children` — el texto siempre viene del `model` prop.
+- Agregar nuevos modelos agregando una entrada a `modelStyles`. Sin tocar el componente.
 
 ---
 

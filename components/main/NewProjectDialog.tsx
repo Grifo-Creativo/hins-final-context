@@ -5,7 +5,7 @@
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { ModelBadge, type ParkModel } from "@/components/ui/model-badge"
 import {
   Dialog,
   DialogContent,
@@ -107,15 +107,7 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
             >
               {PROJECT_TYPES.map((type) => (
                 <ToggleGroupItem key={type.value} value={type.value} className="flex-1">
-                  <Badge
-                    className={
-                      type.value === "GDCV"
-                        ? "bg-blue-600 text-white"
-                        : "bg-green-600 text-white"
-                    }
-                  >
-                    {type.value}
-                  </Badge>
+                  <ModelBadge model={type.value as ParkModel} />
                   <span className="ml-2">{type.label}</span>
                 </ToggleGroupItem>
               ))}

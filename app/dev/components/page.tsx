@@ -22,6 +22,7 @@ import { PeriodSelectorLocal } from "@/components/ui/period-selector"
 import { SectionHeader } from "@/components/ui/section-header"
 import { SoftBadge } from "@/components/ui/soft-badge"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { ModelBadge } from "@/components/ui/model-badge"
 import { StatList, type StatListItem } from "@/components/ui/stat-list"
 import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTable"
 import { InputWithIconButton } from "@/components/ui/input-with-icon-button"
@@ -333,6 +334,30 @@ export default function DevComponentsPage() {
             <div className="flex flex-wrap gap-2">
               <SoftBadge>+12% vs mes anterior</SoftBadge>
               <SoftBadge icon={ZapIcon}>Con ícono</SoftBadge>
+            </div>
+          </Showcase>
+
+          <Showcase title="ModelBadge" file="components/ui/model-badge.tsx">
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Modelos disponibles
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <ModelBadge model="GDD" />
+                  <ModelBadge model="GDCV" />
+                  <ModelBadge model="GDC" />
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  En contexto (heading del parque)
+                </p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl font-bold text-foreground">Parque Solar Norte</span>
+                  <ModelBadge model="GDCV" />
+                </div>
+              </div>
             </div>
           </Showcase>
 

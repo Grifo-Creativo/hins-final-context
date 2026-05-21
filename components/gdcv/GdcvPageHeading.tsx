@@ -3,8 +3,8 @@
 
 import { usePathname, useRouter } from "next/navigation"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ModelBadge } from "@/components/ui/model-badge"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import { gdcvParkName } from "@/data/gdcv-mock"
 import { DownloadIcon } from "lucide-react"
@@ -24,12 +24,7 @@ export function GdcvPageHeading() {
         <h1 className="min-w-0 max-w-full text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
           {gdcvParkName}
         </h1>
-        <Badge
-          variant="secondary"
-          className="shrink-0 border-transparent bg-blue-600 font-medium text-white hover:bg-blue-600"
-        >
-          GDCV
-        </Badge>
+        <ModelBadge model="GDCV" />
       </div>
       <div className="flex w-full min-w-0 items-center gap-4 sm:w-auto sm:gap-6">
         <TabsForBlocks

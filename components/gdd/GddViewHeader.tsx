@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 
 import { GddNotificationsPanel } from "@/components/gdd/GddNotificationsPanel"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { ModelBadge } from "@/components/ui/model-badge"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -92,12 +92,7 @@ export function GddViewHeader() {
           <h1 className="truncate text-xl font-bold tracking-tight text-foreground md:text-2xl">
             {parkName}
           </h1>
-          <Badge
-            variant="secondary"
-            className="shrink-0 border-transparent bg-green-600 font-medium text-white hover:bg-green-600"
-          >
-            GDD
-          </Badge>
+          <ModelBadge model="GDD" />
         </div>
         <div className="flex flex-wrap items-center gap-6">
           <TabsForBlocks
