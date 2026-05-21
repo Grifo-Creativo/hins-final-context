@@ -957,7 +957,7 @@ export function KpiPrimary({
 
 **Anatomía:**
 ```
-Card [py-0, shadow-xs, ring-0, rounded-xl, overflow-hidden]
+Card [py-0, kpi-compact-border-fade, ring-0, rounded-xl, overflow-hidden]
   └── flex col, gap-3, p-4
       ├── flex row, gap-3, items-start
       │   ├── IconBadge size="lg"
@@ -970,7 +970,7 @@ Card [py-0, shadow-xs, ring-0, rounded-xl, overflow-hidden]
 
 | Elemento | Tailwind |
 |---|---|
-| Card wrapper | `bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full` |
+| Card wrapper | `bg-white py-0 ring-0 rounded-xl overflow-hidden h-full kpi-compact-border-fade` |
 | Layout interno | `flex flex-col gap-3 p-4` |
 | Header row | `flex items-start gap-3` |
 | Label | `text-xs font-medium text-muted-foreground truncate` |
@@ -1003,11 +1003,12 @@ import { WalletIcon, ZapIcon } from "lucide-react"
 ```
 
 ### Notas para el agente
-- **Sin** border fade, border-subtle ni máscaras — solo `Card` + `shadow-xs` como `KpiPrimary`.
+- **Border fade effect:** `.kpi-compact-border-fade` aplica dual inset `box-shadow` — borde sutil (1px inset) + disolución hacia abajo. Efecto visual: el borde se desvanece hacia el fondo (especialmente en bordes inferiores y laterales). Interior de la card siempre blanco y limpio.
 - Sparkline: **nunca** pasar `showTooltip={false}` — mismo comportamiento interactivo que `KpiPrimary`.
 - `delta` es opcional — omitir o string vacío si no hay comparativo.
 - Grid recomendado: `grid-cols-2 gap-4` — mismo token que grids 2×N de métricas (`FeatureItem`, `KpiPrimary` wire). No usar `gap-6` (reservado para separación entre secciones).
 - N instancias por vista permitidas (a diferencia de `KpiPrimary`).
+- **CSS token:** `.kpi-compact-border-fade` definido en `app/globals.css` — no hardcodear inline `style={{}}` si el efecto necesita cambiar globalmente.
 
 ---
 

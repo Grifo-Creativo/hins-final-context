@@ -36,7 +36,7 @@ export function KpiPrimaryCompact({
   return (
     <Card
       className={cn(
-        "h-full overflow-hidden rounded-xl bg-white py-0 ring-0",
+        "h-full overflow-hidden rounded-xl bg-white py-0 ring-0 kpi-compact-border-fade",
         className
       )}
     >

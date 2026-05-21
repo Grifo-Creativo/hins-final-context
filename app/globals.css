@@ -170,4 +170,11 @@
   .bg-gradient-green-fill {
     background: linear-gradient(90deg, #16A34A 0%, #A3E635 50%, #22C55E 100%);
   }
+
+  /* KpiPrimaryCompact: border fade effect — dual inset shadows dissolve border towards bottom */
+  .kpi-compact-border-fade {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+      inset 0 -35px 25px -20px rgba(0, 0, 0, 0.08);
+  }
 }
