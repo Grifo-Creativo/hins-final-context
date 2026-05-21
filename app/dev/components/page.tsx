@@ -21,6 +21,7 @@ import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import { PeriodSelectorLocal } from "@/components/ui/period-selector"
 import { SectionHeader } from "@/components/ui/section-header"
 import { SoftBadge } from "@/components/ui/soft-badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { StatList, type StatListItem } from "@/components/ui/stat-list"
 import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTable"
 import { InputWithIconButton } from "@/components/ui/input-with-icon-button"
@@ -332,6 +333,32 @@ export default function DevComponentsPage() {
             <div className="flex flex-wrap gap-2">
               <SoftBadge>+12% vs mes anterior</SoftBadge>
               <SoftBadge icon={ZapIcon}>Con ícono</SoftBadge>
+            </div>
+          </Showcase>
+
+          <Showcase title="StatusBadge" file="components/ui/status-badge.tsx">
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Variantes disponibles
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <StatusBadge status="current">En Curso</StatusBadge>
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  En contexto (SectionHeader)
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">Abril 2026</span>
+                  <StatusBadge status="current">En Curso</StatusBadge>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Para períodos/deltas neutros usar <code className="rounded bg-muted px-1">SoftBadge</code>.
+                Para estados semánticos (live, error, warning) usar <code className="rounded bg-muted px-1">StatusBadge</code>.
+              </p>
             </div>
           </Showcase>
 

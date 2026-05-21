@@ -221,7 +221,7 @@ app/
 ### Luego:
 - ✅ Implementar en `/components` siguiendo spec
 - ✅ Usar en `/app` según `flow.md`
-- ✅ Testear en `/dev/components` si es necesario
+- ✅ **Todo nuevo componente construido y documentado en `@context/components.md` debe estar visible en `http://localhost:3000/dev/components`**
 
 ---
 

@@ -159,7 +159,7 @@ const columns: ColumnDef<CompensacionRow>[] = [
     cell: ({ row }) => {
       const estado = row.getValue("estado") as CompensacionRow["estado"]
       return estado === "En Curso" ? (
-        <StatusBadge status="active">En Curso</StatusBadge>
+        <StatusBadge status="current">En Curso</StatusBadge>
       ) : (
         <span className="text-sm text-muted-foreground">Aplicado</span>
       )

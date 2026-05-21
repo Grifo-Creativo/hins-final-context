@@ -144,7 +144,7 @@ export function SocioEnergyView() {
         <SectionHeader
           size="md"
           title={socioV2PanelKpis.periodLabel}
-          action={<StatusBadge status="active">En Curso</StatusBadge>}
+          action={<StatusBadge status="current">En Curso</StatusBadge>}
         />
 
         <div className="grid grid-cols-2 gap-4">

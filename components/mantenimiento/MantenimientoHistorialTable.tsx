@@ -95,7 +95,7 @@ const columns: ColumnDef<MantenimientoHistorialRow>[] = [
           {row.original.periodo}
         </span>
         {row.original.enCurso ? (
-          <StatusBadge status="active">En Curso</StatusBadge>
+          <StatusBadge status="current">En Curso</StatusBadge>
         ) : null}
       </div>
     ),

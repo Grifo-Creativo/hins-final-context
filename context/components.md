@@ -1458,7 +1458,7 @@ export function SoftBadge({ children, icon: Icon, className }: SoftBadgeProps) {
 Badge semántico para estados de entidad (live, vigente, activo). Distinto de `SoftBadge` (período/delta neutro) y de `Badge` shadcn base (sin semántica de dominio).
 
 ### Cuándo usar
-- Estado de un período, contrato o proceso que está **activo/vigente** → `status="active"` ("En Curso")
+- Estado de un período, contrato o proceso que está **activo/vigente** → `status="current"` ("En Curso")
 - Cualquier estado que requiera color semántico (success, warning, error) — agregar variante a `variantStyles`
 
 ### Cuándo NO usar
@@ -1470,15 +1470,15 @@ Badge semántico para estados de entidad (live, vigente, activo). Distinto de `S
 
 | `status` | Color | Texto típico |
 |---|---|---|
-| `active` | Verde (`green-100 / green-700`) | "En Curso" |
+| `current` | Verde (`green-100 / green-700`) | "En Curso" |
 
 ### Spec
 
 | Propiedad | Valor |
 |---|---|
 | Base | `Badge` shadcn primitivo |
-| `active` background | `bg-green-100` |
-| `active` text | `text-green-700` |
+| `current` background | `bg-green-100` |
+| `current` text | `text-green-700` |
 | Border | `border-transparent` |
 | Hover | `hover:bg-green-100` (sin cambio) |
 
@@ -1488,7 +1488,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 const variantStyles = {
-  active: "border-transparent bg-green-100 text-green-700 hover:bg-green-100",
+  current: "border-transparent bg-green-100 text-green-700 hover:bg-green-100",
 } as const
 
 interface StatusBadgeProps {
@@ -1509,13 +1509,13 @@ export function StatusBadge({ status, children, className }: StatusBadgeProps) {
 ### Uso
 
 ```tsx
-// Estado activo
-<StatusBadge status="active">En Curso</StatusBadge>
+// Período en curso
+<StatusBadge status="current">En Curso</StatusBadge>
 
 // En slot action de SectionHeader
 <SectionHeader
   title="Abril 2026"
-  action={<StatusBadge status="active">En Curso</StatusBadge>}
+  action={<StatusBadge status="current">En Curso</StatusBadge>}
 />
 ```
 

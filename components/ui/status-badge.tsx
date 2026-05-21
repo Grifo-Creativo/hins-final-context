@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 const variantStyles = {
-  active: "border-transparent bg-green-100 text-green-700 hover:bg-green-100",
+  current: "border-transparent bg-green-100 text-green-700 hover:bg-green-100",
 } as const
 
 interface StatusBadgeProps {
@@ -17,7 +17,7 @@ interface StatusBadgeProps {
  *
  * Uso:
  * ```tsx
- * <StatusBadge status="active">En Curso</StatusBadge>
+ * <StatusBadge status="current">En Curso</StatusBadge>
  * ```
  *
  * Mismo token visual que `CompensacionesTable` y `MantenimientoHistorialTable`.
