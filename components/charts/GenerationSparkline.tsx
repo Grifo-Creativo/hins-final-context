@@ -28,7 +28,7 @@ export function GenerationSparkline({
       config={chartConfig}
       className={className ?? "aspect-auto h-14 w-full"}
     >
-      <AreaChart data={data} margin={{ left: 0, right: 0, top: 4, bottom: 0 }}>
+      <AreaChart data={data} margin={{ left: 0, right: 0, top: 0, bottom: 4 }}>
         <defs>
           <linearGradient id="fillSpark" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.35} />

@@ -9,28 +9,165 @@
 
 ## Índice
 
-1. [Form Elements (Inputs, Selects, etc)](#form-elements)
-2. [InputWithIconButton](#inputwithiconbutton)
-3. [Button](#button)
-4. [TabsForBlocks](#tabsforblocks)
-5. [Card](#card)
-6. [CardWire](#cardwire)
-7. [FeatureItem](#featureitem)
-8. [IconBadge](#iconbadge)
-9. [KpiPrimary](#kpiprimary)
-10. [KpiPrimaryCompact](#kpiprimarycompact)
-11. [KpiSecondary](#kpisecondary)
-12. [SoftBadge](#softbadge)
-13. [StatusBadge](#statusbadge)
-14. [ModelBadge](#modelbadge)
-15. [CardWithContent](#cardwithcontent)
-16. [Table](#table)
-17. [GenerationSparkline](#generationsparkline)
-18. [ParkEnergyBarChart](#parkenergybarchar)
-19. [MonetaryBarChart](#monetarybarchar)
-20. [DailyGenerationChart](#dailygenerationchart)
-21. [DailyGenerationChartBlock](#dailygenerationchartblock)
-22. [HinsTooltip](#hinstooltip)
+1. [Heading (Atom)](#heading)
+2. [SectionHeader (Molecule)](#sectionheader)
+3. [Form Elements (Inputs, Selects, etc)](#form-elements)
+4. [InputWithIconButton](#inputwithiconbutton)
+5. [Button](#button)
+6. [TabsForBlocks](#tabsforblocks)
+7. [Card](#card)
+8. [CardWire](#cardwire)
+9. [FeatureItem](#featureitem)
+10. [IconBadge](#iconbadge)
+11. [KpiPrimary](#kpiprimary)
+12. [KpiPrimaryCompact](#kpiprimarycompact)
+13. [KpiSecondary](#kpisecondary)
+14. [SoftBadge](#softbadge)
+15. [StatusBadge](#statusbadge)
+16. [ModelBadge](#modelbadge)
+17. [CardWithContent](#cardwithcontent)
+18. [Table](#table)
+19. [GenerationSparkline](#generationsparkline)
+20. [GenerationSparkbars](#generationsparkbars)
+21. [ParkEnergyBarChart](#parkenergybarchar)
+22. [MonetaryBarChart](#monetarybarchar)
+23. [DailyGenerationChart](#dailygenerationchart)
+24. [DailyGenerationChartBlock](#dailygenerationchartblock)
+25. [HinsTooltip](#hinstooltip)
+
+---
+
+## Heading (Atom)
+
+**Archivo:** `/components/ui/heading.tsx`  
+**Estado:** ✅ Aprobado  
+**Patrón:** Atomic Design — Atom (indivisible)
+
+### Propósito
+
+Componentiza estilos de headings (H1, H2, H3) para garantizar consistencia tipográfica en toda la aplicación. **Única fuente de verdad** para cambios de estilos de headings.
+
+### Cuándo usar
+
+- **H1:** Título principal de vista (1 por página)
+- **H2:** Títulos de secciones/containers (reservado, pocos hoy)
+- **H3:** Títulos de cards, listas, componentes unitarios
+
+### Props
+
+| Prop | Tipo | Required | Default | Descripción |
+|---|---|---|---|---|
+| `level` | `"h1"` \| `"h2"` \| `"h3"` | ✅ | — | Nivel semántico HTML |
+| `children` | `React.ReactNode` | ✅ | — | Contenido del heading |
+| `className` | `string` | ❌ | — | Clases Tailwind adicionales |
+
+### Spec
+
+| Nivel | Tailwind | Tamaño | Peso | Color |
+|---|---|---|---|---|
+| H1 | `text-4xl font-bold` | 36px | 700 | `text-foreground` |
+| H2 | `text-2xl font-semibold` | 24px | 600 | `text-foreground` |
+| H3 | `text-lg font-semibold` | 18px | 600 | `text-foreground` |
+
+### Ejemplos
+
+```tsx
+import { Heading } from "@/components/ui/heading"
+
+// H1: Título principal
+<Heading level="h1">Parque Río Cuarto</Heading>
+
+// H3: Título de card
+<Heading level="h3">Desglose de Ahorro</Heading>
+
+// H3 con clase adicional
+<Heading level="h3" className="leading-snug">Título especial</Heading>
+```
+
+### Notas de implementación
+
+- ✅ Usa tokens CSS directamente (`--foreground`)
+- ✅ Renderiza etiqueta semántica correcta (`<h1>`, `<h2>`, `<h3>`)
+- ✅ Listo para integración en molecules (ej. `SectionHeader`)
+- ❌ No mezclar con h3 inline (`<h3 className="...">`) — siempre usar `<Heading>`
+
+---
+
+## SectionHeader (Molecule)
+
+**Archivo:** `/components/ui/section-header.tsx`  
+**Estado:** ✅ Refactorizado  
+**Patrón:** Atomic Design — Molecule (Heading atom + action slot)
+
+### Propósito
+
+Combina el `Heading` atom (H3) con un slot flexible para **acciones** (tabs, badges, botones, etc.). Patrón: Heading centered + optional action (ml-auto, flex-shrink-0).
+
+### Cuándo usar
+
+- Cuando necesites un H3 **con acciones/controles**
+- Títulos de StatList, Tables, Sections con header controls
+- Para H3 **sin acciones**, usa directamente `<Heading level="h3">`
+
+### Props
+
+| Prop | Tipo | Required | Default | Descripción |
+|---|---|---|---|---|
+| `title` | `string` | ✅ | — | Texto del heading |
+| `action` | `React.ReactNode` | ❌ | — | Slot libre: TabsForBlocks, Badges, Buttons, etc. |
+| `size` | `"md"` \| `"sm"` | ❌ | `"md"` | **size="sm" deprecated** — usar `<Heading>` directo |
+| `className` | `string` | ❌ | — | Clases Tailwind adicionales |
+
+### Spec
+
+**size="md" (recomendado):**
+- Usa `Heading level="h3"` internamente
+- `text-lg font-semibold`
+- Alineación: title centered, action ml-auto
+
+**size="sm" (deprecated):**
+- Mantiene backward compatibility
+- No recomendado para nuevos componentes
+- Usar directamente `<Heading>` en su lugar
+
+### Ejemplos
+
+```tsx
+import { SectionHeader } from "@/components/ui/section-header"
+import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+
+// Sin acciones (usa Heading directamente, no SectionHeader):
+<Heading level="h3">Título simple</Heading>
+
+// Con acciones (tabs):
+<SectionHeader
+  title="Desglose de Ahorro"
+  action={
+    <TabsForBlocks
+      variant="icon"
+      tabs={[
+        { value: "dinero", icon: WalletIcon, ariaLabel: "Dinero" },
+        { value: "energia", icon: ZapIcon, ariaLabel: "Energía" }
+      ]}
+      onValueChange={handleTabChange}
+    />
+  }
+/>
+
+// Con otros controles (badge, button):
+<SectionHeader
+  title="Compensaciones"
+  action={<Badge>2 pendientes</Badge>}
+/>
+```
+
+### Notas de implementación
+
+- ✅ Usa `Heading` atom internamente (no h3 inline)
+- ✅ Flexible: action slot acepta cualquier React node
+- ✅ Responsive: acción se ajusta con ml-auto
+- ⚠️ **size="sm" deprecated** — plan: remover en futuro
+- ❌ No hardcodear acciones — pasar como prop
 
 ---
 
@@ -2488,6 +2625,178 @@ export function GenerationSparkline({ data, chartConfig, className }: Generation
 - No desactivar tooltip salvo caso excepcional documentado en el flow.
 - `chartConfig` se importa desde `/data/chart-config` — nunca hardcodear colores.
 - `data` requiere `{ i: number; value: number }[]` — el índice `i` es necesario.
+
+---
+
+## GenerationSparkbars
+
+**Archivo:** `/components/charts/GenerationSparkbars.tsx`
+**Estado:** ✅ Aprobado
+**Patrón:** Variante de GenerationSparkline — bar chart en lugar de area chart
+**Usado en:** KpiPrimaryCompact (cuando `sparklineType="bars"`)
+
+### Propósito
+
+Sparkbar (miniatura de bar chart) para mostrar tendencia de generación dentro de KPIs primary compact. Alternativa visual a `GenerationSparkline` — misma altura (`h-14`), mismo contenedor, pero renderizado como barras en lugar de área continua.
+
+### Cuándo usar
+
+- **Dentro de KpiPrimaryCompact** con `sparklineType="bars"` — para resaltar datos discretos por período
+- Cuando la tendencia es más importante que los valores exactos
+- Cuando el patrón de barras comunica mejor (vs. línea continua) — ej: generación diaria por semana
+
+### Cuándo NO usar
+
+- Sparklines en otros contextos (KpiPrimary, KpiSecondary) — usar `GenerationSparkline`
+- Charts principales de una vista → ParkEnergyBarChart, MonetaryBarChart u otros
+- Datos continuos donde el área bajo la curva importa
+
+### Props
+
+| Prop | Tipo | Required | Default | Descripción |
+|---|---|---|---|---|
+| `data` | `{ i: number; value: number }[]` | ✅ | — | Array de puntos: índice + valor |
+| `chartConfig` | `ChartConfig` | ✅ | — | Config de colores desde `/data/chart-config` |
+| `className` | `string` | ❌ | `"aspect-auto h-14 w-full"` | Clases Tailwind para wrapper |
+| `showTooltip` | `boolean` | ❌ | `true` | Mostrar tooltip al hover |
+
+### Spec
+
+| Propiedad | Valor |
+|---|---|
+| Tipo | Recharts BarChart |
+| Altura | `h-14` (56px) — idéntica a GenerationSparkline |
+| Ancho | `w-full` dentro de wrapper `mx-[-16px]` (si está en KpiPrimaryCompact) |
+| Bar fill | `var(--color-value)` — from chartConfig |
+| Bar radius | `[2, 2, 0, 0]` — redondeado solo arriba, muy sutil |
+| Bar spacing | Automático según cantidad de puntos (Recharts) |
+| Margin | `left: 0, right: 0, top: 0, bottom: 4` |
+| Tooltip | `ChartTooltipContent hideLabel hideIndicator` — configurable por prop |
+| Dots | ninguno — renderizado como barras, no puntos |
+
+### Implementación
+
+```tsx
+// /components/charts/GenerationSparkbars.tsx
+"use client"
+
+import { Bar, BarChart } from "recharts"
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
+
+type GenerationSparkbarsProps = {
+  data: { i: number; value: number }[]
+  chartConfig: ChartConfig
+  className?: string
+  showTooltip?: boolean
+}
+
+export function GenerationSparkbars({
+  data,
+  chartConfig,
+  className,
+  showTooltip = true,
+}: GenerationSparkbarsProps) {
+  return (
+    <ChartContainer
+      config={chartConfig}
+      className={className ?? "aspect-auto h-14 w-full"}
+    >
+      <BarChart data={data} margin={{ left: 0, right: 0, top: 0, bottom: 4 }}>
+        {showTooltip && <ChartTooltip content={<ChartTooltipContent hideLabel hideIndicator />} />}
+        <Bar
+          dataKey="value"
+          fill="var(--color-value)"
+          radius={[2, 2, 0, 0]}
+        />
+      </BarChart>
+    </ChartContainer>
+  )
+}
+```
+
+### Uso en contexto
+
+```tsx
+// En KpiPrimaryCompact con sparklineType="bars"
+<KpiPrimaryCompact
+  icon={ZapIcon}
+  label="Energía Generada"
+  value="830"
+  unit="kWh"
+  delta={{ value: 12, trend: "up" }}
+  sparklineData={weeklyGenerationData}
+  sparklineType="bars"  // ← Activa GenerationSparkbars
+  chartConfig={generationChartConfig}
+/>
+
+// Más específicamente, dentro del componente KpiPrimaryCompact:
+{sparklineData && (
+  <div className="mx-[-16px]">
+    {sparklineType === "bars" ? (
+      <GenerationSparkbars
+        data={sparklineData}
+        chartConfig={chartConfig}
+        showTooltip={true}
+      />
+    ) : (
+      <GenerationSparkline
+        data={sparklineData}
+        chartConfig={chartConfig}
+      />
+    )}
+  </div>
+)}
+```
+
+### Comparación: GenerationSparkline vs GenerationSparkbars
+
+| Aspecto | Sparkline (Area) | Sparkbars (Bar) |
+|--------|------------------|-----------------|
+| Tipo visual | Área continua bajo curva | Barras discretas |
+| Mensaje | Tendencia suave, evolución | Valores por período, discreto |
+| Radio | Smooth `monotone` | Bars con `radius=[2,2,0,0]` |
+| Alternativa | Mejor para datos continuos | Mejor para datos semanales/diarios |
+| Tooltip | Punto flotante por hover | Barra seleccionada |
+| Default | `GenerationSparkline` | Requiere `sparklineType="bars"` explícito |
+
+### Spec visual
+
+```
+┌─────────────────────────────────────────────────┐
+│ h-14 (56px) total height                        │
+├─────────────────────────────────────────────────┤
+│      ║  ║      ║  ║      ║  ║      ║           │  ← barras
+│      ║  ║ ║    ║  ║ ║    ║  ║ ║    ║           │
+│  ║   ║  ║ ║ ║  ║  ║ ║ ║  ║  ║ ║ ║  ║           │
+│  ║ ║ ║  ║ ║ ║  ║  ║ ║ ║  ║  ║ ║ ║  ║           │
+│  ║ ║ ║  ║ ║ ║  ║  ║ ║ ║  ║  ║ ║ ║  ║   ║ ║    │
+│  ║ ║ ║  ║ ║ ║  ║  ║ ║ ║  ║  ║ ║ ║  ║   ║ ║    │
+└─────────────────────────────────────────────────┘
+  color: var(--color-value) — dynamic por chartConfig
+  radius: 2px arriba, sharp abajo
+```
+
+**Margin:** bottom=4px para dar respiro visual.
+
+### Notas para el agente
+
+- ✅ Siempre consumido desde `KpiPrimaryCompact` con `sparklineType="bars"`
+- ✅ `data` requiere estructura `{ i: number; value: number }[]` — el índice `i` es obligatorio
+- ✅ `chartConfig` desde `/data/chart-config` — **nunca hardcodear colores**
+- ✅ `showTooltip` es configurable — por default `true` (igual que GenerationSparkline)
+- ⚠️ **Diferencia clave:** GenerationSparkbars usa `BarChart`, no `AreaChart` — ambos deprecan el atributo `dot`
+- ❌ No usar fuera de KpiPrimaryCompact — para otros sparklines, usar GenerationSparkline o charts específicos
+- ❌ No hardcodear `radius`, `margin`, `fill` — siempre derivados de props o chartConfig
+
+**Validación en mock:**
+- Datos de `weeklyGenerationData` (7 puntos por semana)
+- Datos de `monthlyGenerationData` (4-5 barras por mes)
+- Tooltip muestra valor + unidad con estilos consistentes
 
 ---
 

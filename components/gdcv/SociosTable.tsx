@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Heading } from "@/components/ui/heading"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -266,9 +267,9 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
 
       {/* Section header */}
       <div className="flex items-center justify-between p-6 pb-0">
-        <h3 className="text-lg font-semibold text-foreground">
+        <Heading level="h3">
           Socios del Parque
-        </h3>
+        </Heading>
         <div className="flex items-center gap-2">
           {/* Column visibility */}
           <DropdownMenu>

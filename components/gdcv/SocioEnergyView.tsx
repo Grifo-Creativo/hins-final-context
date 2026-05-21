@@ -14,7 +14,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithContent } from "@/components/ui/card-with-content"
-import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
+import { FeatureItem } from "@/components/ui/feature-item"
 import { StatList } from "@/components/ui/stat-list"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import {
@@ -41,8 +41,8 @@ import { WalletIcon, ZapIcon } from "lucide-react"
 const ahorroChartConfig = socioAhorroStackChartConfig
 
 const STAT_TABS = [
-  { value: "inyeccion", label: "En Dinero" },
-  { value: "energia", label: "En Energía" },
+  { value: "inyeccion", icon: WalletIcon, ariaLabel: "En Dinero" },
+  { value: "energia", icon: ZapIcon, ariaLabel: "En Energía" },
 ]
 
 const DINERO_CHART_RANGE_TABS = CHART_RANGE_TABS.filter((tab) => tab.value !== "1d")
@@ -145,25 +145,23 @@ export function SocioEnergyView() {
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <KpiPrimaryCompact
+            <FeatureItem
               icon={WalletIcon}
               label={socioV2PanelKpis.ahorro.label}
               value={socioV2PanelKpis.ahorro.value}
-              sparklineData={socioV2AhorroSparkline}
             />
-            <KpiPrimaryCompact
+            <FeatureItem
               icon={ZapIcon}
               label={socioV2PanelKpis.energiaGen.label}
-              value={socioV2PanelKpis.energiaGen.value}
-              unit={socioV2PanelKpis.energiaGen.unit}
-              sparklineData={socioV2EnergiaSparkline}
+              value={`${socioV2PanelKpis.energiaGen.value} ${socioV2PanelKpis.energiaGen.unit}`}
             />
           </div>
 
           <StatList
-            title="Ahorro"
+            title="Desglose de Ahorro"
             items={statItems}
             tabs={STAT_TABS}
+            tabsVariant="icon"
             defaultTab="inyeccion"
             onTabChange={setStatTab}
           />

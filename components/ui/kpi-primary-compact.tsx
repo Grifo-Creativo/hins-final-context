@@ -1,5 +1,6 @@
 // components/ui/kpi-primary-compact.tsx
 import { GenerationSparkline } from "@/components/charts/GenerationSparkline"
+import { GenerationSparkbars } from "@/components/charts/GenerationSparkbars"
 import { CardWire } from "@/components/ui/card-wire"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { SoftBadge } from "@/components/ui/soft-badge"
@@ -14,6 +15,7 @@ interface KpiPrimaryCompactProps {
   unit?: string
   delta?: string
   sparklineData?: { value: number }[]
+  sparklineType?: "line" | "bars"
   className?: string
 }
 
@@ -28,10 +30,13 @@ export function KpiPrimaryCompact({
   unit,
   delta,
   sparklineData,
+  sparklineType = "line",
   className,
 }: KpiPrimaryCompactProps) {
   const indexed = sparklineData?.map((d, i) => ({ i, value: d.value })) ?? []
   const showDelta = Boolean(delta?.trim())
+
+  const SparklineComponent = sparklineType === "bars" ? GenerationSparkbars : GenerationSparkline
 
   return (
     <CardWire
@@ -59,7 +64,7 @@ export function KpiPrimaryCompact({
 
       {indexed.length > 0 ? (
         <div className="mx-[-16px]">
-          <GenerationSparkline
+          <SparklineComponent
             data={indexed}
             chartConfig={generationSparklineConfig}
             className="aspect-auto h-14 w-full"

@@ -1,5 +1,6 @@
 // components/ui/card-with-content.tsx
 import { Card } from "@/components/ui/card"
+import { Heading } from "@/components/ui/heading"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import { cn } from "@/lib/utils"
 
@@ -111,9 +112,9 @@ function CardWithContentHeader({
         )}
       >
         {showTitle ? (
-          <h3 className="text-lg font-semibold leading-snug text-foreground">
+          <Heading level="h3" className="leading-snug">
             {title}
-          </h3>
+          </Heading>
         ) : null}
         {showSubtitle ? (
           <p className="hidden text-sm font-normal text-muted-foreground md:block">

@@ -24,6 +24,7 @@ import {
 
 import { StatusBadge } from "@/components/ui/status-badge"
 import { Button } from "@/components/ui/button"
+import { Heading } from "@/components/ui/heading"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -225,9 +226,9 @@ export function CompensacionesTable({ data }: CompensacionesTableProps) {
     <div className="bg-white rounded-xl shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
-        <h3 className="text-lg font-semibold text-foreground">
+        <Heading level="h3">
           Historial de Compensaciones
-        </h3>
+        </Heading>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

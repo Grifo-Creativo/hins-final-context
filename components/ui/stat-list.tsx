@@ -1,7 +1,7 @@
 // components/ui/stat-list.tsx
 import { IconBadge } from "@/components/ui/icon-badge"
 import { SectionHeader } from "@/components/ui/section-header"
-import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { TabsForBlocks, type TabsForBlocksVariant } from "@/components/ui/tabs-for-blocks"
 import { cn } from "@/lib/utils"
 import { type LucideIcon } from "lucide-react"
 
@@ -14,13 +14,16 @@ export interface StatListItem {
 
 interface StatListTab {
   value: string
-  label: string
+  label?: string
+  icon?: LucideIcon
+  ariaLabel?: string
 }
 
 interface StatListProps {
   title: string
   items: StatListItem[]
   tabs?: StatListTab[]
+  tabsVariant?: TabsForBlocksVariant
   defaultTab?: string
   onTabChange?: (value: string) => void
   className?: string
@@ -30,6 +33,7 @@ export function StatList({
   title,
   items,
   tabs,
+  tabsVariant = "text",
   defaultTab,
   onTabChange,
   className,
@@ -37,11 +41,12 @@ export function StatList({
   return (
     <div className={cn("flex flex-col gap-0", className)}>
       <SectionHeader
-        size="sm"
+        size="md"
         title={title}
         action={tabs && tabs.length > 0 ? (
           <TabsForBlocks
             tabs={tabs}
+            variant={tabsVariant}
             defaultValue={defaultTab ?? tabs[0]?.value}
             onValueChange={onTabChange}
           />

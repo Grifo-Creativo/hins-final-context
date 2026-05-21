@@ -145,6 +145,52 @@ Colores semánticos propios del negocio energético. No son chart colors ni UI c
 - No hardcodear `font-family` — usar siempre `--font-sans`.
 - No usar tamaños menores a `text-xs` (12px).
 
+### Jerarquía de Headings — Componente `Heading` (Atom)
+
+**PATRÓN ATOMIC DESIGN:**
+```
+ATOM: Heading       → componentiza estilos H1/H2/H3
+MOLECULE: SectionHeader → Heading + action slot
+ORGANISM: CardWithContent, StatList, Tables → usan Heading internamente
+```
+
+#### Cuándo usar cada nivel
+
+| Nivel | Tailwind | Contexto | Ejemplo | Componente |
+|---|---|---|---|---|
+| **H1** | `text-4xl font-bold` | Título principal de vista (1 por página) | "Parque Río Cuarto" | Directo en página |
+| **H2** | `text-2xl font-semibold` | Secciones/containers que agrupan cards (reservado, pocos hoy) | [Futuro: agrupación de bloques] | Directo en layout |
+| **H3** | `text-lg font-semibold` | Títulos de cards, listas, componentes unitarios (**MÁS VARIACIONES**) | "Desglose de Ahorro", "Historial de Compensaciones" | `Heading`, `SectionHeader` |
+
+#### Implementación
+
+**H3 con variante simple (sin acciones):**
+```tsx
+<Heading level="h3">Desglose de Ahorro</Heading>
+```
+
+**H3 con acciones (usando molecule `SectionHeader`):**
+```tsx
+<SectionHeader
+  title="Desglose de Ahorro"
+  action={<TabsForBlocks variant="icon" ... />}
+/>
+```
+
+#### Reglas
+
+✅ **DO:**
+- Usar `<Heading level="h3">` para títulos sin acciones
+- Usar `<SectionHeader title="...">` cuando haya actions/tabs
+- **Única fuente de verdad:** cambios en estilos van en `/components/ui/heading.tsx`
+- Siempre usar etiqueta semántica correcta (`<h1>`, `<h2>`, `<h3>`)
+
+❌ **DON'T:**
+- Hardcodear clases `text-lg font-semibold` en componentes — usar `<Heading>`
+- Crear variantes de heading fuera del atom (ej. `<h3 className="custom">`)
+- Mezclar `<h3>` nativo con `<Heading level="h3">` en la misma app
+- Usar H1 más de una vez por página
+
 ---
 
 ## 3. Geometría, Spacing y Shadows
@@ -242,6 +288,8 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 
 | Componente | Archivo | Spec completo |
 |---|---|---|
+| `Heading` | `/components/ui/heading.tsx` | → `components.md` |
+| `SectionHeader` | `/components/ui/section-header.tsx` | → `components.md` |
 | `Card` | `/components/ui/card.tsx` | → `components.md` |
 | `IconBadge` | `/components/ui/icon-badge.tsx` | → `components.md` |
 | `KpiPrimary` | `/components/ui/kpi-primary.tsx` | → `components.md` |
