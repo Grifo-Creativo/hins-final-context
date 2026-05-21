@@ -36,7 +36,7 @@ export function KpiPrimaryCompact({
   return (
     <CardWire
       className={cn(
-        "h-full flex flex-col gap-3",
+        "h-full flex flex-col gap-3 shadow-sm",
         className
       )}
     >
