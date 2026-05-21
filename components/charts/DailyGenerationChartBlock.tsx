@@ -19,9 +19,6 @@ import {
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
-const navButtonClass =
-  "h-8 gap-2 rounded-full text-xs shadow-xs"
-
 function InlineStat({
   label,
   value,
@@ -115,32 +112,24 @@ export function DailyGenerationChartBlock({
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          className={cn(
-            navButtonClass,
-            "absolute left-3 top-1/2 z-10 -translate-y-1/2 bg-white/95 max-md:size-8 max-md:gap-0 max-md:px-0"
-          )}
+          size="icon-sm"
+          className="absolute left-3 top-1/2 z-10 -translate-y-1/2"
           onClick={() => changeDay(-1)}
           aria-label={`Día anterior, ${formatChartDayNavShort(prevDay)}`}
         >
-          <ChevronLeftIcon className="size-4" aria-hidden />
-          <span className="max-md:sr-only">{formatChartDayNavShort(prevDay)}</span>
+          <ChevronLeftIcon aria-hidden />
         </Button>
 
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          className={cn(
-            navButtonClass,
-            "absolute right-3 top-1/2 z-10 -translate-y-1/2 bg-white/95 max-md:size-8 max-md:gap-0 max-md:px-0"
-          )}
+          size="icon-sm"
+          className="absolute right-3 top-1/2 z-10 -translate-y-1/2"
           onClick={() => changeDay(1)}
           disabled={isToday}
           aria-label={`Día siguiente, ${formatChartDayNavShort(nextDay)}`}
         >
-          <span className="max-md:sr-only">{formatChartDayNavShort(nextDay)}</span>
-          <ChevronRightIcon className="size-4" aria-hidden />
+          <ChevronRightIcon aria-hidden />
         </Button>
       </div>
     </div>

@@ -48,7 +48,7 @@ export function SocioAccessView() {
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center">
-      <Card className="w-full max-w-md rounded-xl border-0 bg-white p-6 shadow-sm">
+      <Card className="w-full max-w-md rounded-xl border-0 bg-white p-6 shadow-xs">
         <div className="mb-6 text-center">
           <p className="text-sm font-medium text-muted-foreground">{socioParkName}</p>
           <h1 className="mt-1 text-2xl font-semibold text-foreground">
@@ -100,7 +100,7 @@ export function SocioAccessView() {
 
           <Button
             type="submit"
-            className="w-full shadow-sm"
+            className="w-full shadow-xs"
             disabled={otp.length < 4 || isSubmitting}
           >
             Continuar

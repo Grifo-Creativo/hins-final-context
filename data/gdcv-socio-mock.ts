@@ -49,12 +49,16 @@ const SOCIO_PARQUE_TAIL: Record<string, number> = {
 }
 
 function buildSocioAhorroMonthly(): SocioAhorroRow[] {
-  return GDCV_ENERGY_MONTHLY_CANONICAL.map((row) => ({
-    label: row.label,
-    generated:
-      SOCIO_AHORRO_TAIL[row.label] ??
-      Math.round(row.generated * AHORRO_PER_KWH),
-  }))
+  return GDCV_ENERGY_MONTHLY_CANONICAL.map((row) => {
+    const total = SOCIO_AHORRO_TAIL[row.label] ?? Math.round(row.generated * AHORRO_PER_KWH)
+    const autoconsumo = Math.round(total * 0.68)
+    const inyectada = total - autoconsumo
+    return {
+      label: row.label,
+      autoconsumo,
+      inyectada,
+    }
+  })
 }
 
 function buildSocioParqueMonthly(): SocioParqueRow[] {
@@ -68,15 +72,15 @@ function buildSocioParqueMonthly(): SocioParqueRow[] {
 
 // ─── Mi Ahorro Chart ────────────────────────────────────────────────────────
 
-export type SocioAhorroRow = { label: string; generated: number }
+export type SocioAhorroRow = { label: string; autoconsumo: number; inyectada: number }
 
 const SOCIO_AHORRO_MONTHLY = buildSocioAhorroMonthly()
 
 const SOCIO_AHORRO_WEEKLY: readonly SocioAhorroRow[] = [
-  { label: "1–7 Abr", generated: 18000 },
-  { label: "8–14 Abr", generated: 20000 },
-  { label: "15–21 Abr", generated: 17600 },
-  { label: "22–30 Abr", generated: 18800 },
+  { label: "1–7 Abr", autoconsumo: 12240, inyectada: 5760 },
+  { label: "8–14 Abr", autoconsumo: 13600, inyectada: 6400 },
+  { label: "15–21 Abr", autoconsumo: 11968, inyectada: 5632 },
+  { label: "22–30 Abr", autoconsumo: 12784, inyectada: 6016 },
 ]
 
 export function getSocioAhorroSeries(range: ChartRangeChip): SocioAhorroRow[] {

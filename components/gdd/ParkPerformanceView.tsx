@@ -65,7 +65,6 @@ export function ParkPerformanceView() {
       <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
         <CardWithContent
           title="Energía Generada del Parque"
-          subtitle={chartSubtitle}
           tabs={CHART_RANGE_TABS}
           activeTab={period}
           defaultTab="6m"

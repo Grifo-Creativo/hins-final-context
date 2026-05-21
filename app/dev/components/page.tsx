@@ -1,6 +1,7 @@
 // app/dev/components/page.tsx
 "use client"
 
+import { useState } from "react"
 import { GenerationSparkline } from "@/components/charts/GenerationSparkline"
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { ROIProjectionChart } from "@/components/charts/ROIProjectionChart"
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CardWire } from "@/components/ui/card-wire"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { DatePicker } from "@/components/ui/date-picker"
 import { FeatureItem } from "@/components/ui/feature-item"
 import { HinsTooltip } from "@/components/ui/hins-tooltip"
 import { IconBadge } from "@/components/ui/icon-badge"
@@ -68,6 +70,18 @@ const STAT_LIST_DEMO: StatListItem[] = [
   { name: "Teléfono de contacto", value: "NN" },
   { name: "Ahorro en Emisiones", value: "3.47" },
 ]
+
+function DatePickerDemo() {
+  const [selectedDate, setSelectedDate] = useState(new Date(2026, 4, 20)) // May 20, 2026
+
+  return (
+    <DatePicker
+      value={selectedDate}
+      onValueChange={setSelectedDate}
+      disabled={(date) => date > new Date()} // No future dates
+    />
+  )
+}
 
 function Showcase({
   title,
@@ -228,6 +242,15 @@ export default function DevComponentsPage() {
                 iconTooltip="N° de medidor del parque"
                 placeholder="Ingresar..."
               />
+            </div>
+          </Showcase>
+
+          <Showcase
+            title="DatePicker"
+            file="components/ui/date-picker.tsx"
+          >
+            <div className="max-w-xs">
+              <DatePickerDemo />
             </div>
           </Showcase>
 

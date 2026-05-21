@@ -103,7 +103,6 @@ export function GdcvRoiView() {
       {/* Block 2 — Curva */}
       <CardWithContent
         title="Curva de Recuperación Acumulada"
-        subtitle="Crédito acumulado vs Inversión inicial"
       >
         <RoiRecoveryLineChart
           data={curvaRecuperacionData}

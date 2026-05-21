@@ -126,7 +126,7 @@ export function ParkEnergyBarChart({
         ) : null}
         <Bar
           dataKey="generated"
-          radius={n <= 12 ? [6, 6, 0, 0] : 0}
+          radius={n <= 16 ? [6, 6, 0, 0] : 0}
           barSize={density.barSize}
           background={false}
           minPointSize={0}

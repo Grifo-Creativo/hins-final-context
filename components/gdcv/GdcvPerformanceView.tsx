@@ -78,7 +78,6 @@ export function GdcvPerformanceView() {
         {/* Left — bar chart card */}
         <CardWithContent
           title="Energía Generada del Parque"
-          subtitle={chartSubtitle}
           tabs={CHART_RANGE_TABS}
           activeTab={chartRange}
           defaultTab="6m"

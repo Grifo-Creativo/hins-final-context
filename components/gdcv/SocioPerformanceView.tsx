@@ -87,7 +87,6 @@ export function SocioPerformanceView() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
         <CardWithContent
           title="Energía generada del parque"
-          subtitle={chartSubtitle}
           tabs={CHART_RANGE_TABS}
           activeTab={chartRange}
           defaultTab="6m"

@@ -24,9 +24,13 @@ import type { ChartRangeChip } from "@/types/chart-range"
 import { ZapIcon } from "lucide-react"
 
 const ahorroChartConfig = {
-  generated: {
-    label: "Ahorro ($)",
-    color: "var(--chart-1)",
+  autoconsumo: {
+    label: "Autoconsumo Virtual",
+    color: "#a8d976",
+  },
+  inyectada: {
+    label: "Energía Inyectada",
+    color: "#ffc872",
   },
 }
 
@@ -62,7 +66,6 @@ export function SocioEnergyView() {
 
       <CardWithContent
         title="Mi Ahorro en abril"
-        subtitle={ahorroSubtitle}
         tabs={CHART_RANGE_TABS}
         activeTab={ahorroRange}
         defaultTab="6m"

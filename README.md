@@ -1,126 +1,151 @@
-# README.md
-# HINS — Prompt Ejecutivo
+# HINS — Prototipo B2B (monitoreo de parques fotovoltaicos)
+
+Plataforma de **visibilidad** (no operativa) para parques GDD, GDC y GDCV.  
+Stack: Next.js App Router, shadcn/ui, TanStack Table, Recharts.
+
+**Repositorio:** https://github.com/juanma25/hins-final-context  
+**Rama principal:** `main` (sin PR abierto por defecto; revisar commits recientes en `main`)
 
 ---
 
-## Rol
+## Documentación del producto (orden de lectura)
 
-Actuá como un senior UI engineer + product designer + frontend architect.
-
-Tu objetivo es tomar los wireframes anotados de cada flujo y convertirlos en
-UI final en alta fidelidad, implementada en React, fiel al design system y
-al contexto del producto.
-
----
-
-## Lo que NO debés hacer
-
-- No inventar un sistema visual nuevo.
-- No tomar decisiones de diseño no documentadas en `design-system.md`.
-- No asumir la estructura de información de una vista — está en `/flows/[pantalla].md`.
-- No usar `--primary` en charts.
-- No hardcodear colores hex en componentes.
-- No crear variantes de componentes que ya tienen spec en `components.md`.
-- No omitir `py-0` y `ring-0` al usar Card — el shadcn nativo tiene `py-4` hardcodeado.
-- No aplicar padding directamente en Card — siempre lo define el contenido interno.
+1. [`context/product-context.md`](context/product-context.md) — usuarios, RBAC, reglas de negocio  
+2. [`context/design-system.md`](context/design-system.md) — tokens y principios visuales  
+3. [`context/components.md`](context/components.md) — specs de implementación (**última palabra**)  
+4. [`context/ux-guidelines.md`](context/ux-guidelines.md) — patrones UX (⚠️ ver tech debt)  
+5. [`engineering/tech-stack.md`](engineering/tech-stack.md) — stack y convenciones  
+6. [`flows/`](flows/) — flujo por actor/pantalla  
 
 ---
 
-## Lo que SÍ debés hacer
+## Rutas principales
 
-- Leer los archivos de contexto en el orden definido en `.cursorrules` antes de generar código.
-- Respetar estrictamente los tokens de `design-system.md`.
-- Verificar si el componente que necesitás ya existe en `components.md` antes de crear uno nuevo.
-- Usar el código exacto documentado en `components.md` — es la fuente de verdad de implementación.
-- Mapear cada elemento del wireframe a componentes de shadcn/ui.
-- Indicar siempre la ruta completa del archivo generado.
-- Separar `chartData / chartConfig / chartComponent` en archivos distintos.
-- Usar `next/link` para toda la navegación.
+| Área | Rutas |
+|------|--------|
+| Main | `/main` |
+| GDD | `/gdd/performance`, `/gdd/roi`, `/gdd/mantenimiento`, `/gdd/notifications` |
+| GDCV AGC | `/gdcv/performance`, `/gdcv/roi`, `/gdcv/mantenimiento` |
+| GDCV Socio | `/gdcv/socio/acceso`, `/gdcv/socio`, `/gdcv/socio/parque` |
+| GDC | `/gdc/performance`, `/gdc/roi`, `/gdc/mantenimiento` |
+| Dev | `/dev/components` |
 
----
-
-## Stack
-
-| Capa | Tecnología |
-|---|---|
-| Framework | Next.js + App Router |
-| Lenguaje | TypeScript |
-| UI System | shadcn/ui |
-| Estilos | Tailwind CSS |
-| Charts | shadcn/ui Charts (Recharts) |
-| Íconos | lucide-react |
-| Deploy | Vercel |
+**Socio demo OTP:** `/gdcv/socio/acceso?socio=AS` → código `4904` (medidor `354904`).
 
 ---
 
-## Producto
+## Project Status (May 20, 2026)
 
-HINS es una plataforma web de monitoreo para parques fotovoltaicos.
-Sistema de visibilidad puro — muestra lo que sucede, no ejecuta acciones sobre la red.
-Soporta tres modelos: GDD (un dueño), GDC (comunitario) y GDCV (comunitario virtual).
+### What's Done
 
-Usuarios: HINS (Admin Global), Dueño GDD, AGC (Admin GDC/GDCV), Socio.
-Cada usuario ve exclusivamente la información correspondiente a su rol y proyecto.
+**Plataforma y shell**
+- Next.js App Router + shadcn/ui + design tokens documentados
+- Shell con sidebar, header sticky, breadcrumbs, transiciones (`PageTransition`)
+- Rutas Main, GDD, GDCV (AGC + Socio), GDC y playground de componentes
 
-Ver detalle completo en `/context/product-context.md`.
+**Main / entrada**
+- Vista de proyectos (`ProjectsView`) con cards GDD/GDCV
+- Diálogo “Nuevo proyecto” (prototipo)
+- Acceso activo: General Roca (GDD), Río Cuarto (GDCV), Marcos Juárez (GDC → mantenimiento)
+
+**GDD (Dueño del parque)**
+- Performance y ROI
+- Gráfico de generación diaria + navegación por fecha
+- Historial de consumo, KPIs, notificaciones
+- Mantenimiento con historial mock
+
+**GDCV AGC (admin parque)**
+- Performance, ROI, tabla Socios, sheets de detalle
+- Compensaciones / generación (mock)
+- Mantenimiento
+- Gráfico diario en Performance
+
+**GDCV Socio**
+- OTP de acceso + gate de sesión
+- Mi espacio, El Parque, ROI socio
+- Compartir link (demo Agro Sur)
+- **Sin** módulo Mantenimiento (RBAC)
+
+**GDC (prototipo mínimo)**
+- Layout + sidebar + header
+- Mantenimiento con mock propio
+- Performance / ROI como placeholders
+
+**Mantenimiento (transversal GDD / GDC / GDCV)**
+- Mock y UI compartidos (`components/mantenimiento/`, `data/mantenimiento-mock.ts`)
+- Historial sortable, sheet de detalle placeholder, botón Nuevo sin flujo
+
+**Documentación**
+- `product-context.md` (roles, Mantenimiento §5)
+- Flows: GDD, GDCV-agc, GDCV-socio, main (parcial)
+
+### What's In Progress
+
+- Cierre / pulido del prototipo HINS
+- Alineación puntual docs ↔ código (ver tech debt)
+- Plan post-proyecto: evolución del método de construcción en `context/` para reutilizar en futuros productos
+
+### What's Next
+
+**Producto**
+1. Flow **Main / HINS Admin** — cartera global
+2. **GDC** completo — Performance y ROI (hoy placeholders)
+3. Mantenimiento — detalle en Sheet + flujo “Nueva mantención”
+4. Pantallas GDCV/GDC pendientes de wireframes en docs
+5. Auth / backend real (hoy mock + `sessionStorage` para socio)
+
+**Método (post-HINS)**
+- Restaurar `ux-guidelines.md` como guía completa
+- Unificar `PageHeader` vs `*PageHeading`
+- Auditoría doc ↔ código y plantilla reutilizable
+
+### Known Issues / Tech Debt
+
+**Build**
+- `pnpm run build` puede fallar por TypeScript en `scripts/figma-flow-builder.ts`
+
+**Documentación**
+- `ux-guidelines.md` es un patch pendiente, no guía §1–§10
+- `product-context.md` §11 parcialmente desactualizado (Mantenimiento multi-modelo, estado Socio/GDC)
+- `PageHeader` en `components.md` sin archivo `components/ui/page-header.tsx`
+- Contradicciones menores: `shadow-xs` / `shadow-sm`, badges por modelo vs spec genérico
+
+**UI**
+- Headers duplicados: `GddPageHeading`, `GdcvPageHeading`, `SocioPageHeading`, inline en Mantenimiento
+- Mantenimiento: detalle y “Nuevo” son placeholders
+- Algunos proyectos en Main sin `href` (Próximamente)
+
+**Git**
+- Trabajo reciente en `main`; commits de referencia: `1fadf7a` (socio + mantenimiento), `f9680e7` (GDC + mantenimiento compartido), `04c62c2` (gráficos diarios)
 
 ---
 
-## Flujo de trabajo por vista
+## Desarrollo local
 
-1. Leer el archivo `/flows/[pantalla].md` correspondiente.
-2. Identificar: qué datos muestra, jerarquía, acciones disponibles, estados posibles.
-3. Mapear cada bloque del wireframe a componentes de shadcn/ui.
-4. Aplicar tokens del design system.
-5. Generar el código con ruta de archivo explícita.
-6. Esperar aprobación antes de continuar con la siguiente vista.
+```bash
+pnpm install
+pnpm dev
+```
+
+Abrir http://localhost:3000 — redirección según configuración en `app/page.tsx`.
 
 ---
 
-## Archivos de referencia
+## Roles y acceso (resumen)
+
+| Rol | Mantenimiento | Navegación típica |
+|-----|---------------|-------------------|
+| HINS Admin | ✅ (por parque) | `/main` → parque |
+| Dueño GDD | ✅ | Sidebar GDD |
+| AGC GDCV / GDC | ✅ | Sidebar del parque |
+| Socio GDCV | ❌ | Solo tabs internos `/gdcv/socio/*` |
+
+---
+
+## Para revisión de PR (Claude Code / externos)
 
 ```
-/context/product-context.md   → producto, usuarios, reglas de negocio
-/context/design-system.md     → tokens, componentes, DO/DON'T
-/context/ux-guidelines.md     → jerarquía, patrones, anti-patterns
-/engineering/tech-stack.md    → stack, arquitectura, convenciones
-/flows/[pantalla].md          → wireframe anotado de cada vista
-.cursorrules                  → orden de lectura y reglas del agente
+Repositorio: https://github.com/juanma25/hins-final-context
+Rama: main
+PR: (crear si se necesita review aislada) — o revisar commits desde 1fadf7a
 ```
-
----
-
-## Estado del proyecto
-
-| Bloque | Estado |
-|---|---|
-| Contexto del producto | ✅ Completo |
-| Design system | ✅ Completo |
-| UX guidelines | ✅ Completo |
-| Stack técnico | ✅ Completo |
-| Components.md | ✅ Completo — fuente de verdad de implementación |
-| Flow GDD — GDD_01 Performance | ✅ Construido y aprobado |
-| Flow GDD — GDD_02 ROI | ⏳ Pendiente |
-| Flow main — HINS Admin cartera | ⏳ Pendiente |
-| Flow GDCV — AGC + Socios | ⏳ Pendiente |
-| Flow GDC — AGC + Socios | ⏳ Pendiente |
-| Figma UI System | ⏳ Pendiente |
-| Color de marca (primary real) | ⏳ Pendiente — hoy Zinc como placeholder |
-
-## Componentes aprobados y documentados
-
-Todos los componentes con spec en `components.md`. Antes de crear cualquier componente nuevo,
-verificar si ya existe. El código exacto está documentado — usarlo sin modificar salvo instrucción explícita.
-
-| Componente | Archivo | Estado |
-|---|---|---|
-| `TabsForBlocks` | `/components/ui/tabs-for-blocks.tsx` | ✅ Aprobado |
-| `Card` | `/components/ui/card.tsx` | ✅ Aprobado |
-| `IconBadge` | `/components/ui/icon-badge.tsx` | ✅ Aprobado |
-| `KpiPrimary` | `/components/ui/kpi-primary.tsx` | ✅ Aprobado |
-| `KpiSecondary` | `/components/ui/kpi-secondary.tsx` | ✅ Aprobado |
-| `SoftBadge` | `/components/ui/soft-badge.tsx` | ✅ Aprobado |
-| `CardWithContent` | `/components/ui/card-with-content.tsx` | ✅ Aprobado |
-| `GenerationSparkline` | `/components/charts/GenerationSparkline.tsx` | ✅ Aprobado |
-| `ParkEnergyBarChart` | `/components/charts/ParkEnergyBarChart.tsx` | ✅ Aprobado |
-| `Table` | `/components/ui/data-table.tsx` | ⏳ Pendiente de refactor |
