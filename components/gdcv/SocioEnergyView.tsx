@@ -13,10 +13,8 @@ import {
 } from "@/components/gdcv/socio-v2-constants"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
-import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
 import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
-import { SectionHeader } from "@/components/ui/section-header"
 import { StatList } from "@/components/ui/stat-list"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import {
@@ -140,41 +138,38 @@ export function SocioEnergyView() {
         </div>
       </CardWithContent>
 
-      <div className="flex flex-col gap-5 lg:order-1 lg:gap-6">
-        <SectionHeader
-          size="md"
-          title={socioV2PanelKpis.periodLabel}
-          action={<StatusBadge status="current">En Curso</StatusBadge>}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <KpiPrimaryCompact
-            icon={WalletIcon}
-            label={socioV2PanelKpis.ahorro.label}
-            value={socioV2PanelKpis.ahorro.value}
-            sparklineData={socioV2AhorroSparkline}
-          />
-          <KpiPrimaryCompact
-            icon={ZapIcon}
-            label={socioV2PanelKpis.energiaGen.label}
-            value={socioV2PanelKpis.energiaGen.value}
-            unit={socioV2PanelKpis.energiaGen.unit}
-            sparklineData={socioV2EnergiaSparkline}
-          />
-        </div>
-
-        <Card className="overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
-          <div className="p-4">
-            <StatList
-              title="Ahorro"
-              items={statItems}
-              tabs={STAT_TABS}
-              defaultTab="inyeccion"
-              onTabChange={setStatTab}
+      <CardWithContent
+        title={socioV2PanelKpis.periodLabel}
+        headerActions={<StatusBadge status="current">En Curso</StatusBadge>}
+        className="h-full lg:order-1"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <KpiPrimaryCompact
+              icon={WalletIcon}
+              label={socioV2PanelKpis.ahorro.label}
+              value={socioV2PanelKpis.ahorro.value}
+              sparklineData={socioV2AhorroSparkline}
+            />
+            <KpiPrimaryCompact
+              icon={ZapIcon}
+              label={socioV2PanelKpis.energiaGen.label}
+              value={socioV2PanelKpis.energiaGen.value}
+              unit={socioV2PanelKpis.energiaGen.unit}
+              sparklineData={socioV2EnergiaSparkline}
             />
           </div>
-        </Card>
-      </div>
+
+          <StatList
+            title="Ahorro"
+            items={statItems}
+            tabs={STAT_TABS}
+            defaultTab="inyeccion"
+            onTabChange={setStatTab}
+            className="border-t border-border pt-3"
+          />
+        </div>
+      </CardWithContent>
     </div>
   )
 }
