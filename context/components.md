@@ -2885,7 +2885,7 @@ export function ParkEnergyBarChart({ data, chartConfig }: ParkEnergyBarChartProp
 
 **Archivo:** `/components/charts/MonetaryBarChart.tsx`
 **Estado:** ✅ Aprobado
-**Usado en:** GDCV Socio — "Mi Ahorro Generado" / "Mi Energía Generada" (V1 y V2)
+**Usado en:** GDCV Socio — "Mi Ahorro Generado" / "Mi Energía Generada"
 
 ### Cuándo usar
 Bar chart **apilado** de ahorro por período: autoconsumo virtual (base) + energía inyectada (tope).
