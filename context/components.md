@@ -3718,15 +3718,15 @@ export function SectionHeader({
 - Usar **fuera de `Card`** cuando el bloque siguiente son KPIs libres (`KpiPrimaryCompact`) + card de desglose.
 
 ```tsx
-// GDCV Socio V2 — /components/gdcv/SocioEnergyViewV2.tsx
+// GDCV Socio — /components/gdcv/SocioEnergyView.tsx
 <SectionHeader
   size="md"
   title={socioV2PanelKpis.periodLabel}
-  action={<SocioV2EnCursoBadge />}
+  action={<StatusBadge status="current">En Curso</StatusBadge>}
 />
 <div className="grid grid-cols-2 gap-4">
-  <KpiPrimaryCompact ... />
-  <KpiPrimaryCompact ... />
+  <FeatureItem icon={WalletIcon} label="Ahorro" value="$74.400" />
+  <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" />
 </div>
 ```
 
