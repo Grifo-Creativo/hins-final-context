@@ -97,6 +97,39 @@ export const socioAhorroKpi = {
   delta: "+12% vs mes anterior",
 } as const
 
+// ─── Mi Ahorro en Energía (kWh variant) ────────────────────────────────────
+// Derived from SOCIO_AHORRO_MONTHLY using rate: $74.400 ÷ 830.17 kWh = $89.60/kWh
+// Maintains same 68/32 autoconsumo/inyectada split as monetary data
+
+export type SocioAhorroEnergiaRow = { label: string; autoconsumo: number; inyectada: number }
+
+const SOCIO_AHORRO_ENERGIA_MONTHLY: SocioAhorroEnergiaRow[] = [
+  { label: "Nov 25", autoconsumo: 627, inyectada: 295 },
+  { label: "Dic 25", autoconsumo: 547, inyectada: 259 },
+  { label: "Ene 26", autoconsumo: 458, inyectada: 216 },
+  { label: "Feb 26", autoconsumo: 389, inyectada: 183 },
+  { label: "Mar 26", autoconsumo: 358, inyectada: 169 },
+  { label: "Abr 26", autoconsumo: 564, inyectada: 266 },
+]
+
+const SOCIO_AHORRO_ENERGIA_WEEKLY: readonly SocioAhorroEnergiaRow[] = [
+  { label: "1–7 Abr", autoconsumo: 83, inyectada: 39 },
+  { label: "8–14 Abr", autoconsumo: 92, inyectada: 44 },
+  { label: "15–21 Abr", autoconsumo: 81, inyectada: 38 },
+  { label: "22–30 Abr", autoconsumo: 87, inyectada: 41 },
+]
+
+export function getSocioAhorroEnergiaSeries(range: ChartRangeChip): SocioAhorroEnergiaRow[] {
+  return sliceChartRangeSeries(range, SOCIO_AHORRO_ENERGIA_MONTHLY, SOCIO_AHORRO_ENERGIA_WEEKLY)
+}
+
+/** KPI for energy perspective (abril) — "830 kWh" */
+export const socioAhorroEnergiaKpi = {
+  value: "830",
+  unit: "kWh",
+  delta: "Total en Abril",
+} as const
+
 // ─── Mi Energía Generada (KPI) ──────────────────────────────────────────────
 
 export const socioEnergiaGenerada = {
@@ -127,6 +160,18 @@ export const socioStatListEnergia: StatListItem[] = [
     icon: WalletIcon,
     name: "Total kWh en Abril",
     value: "207.5 kWh",
+    subtitle: "De mi 15% del parque",
+  },
+]
+
+/** StatList items for energy-based ahorro breakdown (V2 variant) */
+export const socioStatListAhorroEnergia: StatListItem[] = [
+  { icon: ZapIcon, name: "Autoconsumo virtual", value: "564 kWh" },
+  { icon: ZapIcon, name: "Energía Inyectada", value: "266 kWh" },
+  {
+    icon: WalletIcon,
+    name: "Total kWh en Abril",
+    value: "830 kWh",
     subtitle: "De mi 15% del parque",
   },
 ]
