@@ -21,14 +21,15 @@
 10. [KpiPrimaryCompact](#kpiprimarycompact)
 11. [KpiSecondary](#kpisecondary)
 12. [SoftBadge](#softbadge)
-13. [CardWithContent](#cardwithcontent)
-14. [Table](#table)
-15. [GenerationSparkline](#generationsparkline)
-16. [ParkEnergyBarChart](#parkenergybarchar)
-17. [MonetaryBarChart](#monetarybarchar)
-18. [DailyGenerationChart](#dailygenerationchart)
-19. [DailyGenerationChartBlock](#dailygenerationchartblock)
-20. [HinsTooltip](#hinstooltip)
+13. [StatusBadge](#statusbadge)
+14. [CardWithContent](#cardwithcontent)
+15. [Table](#table)
+16. [GenerationSparkline](#generationsparkline)
+17. [ParkEnergyBarChart](#parkenergybarchar)
+18. [MonetaryBarChart](#monetarybarchar)
+19. [DailyGenerationChart](#dailygenerationchart)
+20. [DailyGenerationChartBlock](#dailygenerationchartblock)
+21. [HinsTooltip](#hinstooltip)
 
 ---
 
@@ -1442,10 +1443,91 @@ export function SoftBadge({ children, icon: Icon, className }: SoftBadgeProps) {
 - Background siempre `bg-background-subtle`. No usar otros colores en estado Primary.
 - Ícono opcional — no forzarlo si el contenido es claro sin él.
 - No implementar closable ni avatar.
-- Para estados semánticos usar Badge nativo de shadcn/ui sin modificar.
+- Para estados semánticos usar **`StatusBadge`** (ver sección siguiente), no Badge nativo inline.
 - `w-fit` es parte del spec base — el componente nunca se estira al ancho del contenedor,
   independientemente de si el padre es `flex-col`, `grid` u otro layout. No agregar
   `self-start` ni `w-fit` en los consumidores: ya está garantizado por el componente.
+
+---
+
+## StatusBadge
+
+**Archivo:** `/components/ui/status-badge.tsx`  
+**Estado:** ✅ Aprobado
+
+Badge semántico para estados de entidad (live, vigente, activo). Distinto de `SoftBadge` (período/delta neutro) y de `Badge` shadcn base (sin semántica de dominio).
+
+### Cuándo usar
+- Estado de un período, contrato o proceso que está **activo/vigente** → `status="active"` ("En Curso")
+- Cualquier estado que requiera color semántico (success, warning, error) — agregar variante a `variantStyles`
+
+### Cuándo NO usar
+- Comparativos de período o deltas → `SoftBadge`
+- Categorías estáticas sin semántica → `Badge` shadcn nativo
+- Acciones → `Button`
+
+### Variantes disponibles
+
+| `status` | Color | Texto típico |
+|---|---|---|
+| `active` | Verde (`green-100 / green-700`) | "En Curso" |
+
+### Spec
+
+| Propiedad | Valor |
+|---|---|
+| Base | `Badge` shadcn primitivo |
+| `active` background | `bg-green-100` |
+| `active` text | `text-green-700` |
+| Border | `border-transparent` |
+| Hover | `hover:bg-green-100` (sin cambio) |
+
+```tsx
+// /components/ui/status-badge.tsx
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+
+const variantStyles = {
+  active: "border-transparent bg-green-100 text-green-700 hover:bg-green-100",
+} as const
+
+interface StatusBadgeProps {
+  status: keyof typeof variantStyles
+  children: React.ReactNode
+  className?: string
+}
+
+export function StatusBadge({ status, children, className }: StatusBadgeProps) {
+  return (
+    <Badge className={cn(variantStyles[status], className)}>
+      {children}
+    </Badge>
+  )
+}
+```
+
+### Uso
+
+```tsx
+// Estado activo
+<StatusBadge status="active">En Curso</StatusBadge>
+
+// En slot action de SectionHeader
+<SectionHeader
+  title="Abril 2026"
+  action={<StatusBadge status="active">En Curso</StatusBadge>}
+/>
+```
+
+### Dónde se usa
+- `components/gdcv/CompensacionesTable.tsx` — columna Estado
+- `components/mantenimiento/MantenimientoHistorialTable.tsx` — estado de período
+- `components/gdcv/SocioEnergyView.tsx` — header del panel derecho (slot action de SectionHeader)
+
+### Notas para el agente
+- Extender con nuevas variantes agregando entradas a `variantStyles`. No usar clases inline en consumidores.
+- El texto ("En Curso", etc.) siempre va como `children` — el componente no hardcodea strings.
+- Reemplaza el patrón anterior: `<Badge className="bg-green-100 text-green-700 border-transparent ...">`.
 
 ---
 

@@ -22,7 +22,7 @@ import {
   TableIcon,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -159,9 +159,7 @@ const columns: ColumnDef<CompensacionRow>[] = [
     cell: ({ row }) => {
       const estado = row.getValue("estado") as CompensacionRow["estado"]
       return estado === "En Curso" ? (
-        <Badge className="bg-green-100 text-green-700 border-transparent hover:bg-green-100">
-          En Curso
-        </Badge>
+        <StatusBadge status="active">En Curso</StatusBadge>
       ) : (
         <span className="text-sm text-muted-foreground">Aplicado</span>
       )

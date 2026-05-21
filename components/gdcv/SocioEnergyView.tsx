@@ -11,7 +11,7 @@ import {
   SOCIO_V2_UNIT_TABS,
   type SocioV2Unit,
 } from "@/components/gdcv/socio-v2-constants"
-import { SocioV2EnCursoBadge } from "@/components/gdcv/socio-v2-en-curso-badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
@@ -144,7 +144,7 @@ export function SocioEnergyView() {
         <SectionHeader
           size="md"
           title={socioV2PanelKpis.periodLabel}
-          action={<SocioV2EnCursoBadge />}
+          action={<StatusBadge status="active">En Curso</StatusBadge>}
         />
 
         <div className="grid grid-cols-2 gap-4">

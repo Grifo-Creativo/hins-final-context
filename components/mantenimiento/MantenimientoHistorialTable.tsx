@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 
 import { MantenimientoDetailSheet } from "@/components/mantenimiento/MantenimientoDetailSheet"
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -95,9 +95,7 @@ const columns: ColumnDef<MantenimientoHistorialRow>[] = [
           {row.original.periodo}
         </span>
         {row.original.enCurso ? (
-          <Badge className="border-transparent bg-green-100 text-green-700 hover:bg-green-100">
-            En Curso
-          </Badge>
+          <StatusBadge status="active">En Curso</StatusBadge>
         ) : null}
       </div>
     ),
