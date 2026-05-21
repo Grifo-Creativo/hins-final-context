@@ -5,16 +5,16 @@ import { useMemo, useState } from "react"
 
 import { MonetaryBarChart } from "@/components/charts/MonetaryBarChart"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
+import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
 import { FeatureItem } from "@/components/ui/feature-item"
-import { SoftBadge } from "@/components/ui/soft-badge"
 import { StatList } from "@/components/ui/stat-list"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   getSocioAhorroSeries,
   getSocioAhorroEnergiaSeries,
   getSocioAhorroChartSubtitle,
-  socioAhorroEnergiaKpi,
   socioStatListInyeccion,
   socioStatListAhorroEnergia,
 } from "@/data/gdcv-socio-mock"
@@ -38,8 +38,8 @@ const MAIN_TABS = [
 ]
 
 const STAT_TABS = [
-  { value: "dinero", label: "En Dinero" },
-  { value: "energia", label: "En Energía" },
+  { value: "dinero", label: "Dinero" },
+  { value: "energia", label: "Energía" },
 ]
 
 export function SocioEnergyViewV2() {
@@ -128,30 +128,31 @@ export function SocioEnergyViewV2() {
         </div>
       </CardWithContent>
 
-      {/* RIGHT CARD: KPIs (side-by-side) + Stats breakdown */}
-      <CardWithContent title="Abril 2026" noPadding className="h-full">
+      {/* RIGHT CARD: header manual con badge inline + KPIs full width + Stats */}
+      <Card className="bg-white shadow-xs ring-0 rounded-xl overflow-hidden h-full">
         <div className="flex flex-col gap-4 p-4">
-          {/* Badge "En Curso" */}
-          <SoftBadge>En Curso</SoftBadge>
+          {/* Header: título + badge "En Curso" en la misma línea */}
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold leading-snug text-foreground">Abril 2026</h3>
+            <Badge className="bg-green-100 text-green-700 border-transparent hover:bg-green-100">
+              En Curso
+            </Badge>
+          </div>
 
-          {/* KPI Grid: 2 items centered, side-by-side (Ahorro + Energía) */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="flex justify-center">
-              <FeatureItem
-                icon={DollarSignIcon}
-                label="Ahorro"
-                value="$74.400"
-                orientation="vertical"
-              />
-            </div>
-            <div className="flex justify-center">
-              <FeatureItem
-                icon={ZapIcon}
-                label="Energía Gen"
-                value="830 kWh"
-                orientation="vertical"
-              />
-            </div>
+          {/* KPI Grid: 2 items a todo el ancho, side-by-side */}
+          <div className="grid grid-cols-2 gap-3">
+            <FeatureItem
+              icon={DollarSignIcon}
+              label="Ahorro"
+              value="$74.400"
+              orientation="vertical"
+            />
+            <FeatureItem
+              icon={ZapIcon}
+              label="Energía Gen"
+              value="830 kWh"
+              orientation="vertical"
+            />
           </div>
 
           {/* Desglose / Stats breakdown */}
@@ -163,7 +164,7 @@ export function SocioEnergyViewV2() {
             onTabChange={(v) => setMainTab(v as "dinero" | "energia")}
           />
         </div>
-      </CardWithContent>
+      </Card>
     </div>
   )
 }
