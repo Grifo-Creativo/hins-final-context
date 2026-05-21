@@ -141,7 +141,7 @@ export function SocioEnergyView() {
       <CardWithContent
         title={socioV2PanelKpis.periodLabel}
         headerActions={<StatusBadge status="current">En Curso</StatusBadge>}
-        className="h-full lg:order-1"
+        className="h-full lg:order-1 shadow-none"
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
@@ -166,7 +166,6 @@ export function SocioEnergyView() {
             tabs={STAT_TABS}
             defaultTab="inyeccion"
             onTabChange={setStatTab}
-            className="border-t border-border pt-3"
           />
         </div>
       </CardWithContent>
