@@ -39,9 +39,6 @@ export function KpiPrimaryCompact({
         "h-full overflow-hidden rounded-xl bg-white py-0 ring-0",
         className
       )}
-      style={{
-        boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.08), inset 0 -35px 25px -20px rgba(0, 0, 0, 0.08)'
-      }}
     >
       <div className="flex h-full flex-col gap-3 p-4">
         <div className="flex min-w-0 items-start gap-3">
