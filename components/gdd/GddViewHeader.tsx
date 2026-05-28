@@ -8,15 +8,10 @@ import { GddNotificationsPanel } from "@/components/gdd/GddNotificationsPanel"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ModelBadge } from "@/components/ui/model-badge"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { SheetOpsNotificationsHeader } from "@/components/ui/sheet-ops"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { sheetContentClassName } from "@/lib/sheet-layout"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import { BellIcon, DownloadIcon, SearchIcon } from "lucide-react"
 
@@ -65,14 +60,12 @@ export function GddViewHeader() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
+              className={sheetContentClassName("notifications")}
             >
-              <SheetHeader className="border-b border-border p-4 text-left">
-                <SheetTitle>Notificaciones del parque</SheetTitle>
-                <SheetDescription>
-                  Avisos y comunicaciones para {parkName}. Solo lectura.
-                </SheetDescription>
-              </SheetHeader>
+              <SheetOpsNotificationsHeader
+                title="Notificaciones del parque"
+                description={`Avisos y comunicaciones para ${parkName}. Solo lectura.`}
+              />
               <GddNotificationsPanel />
             </SheetContent>
           </Sheet>

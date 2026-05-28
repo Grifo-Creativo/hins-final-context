@@ -13,13 +13,7 @@ import { CardWithContent } from "@/components/ui/card-with-content"
 import { SOCIO_PARQUE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { FeatureItem } from "@/components/ui/feature-item"
 import { IconBadge } from "@/components/ui/icon-badge"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { SheetContentDetail } from "@/components/ui/sheet-ops"
 import { SoftBadge } from "@/components/ui/soft-badge"
 import { gdcvEnergyBarChartConfig, generationSparklineConfig } from "@/data/chart-config"
 import {
@@ -40,7 +34,6 @@ import type { ChartRangeChip } from "@/types/chart-range"
 import {
   CircleDollarSignIcon,
   CalendarIcon,
-  XIcon,
   ZapIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -227,34 +220,13 @@ export function SocioPerformanceView() {
         </div>
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
-          side="right"
-          showCloseButton={false}
-          className="flex h-full max-h-dvh w-full max-w-sm flex-col gap-0 overflow-hidden p-0"
-        >
-          <div className="flex min-h-0 flex-1 flex-col">
-            <SheetHeader className="shrink-0 space-y-0 p-6 text-left">
-              <div className="flex flex-row items-start justify-between gap-4">
-                <SheetTitle className="pr-2 text-2xl font-semibold leading-tight text-foreground">
-                  Participación por Socio
-                </SheetTitle>
-                <SheetClose asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="size-8 shrink-0 shadow-xs"
-                    aria-label="Cerrar"
-                  >
-                    <XIcon className="size-4" aria-hidden />
-                  </Button>
-                </SheetClose>
-              </div>
-            </SheetHeader>
-
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <div className="flex flex-col gap-6 p-6 pt-0">
+      <SheetContentDetail
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        title="Participación por Socio"
+        scrollVariant="flush"
+      >
+        <div className="flex flex-col gap-6 p-6 pt-0">
                 <ParticipacionDonutChart cellKeyPrefix="sheet" />
 
                 <div className="flex flex-col">
@@ -289,22 +261,8 @@ export function SocioPerformanceView() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            <div className="shrink-0 border-t border-border bg-popover p-6">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setSheetOpen(false)}
-              >
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+      </SheetContentDetail>
     </>
   )
 }

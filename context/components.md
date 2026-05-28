@@ -26,6 +26,15 @@
 13c. [ParkDetailsCard](#parkdetailscard)
 13d. [ChartRangeOptions](#chartrangeoptions)
 13e. [FormatCurrency](#formatcurrency)
+13e2. [FormatEnergy — unidades energéticas](#formatenergy--unidades-energéticas)
+13e3. [Shell — Sidebar (desktop)](#shell--sidebar-desktop)
+13j. [GddRoiRecuperoTable](#gddroirecuperotable)
+13k. [Sheet — drill-down y anchos](#sheet--drill-down-y-anchos)
+13l. [SheetOps — composición drill-down](#sheetops--composición-drill-down)
+13f. [KpiWithAsset](#kpiwithasset)
+13g. [KpiProgressBar](#kpiprogressbar)
+13h. [KpiPaybackTimeline](#kpipaybacktimeline)
+13i. [KpiWithTimeline](#kpiwithtimeline)
 14. [SoftBadge](#softbadge)
 15. [StatusBadge](#statusbadge)
 16. [ModelBadge](#modelbadge)
@@ -118,6 +127,7 @@ Combina el `Heading` atom (H3) con un slot flexible para **acciones** (tabs, bad
 | Prop | Tipo | Required | Default | Descripción |
 |---|---|---|---|---|
 | `title` | `string` | ✅ | — | Texto del heading |
+| `level` | `"h2"` \| `"h3"` | ❌ | `"h3"` | `h2` = sección de vista (ROI socio, `text-lg`); `h3` = card/bloque |
 | `action` | `React.ReactNode` | ❌ | — | Slot libre: TabsForBlocks, Badges, Buttons, etc. |
 | `size` | `"md"` \| `"sm"` | ❌ | `"md"` | **size="sm" deprecated** — usar `<Heading>` directo |
 | `className` | `string` | ❌ | — | Clases Tailwind adicionales |
@@ -554,6 +564,10 @@ No crear variantes alternativas bajo ninguna circunstancia.
 | Variant `text` (default) | Labels de texto | chips de rango, navegación |
 | Variant `icon` | Solo ícono + `ariaLabel` | toggle $ / ⚡ en chart GDCV Socio |
 | Variant `icon-label` | Ícono + label | reservado — uso explícito en flow |
+| `labelMobile` | Label corto `< sm` | ej. `ROI` en header; desktop sigue con `label` completo |
+| `width="fit"` | Ancho al contenido | DOLAR \| ARS en header ROI — no expandir en mobile |
+| `width="fill"` | Flex en contenedor | Nav Performance \| ROI — `flex-1` en mobile |
+| `readOnly` | Sin `onValueChange` | Reservado — moneda en sheet ROI ahora usa `TabsForBlocks` clickeable (`GddRoiRecuperoTable` `onCurrencyChange`), no un indicador solo-lectura |
 | Size | lg | `text-sm` |
 
 ```tsx
@@ -690,13 +704,14 @@ import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 
 ### Cuándo usar
 - Cualquier monto en UI: KPI, tooltip, tabla, label de barra, eje Y monetario.
-- ROI GDD con toggle de moneda (`formatRoiFromUsd` + `TIPO_CAMBIO_ARS`).
+- ROI GDD/GDCV con toggle de moneda (`formatRoiFromUsd` + `TIPO_CAMBIO_ARS`).
 - `MonetaryBarChart` / `SocioV2BarChart` en modo dinero.
+- `ROIProjectionChart` — tooltip `full`, eje Y `axis`, label inversión `compact` (USD).
+- Mocks en `data/*` que exportan strings de display → `formatCurrency(…)` al definir el mock (no strings manuales).
 
 ### Cuándo NO usar
 - Copy de tabs o botones de moneda → `currencyTabLabel` (literal **DOLAR** / **ARS**, sin prefijo numérico).
-- Strings mock estáticos en `data/*` (pueden coexistir hasta migración; **nuevos** montos dinámicos → helper).
-- `ROIProjectionChart` — aún usa formateo propio `k`/`m` US-style (excepción documentada; migrar en fase ROI charts).
+- **Labels de KPI, headers de tabla, tooltips** → nunca incluir moneda; ver [Currency Context Rules](#currency-context-rules).
 
 ### Prefijos y locale (Argentina)
 
@@ -718,7 +733,7 @@ import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 | Modo | Uso | ARS ejemplo | USD ejemplo |
 |---|---|---|---|
 | `full` | KPI, tooltip, tablas, montos completos | `$ 82.600` | `u$s 3.779` |
-| `compact` | **Solo** label sobre barra (chart) | `$ 82,6k` | `u$s 3,8k` |
+| `compact` | Label sobre barra (chart); KPI ROI mobile ≥1M; montos compactos Socio ROI | `$ 82,6k` | `u$s 3,8k` |
 | `axis` | Eje Y chart monetario | `$ 83k` | `u$s 4k` |
 
 > **Lectura compacta:** `$ 82,6k` = mismo valor que `$ 82.600` en `full`. El sufijo `k`/`M` evita ambigüedad con la coma decimal.
@@ -730,7 +745,6 @@ import {
   formatCurrency,
   formatRoiFromUsd,
   currencyTabLabel,
-  currencyColumnLabel,
   type CurrencyCode,
   type CurrencyFormatMode,
 } from "@/lib/format-currency"
@@ -743,12 +757,82 @@ formatCurrency(74400, "ars", "axis")        // "$ 74k"
 // ROI: valor canónico en USD × tipo de cambio si ARS
 formatRoiFromUsd(100, "ars", TIPO_CAMBIO_ARS, "full")
 
-// Tabs header ROI (GddPageHeading)
+// ROI mobile (≥ 1M): `full` → `compact` automático — ej. `u$s 23,8M`
+formatRoiFromUsdResponsive(23_800_000, "usd", TIPO_CAMBIO_ARS, true)
+
+// Tabs header ROI (GddPageHeading) — único lugar de moneda en labels de UI
 currencyTabLabel("usd")   // "DOLAR"
 currencyTabLabel("ars")   // "ARS"
+```
 
-// Headers tabla: "Ahorro Estimado (DOLAR)"
-currencyColumnLabel(currency)
+### Currency Context Rules
+
+**Principios:** `context/design-system.md` → Currency Context Rules.
+
+#### Contexto global de moneda
+
+El toggle **DOLAR | ARS** en `GddPageHeading` (vista ROI GDD) es el **único** control de moneda de la vista. Todos los KPIs, celdas de tabla, tooltips y ejes heredan el `CurrencyCode` activo (`?currency=ars` en URL o default `usd`).
+
+#### Reglas de labels (UI in-app)
+
+| Regla | Detalle |
+|---|---|
+| Labels = concepto | "Inversión Recuperada", "Ahorro Estimado", "Cap. Recuperado" |
+| Sin moneda en label | ❌ `(DOLAR)`, `(ARS)`, `(USD)`, "USD", "pesos" |
+| Moneda en valor | ✅ prefijo vía `formatCurrency` / `formatRoiFromUsd` |
+| Sin duplicación | ❌ tab + label + valor con moneda a la vez |
+
+#### Headers de tabla
+
+Usar labels semánticos **sin** sufijo de moneda:
+
+```tsx
+// ✅ Correcto
+header: "Ahorro Estimado"
+
+// ❌ Incorrecto — redundante con tab global
+header: `Ahorro Estimado (${currencyTabLabel(currency)})`
+```
+
+#### Excepciones permitidas
+
+| Caso | Helper / patrón |
+|---|---|
+| Tabs globales | `currencyTabLabel` |
+| Exports CSV/PDF | `currencyExportColumnLabel` (legacy: `currencyColumnLabel`) |
+| Multi-currency en misma vista | Label explícito documentado en flow |
+| Tooltips avanzados multi-moneda | Copy documentado en flow |
+
+#### Implementaciones actuales (post-cleanup)
+
+| Consumidor | Patrón |
+|---|---|
+| `GddPageHeading` / `GdcvPageHeading` | Tabs `DOLAR` / `ARS` — contexto global |
+| `GddRoiView` / `GdcvRoiView` | Labels sin moneda; valores `formatRoiFromUsdResponsive` |
+| `GddRoiRecuperoTable` | Ver [GddRoiRecuperoTable](#gddroirecuperotable) |
+| `SocioRoiView` | Paridad GDD ROI: mismos labels (`Recupero Estimado`, badge `Payback`, card TIR/Plazo/Invertido); `SectionHeader` `level="h2"` + `TabsForBlocks` DOLAR\|ARS (`?currency=`); `formatRoiFromUsdResponsive` + `TIPO_CAMBIO_ARS`; sin curva en vista |
+| `MonetaryBarChart` | `currency` prop; labels/ejes vía `formatCurrency` |
+| `SocioV2BarChart` | ARS fijo; `formatCurrency(…, "ars", "compact")` |
+| `ROIProjectionChart` | USD fijo; tooltip `full`, eje `axis`, meta `compact` |
+
+#### Mocks (`data/*`) — strings de display
+
+Montos en mocks que se muestran en UI deben generarse con `formatCurrency` / `formatRoiFromUsd*` al exportar el string, **no** literales `"$74.400"` ni formato US (`$2.13 M`).
+
+| Archivo | Moneda | Patrón |
+|---|---|---|
+| `data/gdd-performance-mock.ts` | `ars` | `formatCurrency(n, "ars", "full")` en `savingsCardMock`, `tariffCardMock`, `consumptionHistoryMock.coverageMoney` |
+| `data/gdcv-mock.ts` | `ars` | Socios `ahorroGenerado`, KPIs parque, `gdcvRoiMetrics`, `socioDetalleMock` |
+| `data/gdcv-socio-mock.ts` | `ars` / `usd` | Helpers locales `fmtArs` / `fmtArsCompact`; inversión socio `formatCurrency(…, "usd", "compact")` |
+| `data/mantenimiento-mock.ts` | `ars` | `fmtArs(n)` → `costoAsociado` en historial GDD/GDCV/GDC |
+| `data/gdd-roi-mock.ts` | — | Valores **numéricos USD**; formateo en vista con `formatRoiFromUsd*` |
+| `data/gdcv-agc-mock.ts` | — | `gdcvRoiKpis` numéricos USD; sin `roiKpis` legacy pre-formateado |
+
+```ts
+// Patrón recomendado en mocks ARS
+import { formatCurrency } from "@/lib/format-currency"
+const fmtArs = (n: number) => formatCurrency(n, "ars", "full")
+export const socioAhorroKpi = { value: fmtArs(74_400), /* … */ }
 ```
 
 ### Moneda por pantalla (negocio)
@@ -756,24 +840,72 @@ currencyColumnLabel(currency)
 | Vista | `CurrencyCode` | Notas |
 |---|---|---|
 | GDCV Socio — Mi Ahorro | `ars` | Ahorro en factura; default en `MonetaryBarChart` |
-| GDD ROI | `usd` / `ars` | Base USD en mock; `?currency=ars` en URL |
-| KPIs estáticos mock | — | Strings tipo `$74.400` sin espacio legado; preferir helper en código nuevo |
-
-### Implementaciones actuales
-
-| Consumidor | Función / prop |
-|---|---|
-| `MonetaryBarChart` | `currency` prop (default `"ars"`) |
-| `GddRoiView`, `GddRoiRecuperoTable` | `formatRoiFromUsd` |
-| `GddPageHeading` | tabs `DOLAR` / `ARS` |
-| `SocioV2BarChart` | `formatCurrency(…, "ars", "compact")` en labels |
+| GDCV Socio — ROI | `usd` + `ars` | Inversión/recupero USD; ahorrado en facturas ARS |
+| GDD ROI / GDCV ROI | `usd` / `ars` | Base USD en mock; `?currency=ars` en URL |
 
 ### Notas para el agente
 - No usar `$` genérico para USD — usar `u$s ` en montos.
+- **ARS y USD llevan espacio tras el prefijo:** `$ 74.400` · `u$s 5,7M` — nunca `$ 74.400` ni `$2.13 M` (formato US).
 - No poner `u$s` ni `$` en labels de tabs — solo **DOLAR** / **ARS**.
+- **No repetir moneda en labels** de KPI, tabla, chart o tooltip — tab global + prefijo del valor.
 - No duplicar `toLocaleString("es-AR")` + prefijo manual en componentes; importar el helper.
-- `compact` solo en labels de barras; tooltip de la misma barra siempre `full`.
+- `compact`: labels de barras; tooltip de la misma barra siempre `full`; excepción ROI mobile ≥1M (`formatRoiFromUsdResponsive`).
 - TIR, plazo, % y fechas no pasan por este helper.
+- `currencyColumnLabel` / `currencyExportColumnLabel` → **solo exports**, no UI in-app.
+
+---
+
+## FormatEnergy — unidades energéticas
+
+**Estado:** ✅ Convención aprobada (formateo inline en charts; helper central `format-energy.ts` pendiente de fase 2).
+
+### Unidades canónicas (SI)
+
+| Magnitud | Unidad | Casing | Ejemplo |
+|---|---|---|---|
+| Energía | kilovatio-hora | `kWh` | `830 kWh` |
+| Potencia instalada | kilovatio-pico | `kWp` | `980 kWp` |
+| Potencia instantánea | kilovatio | `kW` | `1,4 kW · 12 Hrs` |
+| Megavatio-hora | megavatio-hora | `MWh` | reservado si escala >999 kWh en eje |
+
+❌ **Prohibido:** `Kwh`, `KWH`, `kwh` como sufijo de unidad en UI o mocks.
+
+✅ **Correcto:** número con locale `es-AR` + espacio + unidad: `830 kWh`, `204,59 kWh`.
+
+### Formato compacto en charts (patrón actual)
+
+| Contexto | Patrón | Ejemplo |
+|---|---|---|
+| Label barra / KPI energía | `N kWh` o `N,Nk kWh` si ≥1000 | `824,5k kWh` |
+| Eje Y energía | sufijo `k` pegado, sin unidad | `824k` |
+| Tarifa compuesta | `formatCurrency(…, "ars", "full") + " /kWh"` | `$ 80 /kWh` |
+
+### Implementaciones
+
+| Archivo | Patrón |
+|---|---|
+| `MonetaryBarChart` | `formatEnergy*` locales (modo `energia`) |
+| `SocioV2BarChart` | idem modo kWh |
+| `ParkEnergyBarChart` | `toLocaleString("es-AR") + " kWh"` |
+| `gdd-performance-mock.ts` | `totalConsumption: "890 kWh"` (no `Kwh`) |
+| `chart-day-format.ts` | Pico: `formatDailyPeakInline` → `kW · Hrs` |
+
+### Notas para el agente
+- Separar valor numérico (`kwh: 830.17`) de unidad en KPIs cuando sea posible (`unit="kWh"`).
+- En tablas mock, incluir unidad en string display: `"830 kWh"` con casing exacto `kWh`.
+- Horas en vista 1D: ver `design-system.md` → Formato de horas (`12 Hrs`, no `12h`).
+
+---
+
+## Shell — Sidebar (desktop)
+
+**Implementación:** `components/ui/sidebar.tsx` · **Shells:** `components/layout/*LayoutShell.tsx`
+
+En **desktop/tablet (≥768px)** el sidebar administrativo arranca **colapsado** (rail de íconos). El usuario lo expande con `SidebarTrigger` en el header, `SidebarRail` o `Ctrl/Cmd + B`. La preferencia se guarda en cookie `sidebar_state` (solo desktop).
+
+**Mobile:** sin cambios — Sheet cerrado hasta abrir desde el trigger; no usar `defaultOpen` del provider para el drawer.
+
+**Spec completa (persistencia, tooltips, lista de shells):** `engineering/tech-stack.md` → Sidebar (desktop vs mobile). Principios visuales: `design-system.md` → §4 Anatomía del Shell.
 
 ---
 
@@ -1022,7 +1154,7 @@ export function FeatureItem({
 
 ```tsx
 // Horizontal (default) — al cierre de un desglose
-<FeatureItem label="Ahorro Generado" value="$62.000" />
+<FeatureItem label="Ahorro Generado" value="$ 62.000" />
 
 // Vertical — en grid 2 columnas (Medidor | Participación)
 <div className="grid grid-cols-2 gap-4">
@@ -1042,7 +1174,7 @@ export function FeatureItem({
 
 // Mi Espacio — panel 340px (`SocioEnergyView`): forzar columna en md+ (celdas estrechas)
 <div className="grid grid-cols-2 gap-4">
-  <FeatureItem icon={WalletIcon} label="Ahorro" value="$74.400" className="md:flex-col md:items-stretch" />
+  <FeatureItem icon={WalletIcon} label="Ahorro" value="$ 74.400" className="md:flex-col md:items-stretch" />
   <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" className="md:flex-col md:items-stretch" />
 </div>
 
@@ -1292,7 +1424,7 @@ import { WalletIcon, ZapIcon } from "lucide-react"
   <KpiPrimaryCompact
     icon={WalletIcon}
     label="Ahorro"
-    value="$74.400"
+    value="$ 74.400"
     sparklineData={[{ value: 62 }, { value: 58 }, { value: 71 }]}
   />
   <KpiPrimaryCompact
@@ -1469,7 +1601,7 @@ export function KpiSecondary({
 <KpiSecondary
   icon={DollarSignIcon}
   label="Ahorro Total Generado (Abril)"
-  value="$66.400"
+  value="$ 66.400"
   delta="+36% Mes"
 />
 ```
@@ -1479,7 +1611,7 @@ export function KpiSecondary({
 <KpiSecondary
   icon={DollarSignIcon}
   label="Valor de Tarifa Actual"
-  value="$80 / kWh"
+  value="$ 80 / kWh"
   delta="+ 1.6% Mes"
   infoTooltip={{
     content: "Ver tarifas vigentes",
@@ -1493,7 +1625,7 @@ export function KpiSecondary({
 <KpiSecondary
   icon={TrendingUpIcon}
   label="Inversión Inicial"
-  value="$38.000.000"
+  value="$ 38.000.000"
   delta=""  // delta vacío si no hay comparativo
   layout="horizontal"
 />
@@ -1543,11 +1675,13 @@ export function KpiSecondary({
 ## KpiSecondaryMetric
 
 **Archivo:** `/components/ui/kpi-secondary-metric.tsx`
-**Estado:** ✅ Aprobado · integrado en `ParkDetailsCard`
+**Estado:** ✅ Aprobado · integrado en `ParkDetailsCard`, `KpiWithAsset` y fila KPI GDD ROI
 **Propósito:** Primitiva label + value heredada de `KpiSecondary` (bloque vertical) **sin** Card, `IconBadge`, `SoftBadge`, `HinsTooltip` ni delta.
 
 ### Cuándo usar
-- Celdas de un grid 2×2 dentro de `ParkDetailsCard` (único uso producto hoy)
+- Celdas de un grid 2×2 dentro de `ParkDetailsCard`
+- KPIs dentro de `KpiWithAsset` (`size="standard"`)
+- Card 3 GDD ROI — layout custom en vista (`GddRoiView`) con `size="standard"`; **no** crear organismo
 - Cualquier bloque denso donde haga falta la misma jerarquía tipográfica sin mini-cards
 
 ### Cuándo NO usar
@@ -1559,7 +1693,7 @@ export function KpiSecondary({
 | Elemento | `KpiSecondary` | `KpiSecondaryMetric` |
 |---|---|---|
 | Label | `text-sm font-normal text-[#737373]` | **igual** |
-| Value | `text-xl font-semibold text-[#0A0A0A]` | **`text-base font-semibold tabular-nums text-[#0A0A0A] break-words`** |
+| Value | `text-xl font-semibold text-[#0A0A0A]` | **`text-base`** (`compact`, default) · **`text-xl`** (`standard`) |
 | Contenedor | dentro de `Card` + `p-4` | `flex flex-col gap-1 min-w-0` |
 
 El value en **`text-base`** (no `text-lg` ni `text-xl`) evita saturación visual en grid 2×2 y ayuda a que labels largos (ej. *Ultimo Mantenimiento*) convivan con valores técnicos en columna estrecha.
@@ -1570,6 +1704,9 @@ El value en **`text-base`** (no `text-lg` ni `text-xl`) evita saturación visual
 interface KpiSecondaryMetricProps {
   label: string
   value: string
+  size?: "compact" | "standard"  // default compact — standard = text-xl (KpiSecondary)
+  align?: "left" | "right"
+  valueClassName?: string
   className?: string
 }
 ```
@@ -1578,6 +1715,7 @@ interface KpiSecondaryMetricProps {
 
 ```tsx
 <KpiSecondaryMetric label="Cap. Instalada" value="1.250 kWp" />
+<KpiSecondaryMetric label="Inversión Recuperada" value="u$s 6.000.000" size="standard" />
 ```
 
 ### Notas para el agente
@@ -1827,14 +1965,14 @@ export function KpiSecondaryCompact({
 <KpiSecondaryCompact
   icon={TrendingUpIcon}
   label="Inversión Inicial"
-  value="$38.000.000"
+  value="$ 38.000.000"
   delta=""  // delta opcional — vacío si no hay comparativo
 />
 
 <KpiSecondaryCompact
   icon={DollarSignIcon}
   label="Ahorrado Total (en facturas)"
-  value="$8.933.000"
+  value="$ 8.933.000"
   delta="+2.3% Mes"
   infoTooltip={{
     content: "Vs mes anterior",
@@ -2875,12 +3013,12 @@ export interface ConsumptionHistoryRow {
 }
 
 export const consumptionHistoryMock: ConsumptionHistoryRow[] = [
-  { period: "Abril 2026",     energyGenerated: "830 kWh",  energyPurchased: "60 kWh",  coveragePercent: "93%",   totalConsumption: "890 Kwh", coverageMoney: "$66.400" },
-  { period: "Marzo 2026",     energyGenerated: "610 kWh",  energyPurchased: "220 kWh", coveragePercent: "73%",   totalConsumption: "830 Kwh", coverageMoney: "$48.800" },
-  { period: "Febrero 2026",   energyGenerated: "690 kWh",  energyPurchased: "189 kWh", coveragePercent: "78.5%", totalConsumption: "879 Kwh", coverageMoney: "$55.200" },
-  { period: "Enero 2026",     energyGenerated: "780 kWh",  energyPurchased: "20 kWh",  coveragePercent: "97.5%", totalConsumption: "800 Kwh", coverageMoney: "$62.400" },
-  { period: "Diciembre 2025", energyGenerated: "870 kWh",  energyPurchased: "0 kWh",   coveragePercent: "100%",  totalConsumption: "870 Kwh", coverageMoney: "$69.600" },
-  { period: "Noviembre 2025", energyGenerated: "920 kWh",  energyPurchased: "4.2 kWh", coveragePercent: "99.5%", totalConsumption: "924 Kwh", coverageMoney: "$73.600" },
+  { period: "Abril 2026",     energyGenerated: "830 kWh",  energyPurchased: "60 kWh",  coveragePercent: "93%",   totalConsumption: "890 kWh", coverageMoney: "$ 66.400" },
+  { period: "Marzo 2026",     energyGenerated: "610 kWh",  energyPurchased: "220 kWh", coveragePercent: "73%",   totalConsumption: "830 kWh", coverageMoney: "$ 48.800" },
+  { period: "Febrero 2026",   energyGenerated: "690 kWh",  energyPurchased: "189 kWh", coveragePercent: "78.5%", totalConsumption: "879 kWh", coverageMoney: "$ 55.200" },
+  { period: "Enero 2026",     energyGenerated: "780 kWh",  energyPurchased: "20 kWh",  coveragePercent: "97.5%", totalConsumption: "800 kWh", coverageMoney: "$ 62.400" },
+  { period: "Diciembre 2025", energyGenerated: "870 kWh",  energyPurchased: "0 kWh",   coveragePercent: "100%",  totalConsumption: "870 kWh", coverageMoney: "$ 69.600" },
+  { period: "Noviembre 2025", energyGenerated: "920 kWh",  energyPurchased: "4.2 kWh", coveragePercent: "99.5%", totalConsumption: "924 kWh", coverageMoney: "$ 73.600" },
 ]
 ```
 
@@ -3672,9 +3810,9 @@ export function StatList({
 ```tsx
 const ahorroItems: Record<string, StatListItem[]> = {
   inyeccion: [
-    { icon: DollarSignIcon, name: "Por autoconsumo virtual", value: "$54.200" },
-    { icon: DollarSignIcon, name: "Por Energía Inyectada",   value: "$20.200" },
-    { icon: WalletIcon,     name: "Total Ahorro en Abril",   value: "$74.400",
+    { icon: DollarSignIcon, name: "Por autoconsumo virtual", value: "$ 54.200" },
+    { icon: DollarSignIcon, name: "Por Energía Inyectada",   value: "$ 20.200" },
+    { icon: WalletIcon,     name: "Total Ahorro en Abril",   value: "$ 74.400",
       subtitle: "De mi 15% del parque" },
   ],
   energia: [
@@ -3711,70 +3849,210 @@ const [activeTab, setActiveTab] = useState("inyeccion")
 
 ---
 
-## KpiWithTimeline
+## KpiWithAsset
 
-**Archivo:** `/components/ui/kpi-with-timeline.tsx`
-**Estado:** ✅ Nuevo
-**Propósito:** KPI especializado para métricas con timeline de recuperación/proyección
+**Archivo:** `/components/ui/kpi-with-asset.tsx`
+**Estado:** ✅ Aprobado · integrado en GDD ROI (`/gdd/roi`, Col 1)
+**Hijos:** `Card`, `KpiSecondaryMetric`, slot `asset` (ej. `KpiProgressBar`)
+**Export adicional:** `KPI_WITH_ASSET_SECTION_GAP`
+
+### Propósito
+
+Organismo Card KPI + asset visual al fondo (progress bar, timeline, etc.). Tipografía vía `KpiSecondaryMetric` (`size="standard"`). Spacer flexible alinea assets entre cards hermanas en desktop.
 
 ### Cuándo usar
-- Métricas con componente temporal visual (payback, recuperación, timeline)
-- Contextos financieros que requieren mostrar progreso en el tiempo
-- Cuando un KPI tiene badge adicional (TIR, meta, etc) + timeline
+
+- KPI principal + visualización secundaria en la misma card (progreso, timeline)
+- Dos KPIs en fila superior + asset abajo (Col 1 ROI: Inversión Recuperada + Pendiente)
+- Cuando el asset es un componente intercambiable pasado por prop
 
 ### Cuándo NO usar
-- KPI simple sin timeline → KpiSecondaryCompact
-- Dato principal → KpiPrimary
-- Múltiples métricas sin timeline → múltiples KpiSecondaryCompact
+
+- Solo label + value sin asset → `KpiSecondaryMetric` o `KpiSecondaryCompact`
+- Timeline payback con badge → `KpiWithTimeline` (wrapper sobre este organismo)
+- Múltiples KPIs apilados sin asset → layout custom en vista (ver Card 3 GDD ROI)
+
+### Props
+
+| Prop | Tipo | Required | Descripción |
+|---|---|---|---|
+| `label` | `string` | ✅ | KPI principal |
+| `value` | `string` | ✅ | Valor principal (prefijo moneda vía `formatRoiFromUsd` en vista) |
+| `headerAction` | `ReactNode` | ❌ | Slot arriba a la derecha (ej. `SoftBadge`) — modo KPI simple |
+| `bottomLabel` | `string` | ❌ | Segundo KPI (izquierda en fila dual) |
+| `bottomValue` | `string` | ❌ | Valor segundo KPI — requiere `bottomLabel` |
+| `asset` | `ReactNode` | ✅ | Componente visual al fondo |
+| `className` | `string` | ❌ | Clases adicionales en `Card` |
+
+**Modos:**
+- **Simple:** `label` + `value` + `headerAction?` + `asset`
+- **Dual KPI:** si `bottomLabel` y `bottomValue` están definidos → fila con dos `KpiSecondaryMetric` (izq. / der. `align="right"`) + `asset`
 
 ### Spec
 
-**Anatomía:**
-```
-Card [p-0]
-  └── flex col, gap-4, p-6
-      ├── Header row (flex items-start justify-between)
-      │   ├── label → text-sm font-normal #737373
-      │   └── metricBadge (opcional) → text-xs font-semibold
-      │
-      ├── value → text-xl font-semibold #0A0A0A
-      │
-      └── Timeline section (flex col gap-3)
-          ├── Track + nodes (relative positioning)
-          │   ├── Track base: h-[3px] rounded-full bg-border
-          │   ├── Track filled: % ancho, backgroundColor #27500A
-          │   ├── Node Inicio: size-[10px] left-0 #27500A
-          │   ├── Node Hoy: size-3 con HinsTooltip (pct%)
-          │   └── Node Payback: size-[10px] right-0 bg-border
-          │
-          └── Labels (text-[11px])
-              ├── Inicio (left)
-              ├── Hoy · pct% (center, colored #27500A)
-              └── Payback (right)
-```
-
-| Elemento | Tailwind |
+| Elemento | Tailwind / token |
 |---|---|
-| Card wrapper | `bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full` |
-| Layout | `flex flex-col gap-4 p-6` |
-| Header | `flex items-start justify-between gap-2` |
-| Label | `text-sm font-normal text-[#737373]` |
-| Badge | `rounded-md bg-muted px-2 py-0.5 text-xs font-semibold text-foreground` |
-| Value | `text-xl font-semibold text-[#0A0A0A] tabular-nums` |
-| Timeline | `flex flex-col gap-3 mt-2` |
-| Track nodes | `relative height-24` |
-| Timeline labels | `text-[11px]` |
+| Card | `flex h-full min-h-0 flex-col bg-white p-6 shadow-xs ring-0 rounded-xl` |
+| KPIs | `KpiSecondaryMetric` `size="standard"` |
+| Spacer | `KPI_WITH_ASSET_SECTION_GAP` = `min-h-8 flex-1 pt-8 md:min-h-12 md:pt-12` |
+| Asset wrapper | `flex shrink-0 flex-col gap-2` |
+
+### Uso (GDD ROI Col 1)
 
 ```tsx
-// /components/ui/kpi-with-timeline.tsx
-import { Card } from "@/components/ui/card"
-import { HinsTooltip } from "@/components/ui/hins-tooltip"
+<KpiWithAsset
+  label="Inversión Recuperada"
+  value={formatRoiFromUsd(inversionRecuperada, currency, TIPO_CAMBIO_ARS)}
+  bottomLabel="Pendiente de recuperar"
+  bottomValue={formatRoiFromUsd(pendienteRecuperar, currency, TIPO_CAMBIO_ARS)}
+  asset={
+    <KpiProgressBar
+      percent={28.5}
+      bottomLabels={{
+        left: { value: formatCurrency(0, currency) },
+        right: { label: "Total Invertido:", value: formatRoiFromUsd(total, currency, TIPO_CAMBIO_ARS) },
+      }}
+    />
+  }
+/>
+```
 
-interface TimelineData {
+### Notas para el agente
+
+- Exportar y reutilizar `KPI_WITH_ASSET_SECTION_GAP` si otra card hermana necesita la misma alineación vertical de assets.
+- Card mantiene `h-full` para equal height en grids (`lg:grid-cols-[1fr_1fr_auto]` en ROI).
+- No mezclar `headerAction` con modo dual KPI en la misma card.
+
+---
+
+## KpiProgressBar
+
+**Archivo:** `/components/ui/kpi-progress-bar.tsx`
+**Estado:** ✅ Aprobado · integrado en GDD ROI (asset de Col 1)
+**Tipo exportado:** `KpiProgressBarFootnote`
+
+### Propósito
+
+Barra de progreso gruesa (`h-2`) con nodo interactivo (tooltip) y footnotes opcionales en dos líneas (label + value).
+
+### Cuándo usar
+
+- Progreso de recuperación de inversión u otra métrica % dentro de `KpiWithAsset`
+- Cuando se necesitan footnotes alineados con `KpiPaybackTimeline` (misma tipografía `text-[11px]`)
+
+### Cuándo NO usar
+
+- Timeline temporal Inicio → Hoy → Payback → `KpiPaybackTimeline`
+- Progress genérico fuera de contexto KPI → evaluar shadcn `Progress`
+
+### Props
+
+| Prop | Tipo | Required | Descripción |
+|---|---|---|---|
+| `percent` | `number` | ✅ | 0–100; ancho fill + posición nodo tooltip |
+| `bottomLabels` | `{ left, right: KpiProgressBarFootnote }` | ❌ | Footnotes bajo la barra |
+| `KpiProgressBarFootnote.label` | `ReactNode` | ❌ | Línea superior (ej. `"Total Invertido:"`) |
+| `KpiProgressBarFootnote.value` | `ReactNode` | ✅ | Línea inferior (valor) |
+| `KpiProgressBarFootnote.align` | `"left"` \| `"right"` | ❌ | Default `left`; usar `right` en columna derecha |
+
+### Spec
+
+| Elemento | Tailwind / token |
+|---|---|
+| Track | `relative h-2 w-full overflow-hidden rounded-full bg-border` |
+| Fill | `width: ${percent}%`, `backgroundColor: var(--chart-3)` |
+| Trigger tooltip | Área **fill** completa (`width: ${percent}%`); desktop: hover/focus shadcn `Tooltip`; mobile `<lg`: tooltip abierto por defecto |
+| Footnotes | `text-[11px]`, label `font-medium text-muted-foreground`, value `text-muted-foreground tabular-nums` |
+| Placeholder sin label | línea invisible `·` para alinear altura con footnotes de timeline |
+
+### Notas para el agente
+
+- **No** unificar track con timeline: progress bar permanece `h-2`; timeline usa track `h-[3px]` en contenedor `h-6`.
+- Tooltip vía shadcn `Tooltip` (hover/focus sobre el fill en desktop), no `HinsTooltip`. No usar nodo `size-3` separado — el trigger es la barra rellena.
+- Color fill exclusivo chart: `var(--chart-3)`.
+
+---
+
+## KpiPaybackTimeline
+
+**Archivo:** `/components/ui/kpi-payback-timeline.tsx`
+**Estado:** ✅ Aprobado · integrado vía `KpiWithTimeline` (GDD ROI Col 2)
+**Tipo exportado:** `KpiPaybackTimelineData`
+
+### Propósito
+
+Asset visual de timeline payback: track fino, nodos Inicio / Hoy / Payback, footnotes y tooltip en nodo "Hoy".
+
+### Props
+
+```tsx
+interface KpiPaybackTimelineHoy {
+  label: string
+  fecha: string
+  pct: number
+  elapsedYears: string // ej. "2.0", "2.2"
+}
+
+interface KpiPaybackTimelineData {
   inicio: { label: string; fecha: string }
-  hoy: { label: string; fecha: string; pct: number; tooltipText: string }
+  hoy: KpiPaybackTimelineHoy
   payback: { label: string; fecha: string }
 }
+
+/** Tooltip unificado: `{fecha} · {elapsedYears} Años` — sin % (visible en Card 1). */
+formatPaybackTooltipText(fecha, elapsedYears)
+```
+
+| Prop | Tipo | Required |
+|---|---|---|
+| `timelineData` | `KpiPaybackTimelineData` | ✅ |
+
+### Spec
+
+| Elemento | Tailwind / token |
+|---|---|
+| Contenedor track | `relative flex h-6 w-full items-center` |
+| Track base | `absolute inset-x-0 h-[3px] rounded-full bg-border` |
+| Track filled | `h-[3px] bg-green-600`, ancho `${pct}%` |
+| Nodo Inicio | `size-[10px] bg-green-600`, `left-0` |
+| Nodo Hoy | `size-3 bg-green-600 border-2 border-background`, tooltip shadcn |
+| Nodo Payback | `size-[10px] bg-border`, `right-0` |
+| Label central | `text-[11px] font-medium text-green-600`, posición `${pct}%` |
+| Footnotes laterales | `"Inicio:"` / `"Payback:"` + fecha en `text-[11px] text-muted-foreground` |
+
+### Notas para el agente
+
+- `timelineData.hoy.pct` controla fill, nodo Hoy y label central.
+- Color acento timeline: `green-600` (clases Tailwind), **distinto** del fill progress bar (`--chart-3`).
+- Tooltip nodo Hoy: `formatPaybackTooltipText(hoy.fecha, hoy.elapsedYears)` → ej. `"Mayo 2026 · 2.0 Años"`. Mes/año = qué es “Hoy”; tiempo = línea filled `green-600`. **No** repetir % en tooltip.
+- Usar como `asset` de `KpiWithAsset` o vía `KpiWithTimeline`.
+
+---
+
+## KpiWithTimeline
+
+**Archivo:** `/components/ui/kpi-with-timeline.tsx`
+**Estado:** ✅ Aprobado · integrado en GDD ROI (`/gdd/roi`, Col 2)
+**Composición:** `KpiWithAsset` + `SoftBadge` + `KpiPaybackTimeline`
+
+### Propósito
+
+Wrapper fino para KPI con timeline de payback/recuperación. Delega layout en `KpiWithAsset` y timeline en `KpiPaybackTimeline`.
+
+### Cuándo usar
+
+- Métricas con timeline temporal (Recupero Estimado, payback)
+- Badge contextual en header (`metricBadge`, ej. `"Payback"`)
+
+### Cuándo NO usar
+
+- Barra de progreso % → `KpiWithAsset` + `KpiProgressBar`
+- KPI simple sin timeline → `KpiSecondaryMetric` / `KpiSecondaryCompact`
+
+### Props
+
+```tsx
+type TimelineData = KpiPaybackTimelineData
 
 interface KpiWithTimelineProps {
   label: string
@@ -3782,145 +4060,317 @@ interface KpiWithTimelineProps {
   metricBadge?: string
   timelineData: TimelineData
 }
-
-const TIMELINE_GREEN = "#27500A" as const
-
-export function KpiWithTimeline({
-  label,
-  value,
-  metricBadge,
-  timelineData,
-}: KpiWithTimelineProps) {
-  const pct = timelineData.hoy.pct
-
-  return (
-    <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
-      <div className="flex flex-col gap-4 p-6">
-        {/* Header row: label + optional badge */}
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-normal text-[#737373]">{label}</p>
-          {metricBadge && (
-            <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-semibold text-foreground flex-shrink-0">
-              {metricBadge}
-            </span>
-          )}
-        </div>
-
-        {/* Value */}
-        <p className="text-xl font-semibold text-[#0A0A0A] tabular-nums">
-          {value}
-        </p>
-
-        {/* Timeline section */}
-        <div className="flex flex-col gap-3 mt-2">
-          {/* Track + nodes */}
-          <div className="relative flex items-center" style={{ height: 24 }}>
-            {/* Track base (full) */}
-            <div className="absolute inset-x-0 h-[3px] rounded-full bg-border" />
-
-            {/* Track filled (Inicio → Hoy) */}
-            <div
-              className="absolute left-0 h-[3px] rounded-full"
-              style={{ width: `${pct}%`, backgroundColor: TIMELINE_GREEN }}
-            />
-
-            {/* Node: Inicio */}
-            <div
-              className="absolute left-0 -translate-x-1/2 size-[10px] rounded-full"
-              style={{ backgroundColor: TIMELINE_GREEN }}
-            />
-
-            {/* Node: Hoy (with HinsTooltip) */}
-            <div className="absolute -translate-x-1/2" style={{ left: `${pct}%` }}>
-              <HinsTooltip
-                trigger={
-                  <div
-                    className="size-3 rounded-full cursor-pointer"
-                    style={{
-                      backgroundColor: TIMELINE_GREEN,
-                      border: "2px solid var(--background)",
-                      boxShadow: `0 0 0 2px ${TIMELINE_GREEN}`,
-                    }}
-                  />
-                }
-                content={timelineData.hoy.tooltipText}
-              />
-            </div>
-
-            {/* Node: Payback */}
-            <div className="absolute right-0 translate-x-1/2 size-[10px] rounded-full bg-border" />
-          </div>
-
-          {/* Labels */}
-          <div className="relative flex justify-between">
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[11px] font-medium text-foreground">
-                {timelineData.inicio.label}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                {timelineData.inicio.fecha}
-              </p>
-            </div>
-
-            <div
-              className="absolute flex -translate-x-1/2 flex-col items-center gap-0.5"
-              style={{ left: `${pct}%` }}
-            >
-              <p
-                className="text-[11px] font-medium"
-                style={{ color: TIMELINE_GREEN }}
-              >
-                {timelineData.hoy.label}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                {timelineData.hoy.fecha}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-end gap-0.5">
-              <p className="text-[11px] font-medium text-foreground">
-                {timelineData.payback.label}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                {timelineData.payback.fecha}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  )
-}
 ```
 
 ### Uso
+
 ```tsx
 <KpiWithTimeline
   label="Recupero Estimado"
-  value="6.8 años"
-  metricBadge="TIR 18.5"
+  value="7.0 años"
+  metricBadge="Payback"
   timelineData={{
-    inicio: { label: "Inicio", fecha: "Mar 2024" },
+    inicio: { label: "Inicio", fecha: "Mayo 2024" },
     hoy: {
-      label: "Hoy · 37%",
-      fecha: "May 2026",
-      pct: 37,
-      tooltipText: "Hoy · 2.2 años · 37% recuperado",
+      label: "Hoy",
+      fecha: "Mayo 2026",
+      pct: 28.5,
+      elapsedYears: "2.0",
     },
-    payback: { label: "Payback", fecha: "Mar 2030" },
+    payback: { label: "Payback", fecha: "Mayo 2031" },
   }}
 />
 ```
 
 ### Notas para el agente
-- `metricBadge` es opcional — si no se pasa, no se renderiza
-- `value` siempre requerido — dato principal
-- `timelineData.hoy.pct` controla la posición del nodo "Hoy" y ancho de la línea filled
-- Color #27500A (verde oscuro) es hardcodeado como `TIMELINE_GREEN` — constante interna
-- HinsTooltip en nodo "Hoy" → click/tap, NO hover
-- Timeline es visual estática — NO interactivo (excepto tooltip)
-- Card mantiene `h-full` para equal height en grids
-- Diseñado para ROI, payback, y proyecciones financieras
+
+- `metricBadge` se renderiza como `SoftBadge` en `headerAction` — no usar badge muted legacy.
+- Re-exporta `TimelineData` como alias de `KpiPaybackTimelineData`.
+- No duplicar markup de timeline en vistas; extender `KpiPaybackTimeline` si cambia el asset.
+
+---
+
+### Patrón GDD ROI — Fila superior (Bloque 1)
+
+**Vista:** `/components/gdd/GddRoiView.tsx` · **Flow:** `flows/GDD/flow.md`
+
+| Col | Implementación | Componentes |
+|---|---|---|
+| 1 | `KpiWithAsset` dual KPI + progress | `KpiProgressBar`, `KpiSecondaryMetric` |
+| 2 | `KpiWithTimeline` | `KpiWithAsset`, `KpiPaybackTimeline`, `SoftBadge` |
+| 3 | **Layout custom en vista** — sin organismo | `Card` + grid + 3× `KpiSecondaryMetric` |
+
+**Grid:** `grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_auto]`
+
+**Card 3 (TIR · Plazo · Invertido):**
+- Mobile: `grid-cols-3` — tres métricas en fila
+- Desktop (`lg`): `grid-cols-1` — apiladas verticalmente
+- TIR: `valueClassName="text-green-600"`
+- Invertido: valor compacto vía `formatRoiFromUsd(..., "axis")` (ej. `u$s 21M`)
+- **Decisión explícita:** no componentizar Card 3; patrón circunstancial aprobado
+
+**Tabla inferior:** [GddRoiRecuperoTable](#gddroirecuperotable) — misma instancia en `GdcvRoiView` con mocks `gdcvRoiProyectado` / `gdcvRoiHistorico`.
+
+---
+
+## GddRoiRecuperoTable
+
+**Archivo:** `/components/gdd/GddRoiRecuperoTable.tsx`
+**Estado:** ✅ Aprobado
+**Usado en:** `/gdd/roi` (`GddRoiView`), `/gdcv/roi` (`GdcvRoiView`)
+
+### Propósito
+
+Tabla TanStack de recupero de inversión con dos variantes (**Proyectado** / **Histórico**), paginación, menú “Ver columnas” y montos vía `formatRoiFromUsdResponsive` según toggle global DOLAR | ARS.
+
+### Props
+
+| Prop | Tipo | Default | Descripción |
+|---|---|---|---|
+| `variant` | `"proyectado"` \| `"historico"` | — | Tab activo |
+| `onVariantChange` | `(v) => void` | — | Controlado desde la vista |
+| `currency` | `GddRoiCurrency` (`usd` \| `ars`) | — | Hereda tab del `PageHeading` |
+| `proyectadoData` | `GddRoiProyectadoRow[]` | `gddRoiProyectado` | GDCV: `gdcvRoiProyectado` |
+| `historicoData` | `GddRoiHistoricoRow[]` | `gddRoiHistorico` | GDCV: `gdcvRoiHistorico` |
+| `tipoCambio` | `number` | `TIPO_CAMBIO_ARS` | Conversión USD → ARS |
+| `layout` | `"page"` \| `"embedded"` | `"page"` | `page` = bloque en vista ROI; `embedded` = Sheet Socio sin shell blanco/sombra |
+| `showColumnVisibility` | `boolean` | `true` | Menú «Ver columnas»; `false` en Sheet Socio para tabs Proyectado \| Histórico a ancho completo |
+| `onCurrencyChange` | `(c: GddRoiCurrency) => void` | — | Tabs **DOLAR \| ARS** clickeables en la toolbar (mismo contenedor que Proyectado \| Histórico). Si se omite, no se renderiza: GDD/GDCV ROI heredan la moneda del `PageHeading`. Socio lo usa para cambiar moneda dentro del Sheet (no hay heading ahí) |
+| `hideTitle` | `boolean` | `false` | @deprecated — usar `layout="embedded"` |
+
+### Tabs internos
+
+`TabsForBlocks`: **Proyectado** | **Histórico** (no confundir con Performance | ROI del page heading).
+
+### Columnas — Proyectado
+
+| Header (UI) | Campo | Formato |
+|---|---|---|
+| Período | `periodo` | texto |
+| Ahorro Estimado | `ahorroEstimado` | `formatRoiFromUsdResponsive` |
+| Pendiente de Recuperar | `pendienteRecuperar` | `formatRoiFromUsdResponsive` |
+| Avance de Recuperación | `progresoEstimado` | `N.N%` (sin moneda) |
+| Estado | `estado` | `StatusBadge` "En Curso" o texto "Estimado" |
+
+### Columnas — Histórico
+
+| Header (UI) | Campo | Formato |
+|---|---|---|
+| Período | `periodo` | texto |
+| Cap. Recuperado | `capRecuperado` | `formatRoiFromUsdResponsive` |
+| Recupero Acumulado | `capRecuperadoAcumulado` | `formatRoiFromUsdResponsive` |
+| Avance de Recuperación | `porcentajeRecuperacion` | `N%` (sin moneda) |
+
+> **Nombres canónicos:** usar **Recupero Acumulado** y **Avance de Recuperación** — no "Cap. Recuperado Acumulado" ni "Porcentaje de Recuperación (%)".
+
+### Reglas de labels
+
+- Headers = concepto de negocio **sin** sufijo `(DOLAR)` / `(ARS)`.
+- Moneda solo en celdas monetarias vía helper + tab global del heading.
+
+### Uso
+
+```tsx
+<GddRoiRecuperoTable
+  variant={tablaTab}
+  onVariantChange={setTablaTab}
+  currency={currency}
+  proyectadoData={gdcvRoiProyectado}
+  historicoData={gdcvRoiHistorico}
+  tipoCambio={TIPO_CAMBIO_ARS}
+/>
+```
+
+### Notas para el agente
+
+- Datos mock en USD numérico (`data/gdd-roi-mock.ts`, `data/gdcv-agc-mock.ts`); nunca strings `"$38.000.000"` en mocks ROI.
+- Reutilizar este componente en GDD y GDCV; no duplicar tabla.
+- Socio (`SocioRoiView`): `layout="embedded"`, `showColumnVisibility={false}`; título vía `SheetContentTable`. La moneda es un tab **clickeable** dentro de la toolbar (`onCurrencyChange={handleCurrencyChange}`), junto a Proyectado \| Histórico — convierte los valores y sincroniza `?currency=` (única fuente de verdad, igual que `/gdcv/roi`). **No** usar `CurrencyContextIndicator` solo-lectura en `headerAction` para este caso.
+- Flows: `flows/GDD/data-roi.md`, `flows/GDD/flow.md`, `flows/GDCV-agc/GDCV_flow.md`, `flows/GDCV-socio/GDCV_socio_flow.md`.
+
+---
+
+## Sheet — drill-down y anchos
+
+**Primitivo:** `/components/ui/sheet.tsx`  
+**OPS (anchos + shell):** `/lib/sheet-layout.ts`, `/components/ui/sheet-ops.tsx`  
+**Estado:** ✅ Primitivo shadcn/Radix — composición por vista  
+**UX:** `ux-guidelines.md` §3 — drill-down → **Sheet**, no Dialog
+
+### Principio
+
+El **lienzo** (ancho, altura, padding del panel) se define en cada implementación con `className` en `SheetContent`. **No** agregar props de tamaño al primitivo ni cambiar sus defaults globales por un solo caso (tabla Socio, notificaciones, etc.).
+
+### Default del primitivo (sin `className` extra)
+
+| Aspecto | Comportamiento (`side="right"` / `"left"`) |
+|---|---|
+| Ancho &lt; `sm` | `w-3/4` (~75% viewport) |
+| Ancho `sm+` | `w-3/4` con tope `sm:max-w-sm` (~384px) |
+| Altura lateral | `h-full` |
+| Superficie | `bg-popover`, `shadow-lg` (`design-system.md`) |
+| Espaciado interno | `gap-4` en `SheetContent` |
+
+En producto casi siempre se sobrescribe con las clases canónicas de abajo.
+
+### Shell OPS recomendado (contenido estructurado)
+
+Patrón usado en sheets de detalle y tabla (Socio):
+
+| Pieza | Rol |
+|---|---|
+| `SheetContent` | `p-0 gap-0 overflow-hidden` + ancho canónico |
+| `SheetHeader` | `shrink-0`, título (`SheetTitle`), cerrar (`SheetClose` + botón outline icon) |
+| Área scroll | `min-h-0 flex-1 overflow-y-auto` + `px-6` (padding del contenido) |
+| `SheetFooter` | `shrink-0 border-t`, botón «Cerrar» `outline` `w-full` (opcional en tablas densas) |
+
+`showCloseButton={false}` en `SheetContent` — el cierre va en header (y footer si aplica), no el ghost del primitivo.
+
+### Anchos canónicos (`className` en `SheetContent`)
+
+Usar `sheetContentClassName(profile)` de `/lib/sheet-layout.ts` — no repetir strings sueltos.
+
+| Perfil | API | Uso en producto |
+|---|---|---|
+| **Detalle** | `sheetContentClassName("detail")` | `SocioDetailSheet`, `SocioPerformanceView`, `MantenimientoDetailSheet` |
+| **Notificaciones** | `sheetContentClassName("notifications")` | `GddHeader`, `MainHeader`, `GddViewHeader` |
+| **Tabla** | `sheetContentClassName("table")` o `SheetContentTable` | `SocioRoiView` — tabla recupero ROI |
+
+Constantes: `SHEET_CONTENT_BASE`, `SHEET_CONTENT_PROFILE`. Solo estos tres perfiles; otro ancho → acordar en DS antes de implementar.
+
+**Ancho en ≥640px (`sm+`):** los perfiles usan `data-[side=left|right]:sm:max-w-*` para sobrescribir el default del primitivo (`data-[side=right]:sm:max-w-sm`). Sin eso, el tope del perfil `table` **no se aplica** y el sheet queda ~384px.
+
+**Ancho custom por vista** (un solo sheet, sin cambiar el perfil global):
+
+```tsx
+<SheetContentTable
+  contentClassName="data-[side=right]:sm:max-w-3xl data-[side=left]:sm:max-w-3xl"
+  ...
+/>
+```
+
+O editar `SHEET_CONTENT_PROFILE.table` en `/lib/sheet-layout.ts` si el nuevo ancho es estándar de producto.
+
+### Mobile vs `sm+`
+
+| Viewport | Qué aplica |
+|---|---|
+| **&lt; 640px (`sm`)** | Clases **sin** prefijo: `w-full`, `max-w-sm` (si está sin `sm:`), etc. **No** aplica `sm:max-w-md` ni `sm:max-w-3xl` (tabla). |
+| **`sm` y más** | Entran los topes `sm:max-w-*`. |
+
+- Con `w-full` en mobile el panel suele ocupar **casi todo el ancho** (no el `w-3/4` del primitivo).
+- **Ensanchar para tablas** (`sm:max-w-3xl`, perfil `table`) es decisión **tablet/desktop**; en mobile la tabla gana espacio con **scroll horizontal** (`GddRoiRecuperoTable` `layout="embedded"`), no con un sheet más ancho que el viewport.
+
+### Tablas dentro de Sheet
+
+Reutilizar [GddRoiRecuperoTable](#gddroirecuperotable):
+
+| Prop | Valor en sheet |
+|---|---|
+| `layout` | `"embedded"` — sin `rounded-xl bg-white shadow-xs` ni `Heading` h3 duplicado |
+| `showColumnVisibility` | `false` — toolbar sin «Ver columnas» |
+| `onCurrencyChange` | `handleCurrencyChange` — tabs **DOLAR \| ARS** clickeables en la toolbar (junto a Proyectado \| Histórico), sincroniza `?currency=` |
+| Título del bloque | `SheetTitle` en `SheetHeader` (no título interno de la tabla) |
+
+### Ejemplo — sheet tabla (`SocioRoiView`)
+
+Ver también [SheetOps — composición drill-down](#sheetops--composición-drill-down).
+
+```tsx
+<SheetContentTable
+  open={sheetOpen}
+  onOpenChange={setSheetOpen}
+  title="Tabla Recupero de Inversión"
+  showFooter={false}
+>
+  <GddRoiRecuperoTable
+    layout="embedded"
+    showColumnVisibility={false}
+    variant={tablaTab}
+    onVariantChange={setTablaTab}
+    currency={currency}
+    onCurrencyChange={handleCurrencyChange}
+    proyectadoData={socioRoiProyectado}
+    historicoData={socioRoiHistorico}
+    tipoCambio={TIPO_CAMBIO_ARS}
+  />
+</SheetContentTable>
+```
+
+### Notas para el agente
+
+- **Sidebar mobile** usa `Sheet` con ancho propio (`--sidebar-width`) — no mezclar con estos perfiles de drill-down.
+- Dentro del sheet: grupos internos → [CardWire](#cardwire); **no** envolver tablas en `Card` con sombra (ver anti-pattern en `ux-guidelines.md`).
+- Botones en sheet: cerrar en header puede ser `outline` + `shadow-xs`; acción secundaria en footer `outline` `w-full` (`components.md` § Button).
+
+---
+
+## SheetOps — composición drill-down
+
+**Archivos:** `/components/ui/sheet-ops.tsx`, `/lib/sheet-layout.ts`  
+**Estado:** ✅ Aprobado — usar en todo drill-down lateral de producto  
+**UX:** `ux-guidelines.md` §3
+
+### Cuándo usar qué
+
+| Necesidad | Componente / API |
+|---|---|
+| Tabla ancha + tabs variante | `SheetContentTable` |
+| Detalle entidad (socio, mantenimiento, listas) | `SheetContentDetail` |
+| Solo ancho + piezas sueltas | `sheetContentClassName(profile)` + `SheetOps*` |
+| Notificaciones en header | `sheetContentClassName("notifications")` + `SheetOpsNotificationsHeader` |
+
+### Piezas atómicas
+
+| Export | Rol |
+|---|---|
+| `SheetOpsHeader` | Título + `action?` + `SheetClose` (`bordered` \| `detail`) |
+| `SheetOpsNotificationsHeader` | Título + `SheetDescription` (sin icon cerrar) |
+| `SheetOpsScroll` | Scroll con padding OPS (`px-6 py-4`) |
+| `SheetOpsFooter` | «Cerrar» `outline` `w-full` `shadow-xs` |
+
+### Recetas completas
+
+**`SheetContentTable`** — perfil `table`, header bordered, scroll, footer opcional.
+
+**`SheetContentDetail`** — perfil `detail`, header sin borde inferior, footer opcional.
+
+| Componente | Prop | Default | Uso |
+|---|---|---|---|
+| `SheetContentTable` | `showFooter` | `false` | `true` si se quiere «Cerrar» duplicado abajo; Socio ROI usa solo X del header |
+| `SheetContentTable` | `headerAction` | — | Slot opcional en header antes de cerrar. **Socio ROI ya no lo usa**: la moneda es un tab clickeable en la toolbar de la tabla (`GddRoiRecuperoTable` `onCurrencyChange`) |
+| `SheetContentTable` | `contentClassName` | — | Override de ancho `sm+` (misma forma `data-[side=*]:sm:max-w-*`) |
+| `SheetContentDetail` | `scrollVariant` | `"padded"` | `"flush"` cuando el hijo lleva `p-6 pt-0` (CardWire, charts en sheet) |
+| `SheetContentDetail` | `showFooter` | `true` | `false` en placeholders sin acción de cierre inferior |
+
+### Ejemplo — detalle (`SocioDetailSheet`)
+
+```tsx
+<SheetContentDetail
+  open={open}
+  onOpenChange={onOpenChange}
+  title={socio.nombre}
+  scrollVariant="flush"
+>
+  <div className="flex flex-col gap-6 p-6 pt-0">{/* CardWire, StatList, … */}</div>
+</SheetContentDetail>
+```
+
+### Ejemplo — notificaciones (`GddHeader`)
+
+```tsx
+<SheetContent className={sheetContentClassName("notifications")}>
+  <SheetOpsNotificationsHeader
+    title="Notificaciones del parque"
+    description={`Avisos y comunicaciones para ${parkName}. Solo lectura.`}
+  />
+  <GddNotificationsPanel />
+</SheetContent>
+```
+
+### Showcase
+
+`/app/dev/components` — sección **SheetOps** (tres perfiles interactivos).
 
 ---
 
@@ -4074,7 +4524,7 @@ export function SectionHeader({
   action={<StatusBadge status="current">En Curso</StatusBadge>}
 />
 <div className="grid grid-cols-2 gap-4">
-  <FeatureItem icon={WalletIcon} label="Ahorro" value="$74.400" className="md:flex-col md:items-stretch" />
+  <FeatureItem icon={WalletIcon} label="Ahorro" value="$ 74.400" className="md:flex-col md:items-stretch" />
   <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" className="md:flex-col md:items-stretch" />
 </div>
 ```

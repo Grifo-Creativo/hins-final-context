@@ -12,7 +12,7 @@ export function GddLayoutShell({
   children: ReactNode
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <GddSidebar />
       <SidebarInset className="overflow-x-hidden">{children}</SidebarInset>
     </SidebarProvider>

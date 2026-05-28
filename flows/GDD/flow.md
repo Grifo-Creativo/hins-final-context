@@ -54,88 +54,55 @@ Referencia visual: **GDD_ROI_Proyectado.png** (vista Proyectado - esta es la vis
 - Control global en header que muta dinámicamente TODOS los valores USD de la página
 - Default: DOLAR (`usd` — sin query param)
 - Al cambiar a ARS: multiplica valores por `TIPO_CAMBIO_ARS` / `tipo_cambio_actual`, formateo vía `formatRoiFromUsd` (`lib/format-currency.ts`)
-- Headers de tabla monetarios: sufijo `(DOLAR)` o `(ARS)` — ver `currencyColumnLabel`
+- Headers de tabla y KPIs: **sin** sufijo de moneda — contexto implícito del tab global (ver `design-system.md` → Currency Context Rules)
 - **Agnósticos a currency:** Fechas, TIR, Plazo, Porcentajes, Estado
 
 ---
 
 **Bloque 1 — Grid 3 columnas KPIs**
 
-Layout: `grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-3`
+Layout: `grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_auto]`  
+Implementación: `/components/gdd/GddRoiView.tsx` · Specs: `context/components.md` → KpiWithAsset, KpiWithTimeline, patrón Card 3
 
 ```
 ┌──────────────────────────┬──────────────────────────┬──────────────────────────┐
-│ Col 1: Inversión         │ Col 2: Payback           │ Col 3: TIR + Plazo       │
-│ - Inv. Recuperada (DOLAR)│ - Recupero Estimado      │ - TIR                    │
-│ - Progress bar 28.5%     │ - Timeline visual        │ - Plazo                  │
-│ - Pendiente (DOLAR)      │                          │                          │
-│ - Total Invertido        │                          │                          │
+│ Col 1: Inversión         │ Col 2: Payback           │ Col 3: TIR · Plazo · Inv.│
+│ KpiWithAsset (dual KPI)  │ KpiWithTimeline          │ Card + grid custom       │
+│ + KpiProgressBar         │ + KpiPaybackTimeline     │ 3× KpiSecondaryMetric    │
 └──────────────────────────┴──────────────────────────┴──────────────────────────┘
 ```
 
-#### **Columna 1 — Card Inversión Recuperada + Pendiente**
+#### **Columna 1 — Inversión Recuperada + Pendiente**
 
-Card: `h-full min-h-0 flex flex-col`  
-Interior: `flex-1 flex flex-col justify-between p-6 gap-4`
+**Componente:** `KpiWithAsset` (modo dual KPI) + `KpiProgressBar`
 
-Fila 1 (top):
-- Label: "Inversión Recuperada (DOLAR)" — secundario text-sm; en ARS → `(ARS)` + `formatRoiFromUsd`
-- Value: `u$s 6.000.000` en DOLAR (text-2xl font-bold)
-- Progress label badge: `28.5% recuperado` (text-xs font-semibold, bg-foreground text-background, rounded-full)
+- KPIs: `KpiSecondaryMetric` `size="standard"` — Inversión Recuperada (izq.) · Pendiente de recuperar (der.)
+- Valores vía `formatRoiFromUsd` según tab DOLAR | ARS
+- Asset: `KpiProgressBar`
+  - Fill: `var(--chart-3)`, track `h-2`
+  - Footnotes: izq. `formatCurrency(0, currency)` · der. `Total Invertido:` + valor
+  - Tooltip en nodo: `{pct}% recuperado`
 
-Progress bar:
-- Height: `h-2 w-full rounded-full bg-border`
-- Filled: `width: 28.5%` — color: `var(--chart-3)` (verde recuperación)
-- Scale: `$ 0` (left) → `Total Invertido: $21.000.000` (right, text-xs)
+#### **Columna 2 — Recupero Estimado + Timeline**
 
-Spacer: `mt-auto`
+**Componente:** `KpiWithTimeline` → `KpiWithAsset` + `SoftBadge` + `KpiPaybackTimeline`
 
-Fila 2 (bottom):
-- Label: "Pendiente de recuperar (DOLAR)" — secundario text-sm
-- Value: `u$s 15.000.000` en DOLAR (text-2xl font-bold)
+- Label: "Recupero Estimado" · Value: ej. `7.0 años` (agnóstico a currency)
+- Badge header: `SoftBadge` "Payback"
+- Timeline: track `h-[3px]`, acento `green-600`, tooltip shadcn en nodo Hoy
+- Props `timelineData` desde mock (`gdd-roi-mock.ts`)
 
-#### **Columna 2 — Card Payback + Timeline**
+#### **Columna 3 — TIR · Plazo · Invertido (layout custom, sin organismo)**
 
-Card: `h-full min-h-0 flex flex-col`  
-Interior: `flex-1 flex flex-col justify-between p-6 gap-4`
+**Componente:** `Card` + grid responsive + 3× `KpiSecondaryMetric` — **no** crear organismo
 
-Fila 1 (top):
-- Label: "Recupero Estimado (Payback)" — secundario text-sm
-- Value: `7.0 años` (text-2xl font-bold)
+- Mobile: `grid-cols-3` — TIR | Plazo | Invertido en fila
+- Desktop (`lg`): `grid-cols-1` — apiladas verticalmente
+- TIR: `valueClassName="text-green-600"` · agnóstico a currency
+- Plazo: agnóstico a currency
+- Invertido: `formatRoiFromUsd(..., "axis")` — afectado por currency toggle
 
-Spacer: `mt-auto`
-
-Fila 2 (bottom):
-- **Component:** `<RoiPaybackTimeline />` (reutilizar componente existente de ROI actual)
-- Props:
-  ```tsx
-  <RoiPaybackTimeline
-    timelineData={{
-      inicio: { label: "Inicio", fecha: "Mayo 2024" },
-      hoy: { label: "Hoy", fecha: "Hoy", pct: 28.5, tooltipText: "Mayo 2026 · 2.0 Años" },
-      payback: { label: "Payback", fecha: "Mayo 2031" },
-    }}
-  />
-  ```
-- Timeline es visual, NO interactivo (tooltip on-click si existe en componente actual)
-- Color: `var(--color-green-600)` (consistente con progreso)
-
-#### **Columna 3 — Card TIR + Plazo**
-
-Card: `h-full min-h-0 flex flex-col`  
-Interior: `flex-1 flex flex-col justify-between p-6 gap-6`
-
-Fila 1 (top):
-- Label: "TIR" — secundario text-sm
-- Value: `15.00%` (text-2xl font-bold, color: `var(--color-green-600)`)
-
-Spacer: `mt-auto`
-
-Fila 2 (bottom):
-- Label: "Plazo" — secundario text-sm
-- Value: `20 Años` (text-2xl font-bold)
-
-**Nota:** TIR y Plazo son **agnósticos a currency** (no afectados por toggle USD/ARS)
+**Nota:** TIR y Plazo son **agnósticos a currency**. Invertido sí muta con tab DOLAR | ARS.
 
 ---
 
@@ -152,9 +119,9 @@ CardWithContent:
 
 Columnas:
 1. **Período** — String (cronológico forward: "Mayo 2026", "Junio 2026", etc.)
-2. **Ahorro Estimado (DOLAR/ARS)** — Valor monetario (afectado por currency toggle)
-3. **Pendiente de Recuperar (DOLAR/ARS)** — Valor monetario (afectado por currency toggle)
-4. **Progreso Estimado (%)** — Porcentaje (NO afectado por currency)
+2. **Ahorro Estimado** — Valor monetario (afectado por currency toggle; prefijo en celda)
+3. **Pendiente de Recuperar** — Valor monetario (afectado por currency toggle; prefijo en celda)
+4. **Avance de Recuperación** — Porcentaje (NO afectado por currency)
 5. **Estado** — Tag (En Curso / Estimado) (NO afectado por currency)
 6. **Acciones** (⋮) — Descargar | Copiar | Compartir
 
@@ -174,9 +141,9 @@ Paginación al pie (derecha)
 
 Columnas:
 1. **Período** — String (descendente backward: "Abril 2026", "Marzo 2026", etc.)
-2. **Cap. Recuperado (DOLAR/ARS)** — Valor monetario mensual (afectado por currency toggle)
-3. **Cap. Recuperado Acumulado (DOLAR/ARS)** — Valor monetario acumulado (afectado por currency toggle)
-4. **Porcentaje de Recuperación (%)** — Porcentaje (NO afectado por currency)
+2. **Cap. Recuperado** — Valor monetario mensual (afectado por currency toggle; prefijo en celda)
+3. **Recupero Acumulado** — Valor monetario acumulado (afectado por currency toggle; prefijo en celda)
+4. **Avance de Recuperación** — Porcentaje (NO afectado por currency)
 5. **Acciones** (⋮) — Descargar | Copiar | Compartir
 
 Mock data (exacto de Gemini, `data/gdd-roi-mock.ts`):
@@ -228,7 +195,8 @@ export const gddRoiKpis = {
   // Timeline Payback
   timeline: {
     inicio: { label: "Inicio", fecha: "Mayo 2024" },
-    hoy: { label: "Hoy", fecha: "Hoy", pct: 28.5, tooltipText: "Mayo 2026 · 2.0 Años" },
+    hoy: { label: "Hoy", fecha: "Mayo 2026", pct: 28.5, elapsedYears: "2.0" },
+    // tooltip: "Mayo 2026 · 2.0 Años"
     payback: { label: "Payback", fecha: "Mayo 2031" },
   },
 }
@@ -277,7 +245,7 @@ export const gddRoiHistorico = [
 - [ ] Grid 3 columnas con `min-h-0` en todos lados
 - [ ] Col 1: Inv. Recuperada + progress bar + Pendiente + Total Invertido
 - [ ] Col 2: Recupero Estimado + Timeline (reutilizado, mismo comportamiento)
-- [ ] Col 3: TIR + Plazo (agnósticos a currency)
+- [ ] Col 3: TIR · Plazo · Invertido — layout custom (`Card` + grid + `KpiSecondaryMetric`); TIR/Plazo agnósticos a currency
 - [ ] Bloque 2: Tabla dual con TabsForBlocks (Proyectado | Histórico)
 - [ ] Tabla Proyectado: Período | Ahorro Est. | Pendiente | Progreso % | Estado | ⋮
 - [ ] Tabla Histórico: Período | Cap. Recuperado | Cap. Acumulado | % Recuperación | ⋮

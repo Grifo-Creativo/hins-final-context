@@ -1,4 +1,8 @@
 // lib/format-currency.ts
+//
+// Única fuente para prefijos y formateo monetario en UI.
+// Reglas de contexto (tab global, labels sin moneda): design-system.md → Currency Context Rules
+// Spec de implementación: context/components.md → FormatCurrency
 
 /** Código de moneda en UI — alineado a toggles ROI (`usd` | `ars`). */
 export type CurrencyCode = "ars" | "usd"
@@ -47,7 +51,7 @@ function formatScaledSuffix(
 
 /**
  * Formato monetario Argentina: `$ ` (ARS) · `u$s ` (USD), miles `.`, decimales `,`.
- * Tabs de moneda usan copy literal DOLAR / ARS — ver `currencyTabLabel`.
+ * La moneda se comunica solo vía tab global + prefijo del valor — no en labels.
  */
 export function formatCurrency(
   amount: number,
@@ -82,14 +86,26 @@ export function formatCurrency(
   return `${prefix}${formatAmount(amount, decimals)}`
 }
 
-/** Label de tabs / toggles (no es prefijo de monto). */
+/** Label de tabs / toggles globales (no es prefijo de monto). Siempre uppercase: DOLAR | ARS. */
 export function currencyTabLabel(currency: CurrencyCode): string {
   return currency === "usd" ? "DOLAR" : "ARS"
 }
 
-/** Encabezados de tabla con moneda entre paréntesis. */
-export function currencyColumnLabel(currency: CurrencyCode): string {
+/**
+ * Sufijo de moneda para exports técnicos (CSV, PDF, columnas multi-currency).
+ * @deprecated En UI in-app — no usar en headers de tabla, KPIs ni tooltips.
+ * El contexto monetario lo define el tab global; ver Currency Context Rules.
+ */
+export function currencyExportColumnLabel(currency: CurrencyCode): string {
   return currencyTabLabel(currency)
+}
+
+/**
+ * @deprecated Alias legacy — usar `currencyExportColumnLabel` solo en exports.
+ * Prohibido en headers de tabla y labels de KPI dentro de la app.
+ */
+export function currencyColumnLabel(currency: CurrencyCode): string {
+  return currencyExportColumnLabel(currency)
 }
 
 /** Valor base en USD × TC cuando la vista está en ARS. */
@@ -102,4 +118,23 @@ export function formatRoiFromUsd(
 ): string {
   const amount = currency === "ars" ? valueUsd * tipoCambioArs : valueUsd
   return formatCurrency(amount, currency, mode, options)
+}
+
+/** Montos ≥ 1M pasan a `compact` (ej. `u$s 23,8M`) solo en mobile — más aire en KPIs/tablas ROI. */
+export const ROI_MOBILE_COMPACT_MIN_AMOUNT = 1_000_000
+
+export function formatRoiFromUsdResponsive(
+  valueUsd: number,
+  currency: CurrencyCode,
+  tipoCambioArs: number,
+  isMobile: boolean,
+  desktopMode: CurrencyFormatMode = "full"
+): string {
+  const amount = currency === "ars" ? valueUsd * tipoCambioArs : valueUsd
+
+  if (isMobile && desktopMode === "full" && Math.abs(amount) >= ROI_MOBILE_COMPACT_MIN_AMOUNT) {
+    return formatCurrency(amount, currency, "compact")
+  }
+
+  return formatCurrency(amount, currency, desktopMode)
 }

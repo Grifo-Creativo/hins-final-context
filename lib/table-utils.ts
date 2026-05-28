@@ -20,16 +20,29 @@ export function getHinsTableColumnMeta(meta: unknown): HinsTableColumnMeta | und
   return meta as HinsTableColumnMeta
 }
 
+type StickyStartCellOptions = {
+  /** Fondo de la celda sticky en mobile — `popover` para tablas dentro de Sheet. */
+  surface?: "background" | "popover"
+}
+
 /** Tailwind classes for a sticky first column on mobile (`max-md` only). */
-export function stickyStartCellClassName(meta: unknown): string | undefined {
+export function stickyStartCellClassName(
+  meta: unknown,
+  options?: StickyStartCellOptions
+): string | undefined {
   const columnMeta = getHinsTableColumnMeta(meta)
   if (columnMeta?.sticky !== "start") return undefined
 
   const widthKey = columnMeta.stickyWidth ?? "default"
+  const stickyBg =
+    options?.surface === "popover"
+      ? "max-md:bg-popover"
+      : "max-md:bg-background"
 
   return cn(
     "max-md:sticky max-md:left-0 max-md:z-10",
-    "max-md:bg-background max-md:shadow-[4px_0_8px_-4px_rgba(9,9,11,0.08)]",
+    stickyBg,
+    "max-md:shadow-[4px_0_8px_-4px_rgba(9,9,11,0.08)]",
     "max-md:group-hover:bg-muted",
     STICKY_START_WIDTH[widthKey]
   )

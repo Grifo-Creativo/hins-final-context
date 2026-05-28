@@ -26,6 +26,16 @@ import { PanelLeftIcon } from "lucide-react"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
+
+/** Desktop expanded preference from cookie — `null` if unset. Mobile ignores this. */
+function readSidebarOpenCookie(): boolean | null {
+  if (typeof document === "undefined") return null
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${SIDEBAR_COOKIE_NAME}=([^;]*)`)
+  )
+  if (!match) return null
+  return match[1] === "true"
+}
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
@@ -53,7 +63,8 @@ function useSidebar() {
 }
 
 function SidebarProvider({
-  defaultOpen = true,
+  /** Desktop: `false` = rail de íconos (`collapsible="icon"`). Mobile: Sheet cerrado hasta toggle. */
+  defaultOpen = false,
   open: openProp,
   onOpenChange: setOpenProp,
   className,
@@ -72,6 +83,15 @@ function SidebarProvider({
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
   const open = openProp ?? _open
+
+  // Restore desktop expanded/collapsed from cookie (does not affect mobile Sheet).
+  React.useLayoutEffect(() => {
+    if (openProp !== undefined) return
+    const persisted = readSidebarOpenCookie()
+    if (persisted !== null) {
+      _setOpen(persisted)
+    }
+  }, [openProp])
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value

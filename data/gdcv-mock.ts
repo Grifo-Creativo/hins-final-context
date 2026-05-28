@@ -4,6 +4,7 @@ import {
   getChartRangeSubtitle,
   sliceChartRangeSeries,
 } from "@/lib/chart-range-resolve"
+import { formatCurrency } from "@/lib/format-currency"
 import type { ChartRangeChip } from "@/types/chart-range"
 
 // ─── Park ──────────────────────────────────────────────────────────────────
@@ -96,13 +97,13 @@ export const gdcvGenerationSparkline: { value: number }[] = [
 
 export const gdcvAhorroTotalAbril = {
   label: "Ahorro Total en Abril",
-  amount: "$248.143",
+  amount: formatCurrency(248_143, "ars", "full"),
   deltaBadge: "+2.3% Mes",
 }
 
 export const gdcvPromedioPorUsuario = {
   label: "Promedio por usuario",
-  amount: "$21.836",
+  amount: formatCurrency(21_836, "ars", "full"),
   deltaBadge: "+1.6% Mes",
 }
 
@@ -125,7 +126,7 @@ export const sociosMock: SocioRow[] = [
     medidor: "3543871",
     participacion: "15%",
     energiaGenerada: "18.6 kWh",
-    ahorroGenerado: "$37.200",
+    ahorroGenerado: formatCurrency(37_200, "ars", "full"),
   },
   {
     id: "AS",
@@ -133,7 +134,7 @@ export const sociosMock: SocioRow[] = [
     medidor: "354904",
     participacion: "15%",
     energiaGenerada: "18.6 kWh",
-    ahorroGenerado: "$37.200",
+    ahorroGenerado: formatCurrency(37_200, "ars", "full"),
   },
   {
     id: "FC",
@@ -141,7 +142,7 @@ export const sociosMock: SocioRow[] = [
     medidor: "3551118",
     participacion: "25%",
     energiaGenerada: "31.0 kWh",
-    ahorroGenerado: "$62.000",
+    ahorroGenerado: formatCurrency(62_000, "ars", "full"),
     tipo: "Virtual",
   },
   {
@@ -150,7 +151,7 @@ export const sociosMock: SocioRow[] = [
     medidor: "355451",
     participacion: "20%",
     energiaGenerada: "24.8 kWh",
-    ahorroGenerado: "$49.600",
+    ahorroGenerado: formatCurrency(49_600, "ars", "full"),
   },
   {
     id: "CV",
@@ -158,7 +159,7 @@ export const sociosMock: SocioRow[] = [
     medidor: "355778",
     participacion: "20%",
     energiaGenerada: "24.8 kWh",
-    ahorroGenerado: "$49.600",
+    ahorroGenerado: formatCurrency(49_600, "ars", "full"),
   },
   {
     id: "RF",
@@ -166,7 +167,7 @@ export const sociosMock: SocioRow[] = [
     medidor: "355262",
     participacion: "5%",
     energiaGenerada: "6.2 kWh",
-    ahorroGenerado: "$12.400",
+    ahorroGenerado: formatCurrency(12_400, "ars", "full"),
   },
 ]
 
@@ -207,7 +208,7 @@ export const socioDetalleMock: SocioDetalle = {
   autoconsumoKwh: 21.0,
   inyectadaKwh: 10.0,
   totalKwh: 31.0,
-  ahorroGenerado: "$62.000",
+  ahorroGenerado: formatCurrency(62_000, "ars", "full"),
   potenciaUtilizada: "15 kW",
   fechaDeAlta: "Marzo 2024",
   nombreResponsable: "Carlos Catalán",
@@ -219,9 +220,16 @@ export const socioDetalleMock: SocioDetalle = {
 
 export const gdcvRoiMetrics = {
   totalEnergiaGenerada: { label: "Total de Energía Generada", value: "13.556 kWh" },
-  totalAhorrado: { label: "Total Ahorrado", value: "$1.238.300" },
-  ahorroXkWh: { label: "Ahorro por kWh", value: "$91,35 /kWh" },
-  inversionInicial: { label: "Inversión inicial", value: "$4.270.000", recoveredPercent: 29 },
+  totalAhorrado: { label: "Total Ahorrado", value: formatCurrency(1_238_300, "ars", "full") },
+  ahorroXkWh: {
+    label: "Ahorro por kWh",
+    value: `${formatCurrency(91.35, "ars", "full", { decimals: 2 })} /kWh`,
+  },
+  inversionInicial: {
+    label: "Inversión inicial",
+    value: formatCurrency(4_270_000, "ars", "full"),
+    recoveredPercent: 29,
+  },
   payback: { label: "Payback estimado", value: "5.5 años", subtitle: "Desde Marzo 2024" },
 }
 

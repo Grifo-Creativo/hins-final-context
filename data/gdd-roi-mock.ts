@@ -23,7 +23,7 @@ export const gddRoiKpis = {
       label: "Hoy",
       fecha: "Mayo 2026",
       pct: 28.5,
-      tooltipText: "Mayo 2026 · 2.0 Años",
+      elapsedYears: "2.0",
     },
     payback: { label: "Payback", fecha: "Mayo 2031" },
   },

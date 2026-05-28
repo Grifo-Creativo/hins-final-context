@@ -11,15 +11,10 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { SheetOpsNotificationsHeader } from "@/components/ui/sheet-ops"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { sheetContentClassName } from "@/lib/sheet-layout"
 import { BellIcon, SearchIcon } from "lucide-react"
 
 export function MainHeader() {
@@ -77,14 +72,12 @@ export function MainHeader() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
+              className={sheetContentClassName("notifications")}
             >
-              <SheetHeader className="border-b border-border p-4 text-left">
-                <SheetTitle>Notificaciones</SheetTitle>
-                <SheetDescription>
-                  Avisos y comunicaciones del sistema. Solo lectura.
-                </SheetDescription>
-              </SheetHeader>
+              <SheetOpsNotificationsHeader
+                title="Notificaciones"
+                description="Avisos y comunicaciones del sistema. Solo lectura."
+              />
               <div className="flex flex-1 items-center justify-center p-6">
                 <p className="text-sm text-muted-foreground">
                   Sin notificaciones pendientes.

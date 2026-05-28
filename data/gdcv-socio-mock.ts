@@ -13,13 +13,30 @@ import {
   type DailyPoint,
 } from "@/data/gdcv-daily-mock"
 import type { ChartRangeChip } from "@/types/chart-range"
-import type { RoiCurvePoint } from "@/data/gdd-roi-mock"
+import type {
+  GddRoiHistoricoRow,
+  GddRoiProyectadoRow,
+  RoiCurvePoint,
+} from "@/data/gdd-roi-mock"
 import type { StatListItem } from "@/components/ui/stat-list"
 import { formatCurrency } from "@/lib/format-currency"
 import { DollarSignIcon, WalletIcon, ZapIcon } from "lucide-react"
 
 /** Inversión inicial del socio — canónico en USD (UI: `formatCurrency` → `u$s`). */
 export const SOCIO_INVERSION_INICIAL_USD = 5_700_000
+
+/** Capital recuperado (37% de inversión USD). */
+export const SOCIO_CAPITAL_RECUPERADO_USD = 2_130_000
+
+/** Pendiente de recuperar (USD). */
+export const SOCIO_PENDIENTE_USD =
+  SOCIO_INVERSION_INICIAL_USD - SOCIO_CAPITAL_RECUPERADO_USD
+
+/** Total ahorrado acumulado en facturas (ARS). */
+export const SOCIO_TOTAL_AHORRADO_ARS = 2_130_000
+
+const fmtArs = (amount: number) => formatCurrency(amount, "ars", "full")
+const fmtArsCompact = (amount: number) => formatCurrency(amount, "ars", "compact")
 
 // ─── Identidad ──────────────────────────────────────────────────────────────
 
@@ -133,7 +150,7 @@ export function getSocioAhorroChartSubtitle(range: ChartRangeChip): string {
 
 /** KPI resumido (abril) — alineado al bloque "Mi Ahorro en abril" del flow. */
 export const socioAhorroKpi = {
-  value: "$74.400",
+  value: fmtArs(74_400),
   delta: "+12% vs mes anterior",
 } as const
 
@@ -214,12 +231,12 @@ export const socioEnergiaSparkline = [42, 58, 53, 67, 61, 74, 83].map((v) => ({ 
 // ─── StatList Items (Inyección / Energía) ───────────────────────────────────
 
 export const socioStatListInyeccion: StatListItem[] = [
-  { icon: DollarSignIcon, name: "Autoconsumo virtual", value: "$54.200" },
-  { icon: DollarSignIcon, name: "Energía Inyectada", value: "$20.200" },
+  { icon: DollarSignIcon, name: "Autoconsumo virtual", value: fmtArs(54_200) },
+  { icon: DollarSignIcon, name: "Energía Inyectada", value: fmtArs(20_200) },
   {
     icon: WalletIcon,
     name: "Total Ahorro en Abril",
-    value: "$74.400",
+    value: fmtArs(74_400),
     subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
@@ -249,12 +266,12 @@ export const socioStatListAhorroEnergia: StatListItem[] = [
 
 /** StatList items — perspectiva V2 (mockup Desglose Ahorro) */
 export const socioStatListV2Dinero: StatListItem[] = [
-  { icon: DollarSignIcon, name: "Autoconsumo Virtual", value: "$54.200" },
-  { icon: DollarSignIcon, name: "Energía Inyectada", value: "$20.200" },
+  { icon: DollarSignIcon, name: "Autoconsumo Virtual", value: fmtArs(54_200) },
+  { icon: DollarSignIcon, name: "Energía Inyectada", value: fmtArs(20_200) },
   {
     icon: WalletIcon,
     name: "Total Ahorro Abril",
-    value: "$74.400",
+    value: fmtArs(74_400),
     subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
@@ -282,7 +299,7 @@ export const socioV2PanelKpis = {
   periodLabel: "Abril 2026",
   ahorro: {
     label: "Ahorro",
-    value: "$74.400",
+    value: fmtArs(74_400),
   },
   energiaGen: {
     label: "Energia Gen.",
@@ -296,7 +313,7 @@ export const socioV2PanelKpis = {
 export const socioRoiMetrics = {
   totalAhorrado: {
     label: "Ahorrado en Facturas",
-    value: "$2.13 M",
+    value: fmtArsCompact(SOCIO_TOTAL_AHORRADO_ARS),
     badge: "+8% anual",
   },
   inversionInicial: {
@@ -316,6 +333,112 @@ export const socioRoiSecondaryMetrics = {
   tir: { label: "TIR (actualizada)", value: "18.5%" },
   inicioOperaciones: { label: "Inicio de operaciones", value: socioOperationsStartLabel },
 }
+
+/** KPIs numéricos + timeline — `SocioRoiView` (misma forma que `gddRoiKpis` / `gdcvRoiKpis`). */
+export const socioRoiKpis = {
+  totalInvertido: SOCIO_INVERSION_INICIAL_USD,
+  inversionRecuperada: SOCIO_CAPITAL_RECUPERADO_USD,
+  porcentajeRecuperado: socioRoiMetrics.inversionInicial.recoveredPercent,
+  pendienteRecuperar: SOCIO_PENDIENTE_USD,
+  recuperoEstimado: socioRoiMetrics.payback.value,
+  tir: socioRoiSecondaryMetrics.tir.value,
+  plazo: "25 años",
+  timeline: {
+    inicio: { label: "Inicio", fecha: "Mar 2024" },
+    hoy: {
+      label: "Hoy",
+      fecha: "Abr 2026",
+      pct: socioRoiMetrics.inversionInicial.recoveredPercent,
+      elapsedYears: "2.1",
+    },
+    payback: { label: "Payback", fecha: "Dic 2029" },
+  },
+} as const
+
+/** Tabla recupero — `SocioRoiView` sheet (base USD, alineado a `socioRoiKpis`). */
+export const socioRoiProyectado: GddRoiProyectadoRow[] = [
+  {
+    periodo: "Abril 2026",
+    ahorroEstimado: 95_000,
+    pendienteRecuperar: SOCIO_PENDIENTE_USD,
+    progresoEstimado: 37.0,
+    estado: "En Curso",
+  },
+  {
+    periodo: "Mayo 2026",
+    ahorroEstimado: 88_000,
+    pendienteRecuperar: 3_482_000,
+    progresoEstimado: 38.0,
+    estado: "Estimado",
+  },
+  {
+    periodo: "Junio 2026",
+    ahorroEstimado: 92_000,
+    pendienteRecuperar: 3_390_000,
+    progresoEstimado: 38.6,
+    estado: "Estimado",
+  },
+  {
+    periodo: "Julio 2026",
+    ahorroEstimado: 98_000,
+    pendienteRecuperar: 3_292_000,
+    progresoEstimado: 39.3,
+    estado: "Estimado",
+  },
+  {
+    periodo: "Agosto 2026",
+    ahorroEstimado: 105_000,
+    pendienteRecuperar: 3_187_000,
+    progresoEstimado: 40.1,
+    estado: "Estimado",
+  },
+  {
+    periodo: "Septiembre 2026",
+    ahorroEstimado: 112_000,
+    pendienteRecuperar: 3_075_000,
+    progresoEstimado: 41.0,
+    estado: "Estimado",
+  },
+]
+
+export const socioRoiHistorico: GddRoiHistoricoRow[] = [
+  {
+    periodo: "Abril 2026",
+    capRecuperado: 95_000,
+    capRecuperadoAcumulado: SOCIO_CAPITAL_RECUPERADO_USD,
+    porcentajeRecuperacion: 37.0,
+  },
+  {
+    periodo: "Marzo 2026",
+    capRecuperado: 118_000,
+    capRecuperadoAcumulado: 2_035_000,
+    porcentajeRecuperacion: 35.7,
+  },
+  {
+    periodo: "Febrero 2026",
+    capRecuperado: 142_000,
+    capRecuperadoAcumulado: 1_917_000,
+    porcentajeRecuperacion: 33.6,
+  },
+  {
+    periodo: "Enero 2026",
+    capRecuperado: 168_000,
+    capRecuperadoAcumulado: 1_775_000,
+    porcentajeRecuperacion: 31.1,
+  },
+  {
+    periodo: "Diciembre 2025",
+    capRecuperado: 155_000,
+    capRecuperadoAcumulado: 1_607_000,
+    porcentajeRecuperacion: 28.2,
+  },
+  {
+    periodo: "Noviembre 2025",
+    capRecuperado: 132_000,
+    capRecuperadoAcumulado: 1_452_000,
+    porcentajeRecuperacion: 25.5,
+  },
+]
 
 /** Grid 2×2 bajo chart — `SocioPerformanceView` (`/gdcv/socio/parque`). */
 export const socioParqueChartMetricRows: readonly [
@@ -368,49 +491,49 @@ export const compensacionesMock: CompensacionRow[] = [
   {
     periodo: "Abril 2026",
     energiaGenerada: "37.2 kWh",
-    ahorroAutoconsumo: "$54.200",
-    ahorroInyeccion: "$20.200",
-    ahorroTotal: "$74.400",
+    ahorroAutoconsumo: fmtArs(54_200),
+    ahorroInyeccion: fmtArs(20_200),
+    ahorroTotal: fmtArs(74_400),
     estado: "En Curso",
   },
   {
     periodo: "Marzo 2026",
     energiaGenerada: "23.6 kWh",
-    ahorroAutoconsumo: "$47.200",
-    ahorroInyeccion: "$0",
-    ahorroTotal: "$47.200",
+    ahorroAutoconsumo: fmtArs(47_200),
+    ahorroInyeccion: fmtArs(0),
+    ahorroTotal: fmtArs(47_200),
     estado: "Aplicado",
   },
   {
     periodo: "Febrero 2026",
     energiaGenerada: "25.6 kWh",
-    ahorroAutoconsumo: "$51.200",
-    ahorroInyeccion: "$0",
-    ahorroTotal: "$51.200",
+    ahorroAutoconsumo: fmtArs(51_200),
+    ahorroInyeccion: fmtArs(0),
+    ahorroTotal: fmtArs(51_200),
     estado: "Aplicado",
   },
   {
     periodo: "Enero 2026",
     energiaGenerada: "30.2 kWh",
-    ahorroAutoconsumo: "$60.400",
-    ahorroInyeccion: "$0",
-    ahorroTotal: "$60.400",
+    ahorroAutoconsumo: fmtArs(60_400),
+    ahorroInyeccion: fmtArs(0),
+    ahorroTotal: fmtArs(60_400),
     estado: "Aplicado",
   },
   {
     periodo: "Diciembre 2025",
     energiaGenerada: "36.1 kWh",
-    ahorroAutoconsumo: "$72.200",
-    ahorroInyeccion: "$0",
-    ahorroTotal: "$72.200",
+    ahorroAutoconsumo: fmtArs(72_200),
+    ahorroInyeccion: fmtArs(0),
+    ahorroTotal: fmtArs(72_200),
     estado: "Aplicado",
   },
   {
     periodo: "Noviembre 2025",
     energiaGenerada: "41.3 kWh",
-    ahorroAutoconsumo: "$82.600",
-    ahorroInyeccion: "$0",
-    ahorroTotal: "$82.600",
+    ahorroAutoconsumo: fmtArs(82_600),
+    ahorroInyeccion: fmtArs(0),
+    ahorroTotal: fmtArs(82_600),
     estado: "Aplicado",
   },
 ]

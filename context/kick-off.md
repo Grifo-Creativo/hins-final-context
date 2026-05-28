@@ -11,8 +11,7 @@ Antes de ejecutar **cualquier tarea**, leer siempre el contexto en **este orden 
 1. **`@context/product-context.md`** — Qué es HINS, modelos de negocio (GDD/GDCV/GDC), actores, reglas de negocio
 2. **`@context/design-system.md`** — Tokens de color, tipografía, spacing, geometría, escala
 3. **`@context/components.md`** — Specs exactas de implementación de cada componente ← **ÚLTIMA PALABRA SIEMPRE**
-4. **`@context/ux-guidelines.md`** — Jerarquía semántica, patrones UX, anti-patterns, layout alignment, responsive
-5. **`@engineering/tech-stack.md`** — Stack tecnológico, arquitectura de carpetas, convenciones de código
+4. **`@engineering/tech-stack.md`** — Stack tecnológico, arquitectura de carpetas, convenciones de código
 
 **Si hay conflicto entre documentos, seguir la precedencia (ver sección 4).**
 
@@ -59,7 +58,6 @@ flows/
 2. Revisar los wireframes `.png` en la misma carpeta
 3. Usar `@context/components.md` para spec exacta de cada componente
 4. Implementar con `@context/design-system.md` (tokens, no hardcodeados)
-5. Seguir `@context/ux-guidelines.md` para patrones UX
 
 **El `flow.md` es la fuente de verdad de estructura y contenido.**
 
@@ -197,11 +195,7 @@ app/
    - Colores, tipografía, spacing, geometría.
    - Nunca hex hardcodeado; siempre usar tokens CSS.
 
-3. **`@context/ux-guidelines.md`** ← Patrones UX globales
-   - Jerarquía semántica (h1–h4), layout alignment, anti-patterns.
-   - Responsive, touch targets, accesibilidad.
-
-4. **`flows/[flujo]/flow.md`** ← Estructura y contenido de la vista
+3. **`flows/[flujo]/flow.md`** ← Estructura y contenido de la vista
    - Qué bloques, qué data, qué interacciones.
    - Si no está en `components.md`, sigue el flow.
 
@@ -243,6 +237,11 @@ Estos patterns se usan en múltiples vistas. Están documentados una sola vez, s
 ---
 
 ## 8. Rutas y Sidebar
+
+### Sidebar — estado por defecto (admin)
+
+- **Desktop:** colapsado (rail de íconos); el usuario expande con `SidebarTrigger` si lo necesita. Preferencia en cookie `sidebar_state`.
+- **Mobile:** sin cambios — Sheet cerrado hasta abrir desde el header.
 
 ### CON Sidebar (Usuarios admin / gestión del parque):
 ```
@@ -339,7 +338,7 @@ Socio/Cesionario — Participante del parque GDCV con cuotaparte porcentual (ej:
 ## 11. Flujo de Trabajo (Resumen)
 
 1. **Recibís prompt** → incluye referencia a `flow.md` del flujo
-2. **Lees contexto** → en orden: product → design-system → components → ux-guidelines → tech-stack
+2. **Lees contexto** → en orden: product → design-system → components → tech-stack
 3. **Lees flow.md** → estructura, wireframes, data, interacciones
 4. **Implementas** → siguiendo `components.md` (última palabra) + `design-system.md` (tokens)
 5. **Testas en /dev/components** (si es componente nuevo) antes de integrar
@@ -356,8 +355,7 @@ Antes de cualquier implementación, verificá:
 - [ ] Leí `@context/product-context.md` — entiendo negocio y actores
 - [ ] Leí `@context/design-system.md` — conozco todos los tokens disponibles
 - [ ] Leí `@context/components.md` — sé qué está documentado y reutilizable
-- [ ] Leí `@context/ux-guidelines.md` — conozco jerarquía, layout, responsive
-- [ ] Leí `@context/tech-stack.md` — entiendo arquitectura
+- [ ] Leí `@engineering/tech-stack.md` — entiendo arquitectura
 - [ ] Leí `flows/[flujo]/flow.md` — sé qué construir exactamente
 - [ ] Revisé wireframes `.png` en `flows/[flujo]/`
 - [ ] Si es Socio: entiendo que es read-only, sin Sidebar, solo 2 tabs

@@ -105,7 +105,7 @@ Stack: Next.js App Router, shadcn/ui, TanStack Table, Recharts.
 - `pnpm run build` puede fallar por TypeScript en `scripts/figma-flow-builder.ts`
 
 **Documentación**
-- `ux-guidelines.md` es un patch pendiente, no guía §1–§10
+- `ux-guidelines.md` §1–§10 restaurado (§3 Sheet OPS); ampliar si hace falta más detalle histórico
 - `product-context.md` §11 parcialmente desactualizado (Mantenimiento multi-modelo, estado Socio/GDC)
 - `PageHeader` en `components.md` sin archivo `components/ui/page-header.tsx`
 - Contradicciones menores: `shadow-xs` / `shadow-sm`, badges por modelo vs spec genérico

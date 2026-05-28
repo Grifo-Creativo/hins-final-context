@@ -1,12 +1,111 @@
-# ACTUALIZACIÓN: ux-guidelines.md §8 Accesibilidad + §9 Anti-patterns
+# ux-guidelines.md
+# HINS — Patrones de UX
+
+Implementación exacta de componentes y clases: `components.md` (precede este doc).  
+Tokens y geometría: `design-system.md`.
 
 ---
 
-## Sección a REEMPLAZAR: §8 Accesibilidad
+## 1. Principios
 
-**LOCALIZAR en ux-guidelines.md y REEMPLAZAR por:**
+- El sistema es de **visibilidad**, no operativo: no inventar flujos de acción sobre la red.
+- Cada rol ve solo su información (`product-context.md`).
+- Jerarquía clara: contexto del parque → bloque de vista → detalle.
+- En mobile, la acción principal del bloque debe quedar en viewport sin scroll excesivo.
 
-```markdown
+---
+
+## 2. Jerarquía visual
+
+- Fondo del shell: `bg-background-subtle`; cards de contenido: `bg-white`.
+- `--primary` solo en CTAs y focus — nunca en charts ni tabs activos.
+- Tabs de bloque (`TabsForBlocks`): activo = `bg-white shadow-sm`, no `--primary`.
+- Headings: el **tag semántico** define jerarquía (`h1` página, `h2` sección, `h3` bloque), no el tamaño visual (`SectionHeader` `level` en `components.md`).
+
+---
+
+## 3. Drill-down y Sheet
+
+### Cuándo usar Sheet (panel lateral)
+
+Usar **Sheet** cuando el usuario explora **detalle secundario** sin abandonar la vista actual:
+
+| Caso | Ejemplo en producto |
+|------|---------------------|
+| Fila de tabla → detalle | Socio en parque, mantenimiento |
+| KPI / CTA → tabla o desglose ancho | Socio ROI → tabla recupero |
+| Icono header → lista | Notificaciones GDD / Main |
+
+**No usar** Dialog (modal centrado) para drill-down.  
+**No abrir** página nueva si el contenido cumple criterio Sheet y la vista padre debe mantener contexto (filtros, tabs, scroll).
+
+Excepciones: sidebar mobile (`--sidebar-width`), rutas full-page de ROI admin (`/gdd/roi`, `/gdcv/roi`).
+
+### Perfiles de ancho (UX)
+
+Tres perfiles documentados — el agente no inventa anchos:
+
+| Perfil | Intención UX | Referencia código |
+|--------|----------------|-------------------|
+| **Detalle** | Lectura focal, una entidad | `SheetContentDetail` o `sheetContentClassName("detail")` |
+| **Notificaciones** | Lista + descripción corta | `SheetOpsNotificationsHeader` + `sheetContentClassName("notifications")` |
+| **Tabla** | Tabla densa + tabs de variante | `SheetContentTable` |
+
+En **mobile** el panel prioriza `w-full`; tablas ganan espacio con **scroll horizontal**, no ensanchando el sheet más allá del viewport (`components.md` § Sheet — mobile vs `sm+`).
+
+### Shell OPS (experiencia)
+
+Patrón mental para el usuario:
+
+1. **Header** — título del bloque + cerrar (icono outline).
+2. **Cuerpo con scroll** — contenido; tablas sin card blanca interna.
+3. **Footer opcional** — «Cerrar» ancho completo cuando el contenido es largo (tablas).
+
+No duplicar título: en sheets de tabla el título va en `SheetTitle`, no en un `h3` dentro de la tabla.
+
+### Tablas en Sheet
+
+- Una sola superficie (`bg-popover` del panel).
+- Tabs **Proyectado | Histórico** a ancho útil; ocultar «Ver columnas» si el toolbar debe ser solo variante.
+- Moneda: heredar el toggle de la vista padre (no duplicar DOLAR | ARS en el sheet).
+- Agrupaciones internas → `CardWire`; **no** `Card` con sombra envolviendo la tabla.
+
+**Implementación:** `lib/sheet-layout.ts`, `components/ui/sheet-ops.tsx` (`SheetContentTable`, `SheetContentDetail`, `SheetOpsNotificationsHeader`, …). Spec: `components.md` § Sheet + § SheetOps. Demo: `/app/dev/components`.
+
+---
+
+## 4. Navegación
+
+- Rutas internas: `next/link`, no `<a href>`.
+- Breadcrumb en vistas de parque; Socio sin sidebar de admin.
+- Notificaciones: solo Sheet desde header, no ruta dedicada (`/gdd/notifications` redirige conceptualmente).
+
+---
+
+## 5. Mobile
+
+- Sidebar: Sheet overlay; estado colapsado en desktop vía cookie (`design-system.md`).
+- Drill-down: mismo Sheet; perfiles de ancho según §3.
+- Acción principal del bloque visible sin depender de scroll hasta el footer de página.
+
+---
+
+## 6. Estados vacío, carga y error
+
+- Nunca pantalla en blanco sin mensaje ni contexto.
+- Siempre comunicar cargando / error / sin datos.
+- Placeholders de módulo pendiente (GDC) deben indicar que el bloque llegará, no simular datos falsos como reales.
+
+---
+
+## 7. Datos y períodos
+
+- No mezclar períodos distintos en la misma vista sin indicarlo.
+- No reutilizar la misma serie para 1M / 3M / 6M sin derivación explícita.
+- Labels de KPI sin moneda embebida — contexto vía tab DOLAR | ARS + prefijo en valor (`components.md` FormatCurrency).
+
+---
+
 ## 8. Accesibilidad
 
 - Estados de foco: siempre `--ring`.
@@ -18,15 +117,9 @@
 - Charts: validar con herramientas de daltonismo (protanopia, deuteranopia, tritanopia).
   - Recharts: usar `role="img"` + `aria-label` descriptivo en ResponsiveContainer.
   - Leyenda siempre: colores + patrones visuales (sólido/punteado) + labels.
-```
 
 ---
 
-## Sección a REEMPLAZAR: §9 Anti-patterns
-
-**LOCALIZAR en ux-guidelines.md y REEMPLAZAR por:**
-
-```markdown
 ## 9. Anti-patterns
 
 - ❌ Mostrar datos de otros usuarios al Socio
@@ -36,7 +129,7 @@
 - ❌ Usar colores de chart en botones, badges o navegación
 - ❌ Confiar SOLO en color para diferenciar series — siempre acompañar con patrón visual (sólido/punteado/grosor)
 - ❌ Poner la acción principal fuera del viewport en mobile
-- ❌ Usar Dialog (modal centrado) para drill-down — usar Sheet
+- ❌ Usar Dialog (modal centrado) para drill-down — usar Sheet (§3)
 - ❌ Mostrar pantalla vacía sin contexto cuando no hay datos
 - ❌ Mezclar períodos distintos en la misma vista sin indicarlo
 - ❌ Reutilizar la misma serie para 1M / 3M / 6M sin derivación
@@ -49,28 +142,19 @@
 - ❌ Usar tab activo con `--primary` o color negro — siempre `bg-white shadow-sm`
 - ❌ Dejar columnas con altura auto en layouts multi-columna que requieren equal height
 - ❌ Table dentro de Card
+- ❌ Card con sombra **dentro** de Sheet envolviendo una tabla
 - ❌ Usar heading semántico incorrecto — el nivel del tag define jerarquía, no el tamaño visual
 - ❌ Charts sin tooltip accesible — información debe ser explorable sin hover
 - ❌ Líneas de chart muy delgadas (<1.5px) con colores claros — aumentar grosor para visibilidad
-```
+- ❌ Inventar clases de ancho de Sheet fuera de los tres perfiles (§3)
 
 ---
 
-## Nueva sección a AGREGAR: §10 Charts Financieros (Paleta Extendida)
-
-**AGREGAR AL FINAL del documento, antes de cualquier índice:**
-
-```markdown
-## 10. Charts Financieros — Paleta Extendida (Zinc + Green + Rose)
+## 10. Charts financieros — Paleta extendida (Zinc + Green + Rose)
 
 ### Contexto
 
-Charts de proyección financiera (ROI, recuperación, payback) requieren semántica
-que va más allá de la paleta green estándar. Necesitan comunicar:
-- Datos reales (concretos, no negociables)
-- Proyecciones (probables pero inciertas)
-- Oportunidades (favorable, positivo)
-- Riesgos (cautela, adversidades)
+Charts de proyección financiera (ROI, recuperación, payback) requieren semántica que va más allá de la paleta green estándar: datos reales, proyecciones, oportunidades, riesgos.
 
 ### Paleta y uso
 
@@ -87,66 +171,18 @@ que va más allá de la paleta green estándar. Necesitan comunicar:
 
 **Construcción:**
 1. Línea de dato real = Zinc 950 sólida, máxima prominencia
-2. Líneas de proyección = Zinc 600 con alpha 0.6, comunica incertidumbre
-3. Línea favorable = Green 500, comunica oportunidad
-4. Línea riesgo = Rose 400 punteada, comunica cautela (grosor compensa bajo contraste)
-5. Línea meta = Green 600, objetivo esperado (neutral, no rojo = no es amenaza)
-6. Referencia temporal = Zinc 800, marcador presente
+2. Líneas de proyección = Zinc 600 con alpha 0.6
+3. Línea favorable = Green 500
+4. Línea riesgo = Rose 400 punteada (grosor ≥ 2.5px)
+5. Línea meta = Green 600
+6. Referencia temporal = Zinc 800
 
-**Accesibilidad:**
-- Rose 400 (3.1:1 contrast) es WCAG Border — SOLO permitido si:
-  - strokeWidth >= 2.5px
-  - Patrón visual diferente (punteada, no sólida)
-  - Acompañado de patrón en leyenda + tooltip
-- Validar con herramienta de daltonismo antes de ship
-- Tooltip accesible al hover — información no se pierde sin color
+**Accesibilidad:** Rose 400 solo con patrón punteado + leyenda + tooltip. Validar daltonismo antes de ship.
 
-**Patrón visual:**
-- NO confiar solo en color
-- Combinación: color + grosor + patrón (sólido/punteado)
-- Leyenda clara: muestra color + patrón + label
+### Cuándo usar / no usar
 
-### Ejemplo: ROI Projection Chart
-
-```
-Real acumulada         Zinc 950 sólida 3px      (dato, máxima autoridad)
-Base                   Zinc 600 @60% sólida 2px (proyección, menos certeza)
-Favorable (optimista)  Green 500 sólida 1.5px   (oportunidad)
-Riesgo (cautela)       Rose 400 punteada 2.5px  (alerta, suave)
-Meta (objetivo)        Green 600 sólida 2px     (éxito esperado)
-Hoy (presente)         Zinc 800 sólida 1.5px    (referencia temporal)
-```
-
-### Documentación y governance
-
-Paleta extendida está documentada en `design-system.md` §1 "Paleta extendida para Finanzas".
-Revisable cuando se defina color de marca primario en el sistema.
-
-### Cuándo usar
-
-✅ Charts de proyección financiera (ROI, payback, recuperación)
-✅ Comparativas de escenarios (base vs favorable vs riesgo)
-❌ Charts de generación, consumo, o energía (usar Green ramp estándar)
+✅ ROI, payback, recuperación, escenarios base/favorable/riesgo  
+❌ Generación, consumo, energía (Green ramp estándar)  
 ❌ UI funcional (botones, badges, navegación)
 
-### Cuándo NO usar
-
-- Gráficos de performance operacional (usar Green ramp)
-- Datos energéticos (autoconsumo, inyectada)
-- UI/navegación/acciones
-- Si no hay capacidad de validar accesibilidad (daltonismo)
-```
-
----
-
-## Resumen de cambios
-
-| Sección | Cambio |
-|---------|--------|
-| **§8 Accesibilidad** | Actualizar directives sobre color + patrón visual + validación daltonismo |
-| **§9 Anti-patterns** | Agregar anti-pattern: "No confiar solo en color" |
-| **§10 (nueva)** | Guía completa para paleta extendida + cuándo usar |
-
----
-
-**Nota:** §10 es NEW CONTENT. §8 y §9 son REEMPLAZOS de texto existente.
+Detalle de tokens: `design-system.md` — Paleta extendida para Finanzas.

@@ -1,141 +1,179 @@
 // components/gdcv/SocioRoiView.tsx
 "use client"
 
-import { RoiRecoveryLineChart } from "@/components/charts/RoiRecoveryLineChart"
-import { Card } from "@/components/ui/card"
-import { KpiCard } from "@/components/ui/kpi-card"
-import { KpiRoiCard } from "@/components/ui/kpi-roi-card"
-import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
-import { roiRecoveryChartConfig } from "@/data/chart-config"
+import { useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { HandCoinsIcon } from "lucide-react"
+
 import {
-  SOCIO_INVERSION_INICIAL_USD,
-  SOCIO_INVERSION_REFERENCIA,
-  socioCurvaRecuperacion,
-  socioRoiMetrics,
-  socioRoiSecondaryMetrics,
+  GddRoiRecuperoTable,
+  type GddRoiCurrency,
+  type GddRoiTableVariant,
+} from "@/components/gdd/GddRoiRecuperoTable"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { KpiProgressBar } from "@/components/ui/kpi-progress-bar"
+import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
+import { KpiWithAsset } from "@/components/ui/kpi-with-asset"
+import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
+import { SectionHeader } from "@/components/ui/section-header"
+import { currencyTabsForBlocks } from "@/components/ui/currency-context-indicator"
+import { SheetContentTable } from "@/components/ui/sheet-ops"
+import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import {
+  socioRoiHistorico,
+  socioRoiKpis,
+  socioRoiProyectado,
 } from "@/data/gdcv-socio-mock"
-import { DollarSignIcon, TrendingUpIcon } from "lucide-react"
+import { TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
+import { useIsMobile } from "@/hooks/use-is-mobile"
+import {
+  formatCurrency,
+  formatRoiFromUsdResponsive,
+} from "@/lib/format-currency"
+
+/** Col 3 = 340px — alineado a `SOCIO_ENERGY_TOP_ROW_GRID` (panel Abril arriba). */
+const SOCIO_ROI_KPI_GRID =
+  "grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_340px]"
 
 export function SocioRoiView() {
-  // Calcular métricas derivadas
-  const inversionInicial = SOCIO_INVERSION_INICIAL_USD
-  const capitalRecuperado = 2_130_000 // $2.13M (37% de inversión)
-  const pendiente = inversionInicial - capitalRecuperado // $3.57M
-  const porcentajeRecuperado = 37
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const currency = (searchParams.get("currency") ?? "usd") as GddRoiCurrency
+  const isMobile = useIsMobile()
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [tablaTab, setTablaTab] = useState<GddRoiTableVariant>("proyectado")
+
+  const fmt = (valueUsd: number, desktopMode: "full" | "axis" = "full") =>
+    formatRoiFromUsdResponsive(
+      valueUsd,
+      currency,
+      TIPO_CAMBIO_ARS,
+      isMobile,
+      desktopMode
+    )
+
+  function handleCurrencyChange(newCurrency: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (newCurrency === "usd") {
+      params.delete("currency")
+    } else {
+      params.set("currency", newCurrency)
+    }
+    const qs = params.toString()
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+  }
+
+  const pct = socioRoiKpis.porcentajeRecuperado
+  const totalInvertidoAmount =
+    currency === "ars"
+      ? socioRoiKpis.totalInvertido * TIPO_CAMBIO_ARS
+      : socioRoiKpis.totalInvertido
+  const totalInvertidoDisplay = formatCurrency(
+    totalInvertidoAmount,
+    currency,
+    "compact"
+  )
 
   return (
-    <div className="grid min-h-0 grid-cols-1 gap-6 md:grid-cols-2">
-      {/* Col 1 — ROI KPIs con Cards individuales */}
-      <div className="flex h-full flex-col gap-6">
-        {/* Título fuera de la Card */}
-        <h2 className="text-lg font-semibold text-foreground">
-          Retorno de la Inversión (ROI)
-        </h2>
+    <>
+      <section className="flex flex-col gap-6">
+        <SectionHeader
+          level="h2"
+          title="Retorno de la Inversión (ROI)"
+          action={
+            <TabsForBlocks
+              width="fit"
+              className="shrink-0"
+              tabs={currencyTabsForBlocks}
+              value={currency}
+              onValueChange={handleCurrencyChange}
+            />
+          }
+        />
 
-        {/* Grid de Cards: KPI1 | KPI2 (2 cols), KPI3 (full width) */}
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* KPI 1 — Inversión + Ahorrado con Sparkline */}
-          <KpiRoiCard
-            items={[
-              {
-                icon: TrendingUpIcon,
-                label: "Inversión Inicial",
-                value: socioRoiMetrics.inversionInicial.value,
-                badge: "Marzo 2024",
-              },
-              {
-                icon: DollarSignIcon,
-                label: socioRoiMetrics.totalAhorrado.label,
-                value: socioRoiMetrics.totalAhorrado.value,
-              },
-            ]}
-            sparklineData={[
-              { value: 0.41 },
-              { value: 0.65 },
-              { value: 0.89 },
-              { value: 1.22 },
-              { value: 1.53 },
-              { value: 2.13 },
-            ]}
+        <div className={SOCIO_ROI_KPI_GRID}>
+          <KpiWithAsset
+            label="Inversión Recuperada"
+            value={fmt(socioRoiKpis.inversionRecuperada)}
+            asset={
+              <KpiProgressBar
+                percent={pct}
+                bottomLabels={{
+                  left: { value: formatCurrency(0, currency) },
+                  right: {
+                    label: "Total Invertido:",
+                    value: fmt(socioRoiKpis.totalInvertido),
+                  },
+                }}
+              />
+            }
+            bottomLabel="Pendiente de recuperar"
+            bottomValue={fmt(socioRoiKpis.pendienteRecuperar)}
           />
 
-          {/* KPI 2 — Recupero + Pendiente + % */}
-          <KpiCard>
-            <div className="flex min-h-0 flex-1 flex-col">
-              <div className="flex shrink-0 items-start justify-between gap-4">
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm text-muted-foreground">Cap. Recuperado</p>
-                  <p className="text-xl font-semibold text-foreground tabular-nums">
-                    $2.13 M
-                  </p>
-                </div>
+          <KpiWithTimeline
+            label="Recupero Estimado"
+            value={socioRoiKpis.recuperoEstimado}
+            metricBadge="Payback"
+            timelineData={socioRoiKpis.timeline}
+          />
 
-                <div className="flex flex-col gap-1 items-end">
-                  <p className="text-sm text-muted-foreground">Pendiente</p>
-                  <p className="text-xl font-semibold text-foreground tabular-nums">
-                    $3.57 M
-                  </p>
-                </div>
+          <Card className="flex h-full min-h-0 w-full flex-col bg-white p-6 shadow-xs ring-0 rounded-xl">
+            <div className="flex min-h-0 flex-1 flex-col gap-4 lg:gap-6">
+              <div className="grid grid-cols-2 gap-4 lg:gap-x-6 lg:gap-y-6">
+                <KpiSecondaryMetric
+                  label="TIR"
+                  value={socioRoiKpis.tir}
+                  size="standard"
+                  valueClassName="text-green-600"
+                  className="min-w-0 items-start text-left"
+                />
+                <KpiSecondaryMetric
+                  label="Plazo"
+                  value={socioRoiKpis.plazo}
+                  size="standard"
+                  className="min-w-0 items-start text-left max-lg:items-center max-lg:text-center"
+                />
+                <KpiSecondaryMetric
+                  label="Mi Inversión"
+                  value={totalInvertidoDisplay}
+                  size="standard"
+                  className="col-span-2 min-w-0 items-start text-left lg:col-span-1"
+                />
               </div>
-
-              <div className="mt-auto flex shrink-0 flex-col gap-2">
-                <p className="text-left text-sm text-muted-foreground">
-                  {porcentajeRecuperado}% recuperado
-                </p>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-border">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${porcentajeRecuperado}%`,
-                      backgroundColor: "var(--chart-3)",
-                    }}
-                  />
-                </div>
-              </div>
+              <Button
+                type="button"
+                className="mt-auto w-full shadow-xs"
+                onClick={() => setSheetOpen(true)}
+              >
+                <HandCoinsIcon aria-hidden />
+                Ver Tabla de Recupero
+              </Button>
             </div>
-          </KpiCard>
-
-          {/* KPI 3 — Payback con Timeline (full width) */}
-          <div className="col-span-1 min-h-0 sm:col-span-2">
-            <KpiWithTimeline
-              label="Payback Estimado"
-              value={socioRoiMetrics.payback.value}
-              metricBadge={`TIR ${socioRoiSecondaryMetrics.tir.value}`}
-              timelineData={{
-                inicio: { label: "Inicio", fecha: "Mar 2024" },
-                hoy: {
-                  label: "Hoy · 37%",
-                  fecha: "Abr 2026",
-                  pct: 37,
-                  tooltipText: "Hoy · 2.1 años · 37% recuperado",
-                },
-                payback: { label: "Payback", fecha: "Dic 2029" },
-              }}
-            />
-          </div>
+          </Card>
         </div>
-      </div>
+      </section>
 
-      {/* Col 2 — Curva de Recuperación */}
-      <div className="flex h-full flex-col gap-6">
-        {/* Título fuera de la Card */}
-        <h2 className="text-lg font-semibold text-foreground">
-          Curva de Recuperación Acumulada
-        </h2>
-
-        {/* Card con el Chart */}
-        <Card className="flex flex-1 min-h-0 flex-col bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden">
-          <div className="p-4">
-            <RoiRecoveryLineChart
-              data={socioCurvaRecuperacion}
-              chartConfig={roiRecoveryChartConfig}
-              investmentReference={SOCIO_INVERSION_REFERENCIA}
-              rangoAnios={5}
-              showRangeChips={false}
-            />
-          </div>
-        </Card>
-      </div>
-    </div>
+      <SheetContentTable
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        title="Tabla Recupero de Inversión"
+        showFooter={false}
+      >
+        <GddRoiRecuperoTable
+          layout="embedded"
+          showColumnVisibility={false}
+          variant={tablaTab}
+          onVariantChange={setTablaTab}
+          currency={currency}
+          onCurrencyChange={handleCurrencyChange}
+          proyectadoData={socioRoiProyectado}
+          historicoData={socioRoiHistorico}
+          tipoCambio={TIPO_CAMBIO_ARS}
+        />
+      </SheetContentTable>
+    </>
   )
 }

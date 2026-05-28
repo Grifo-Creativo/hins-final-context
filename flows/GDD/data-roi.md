@@ -22,7 +22,7 @@ Este documento contiene los valores finales oficiales y validados para la maquet
 ## 2. Dataset para Tabla: Pestaña "Histórico"
 *Lógica: Orden descendente hacia el pasado. Valores consolidados reales.*
 
-| Período (String) | Cap. Recuperado Mensual (DOLAR/ARS) | Cap. Recuperado Acumulado (DOLAR/ARS) | Porcentaje de Recuperación (%) |
+| Período (String) | Cap. Recuperado Mensual | Recupero Acumulado | Avance de Recuperación |
 | :--- | :--- | :--- | :--- |
 | **Abril 2026** | `$210.000` | `$6.000.000` | `28.5%` |
 | **Marzo 2026** | `$260.000` | `$5.790.000` | `27.6%` |
@@ -36,7 +36,7 @@ Este documento contiene los valores finales oficiales y validados para la maquet
 ## 3. Dataset para Tabla: Pestaña "Proyectado"
 *Lógica: Orden cronológico hacia el futuro. Valores estimados basados en simulación.*
 
-| Período (String) | Ahorro Estimado (DOLAR/ARS) | Pendiente de Recuperar (DOLAR/ARS) | Progreso Estimado (%) | Estado (Tag) |
+| Período (String) | Ahorro Estimado | Pendiente de Recuperar | Avance de Recuperación | Estado (Tag) |
 | :--- | :--- | :--- | :--- | :--- |
 | **Mayo 2026** | `$180.000` | `$15.000.000` | `28.5%` | `En Curso` |
 | **Junio 2026** | `$140.000` | `$14.820.000` | `29.4%` | `Estimado` |
@@ -48,5 +48,8 @@ Este documento contiene los valores finales oficiales y validados para la maquet
 ---
 
 ## 4. Reglas de Formateo de UI para el Desarrollador
-1.  **Símbolo de Moneda:** Todos los valores de las celdas numéricas en las columnas de dinero deben renderizarse anteponiendo el signo `$`.
-2.  **Comportamiento Dinámico (Switch ARS):** Si el usuario activa el toggle **ARS**, las celdas monetarias (excepto TIR y Plazo) usan `formatRoiFromUsd` con `TIPO_CAMBIO_ARS`; headers `(ARS)` vía `currencyColumnLabel`. Formato: `context/components.md` → FormatCurrency.
+1.  **Contexto global:** Toggle **DOLAR | ARS** en header — define moneda de toda la vista.
+2.  **Labels de columna/KPI:** solo concepto (`Ahorro Estimado`, `Cap. Recuperado`) — **sin** sufijo de moneda.
+3.  **Valores monetarios:** prefijo vía `formatRoiFromUsd` / `formatCurrency` — `u$s ` (DOLAR) o `$ ` (ARS), locale `es-AR`.
+4.  **Comportamiento dinámico (Switch ARS):** Celdas monetarias (excepto TIR y Plazo) × `TIPO_CAMBIO_ARS` cuando tab ARS activo.
+5.  **Spec completa:** `context/components.md` → FormatCurrency + Currency Context Rules.

@@ -8,7 +8,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export function GdcLayoutShell({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <GdcSidebar />
       <SidebarInset className="overflow-x-hidden">{children}</SidebarInset>
     </SidebarProvider>

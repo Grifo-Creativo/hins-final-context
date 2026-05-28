@@ -21,12 +21,13 @@ La pantalla se divide en dos grandes bloques para resolver la UX de inversores t
 *   **Conversión de Valores Monetarios:** Base USD en datos; en **ARS** → `valor * tipo_cambio`. Formato UI: `u$s ` (DOLAR) / `$ ` (ARS), locale `es-AR` — helper `formatRoiFromUsd`.
 *   **TIR y Plazo (Agnósticos):** No se convierten ni reformatean con el toggle.
 *   **Tabs:** labels literales **DOLAR** y **ARS** (no `u$s` en el chip).
+*   **Labels de KPI y columnas:** solo concepto de negocio — sin `(DOLAR)`, `(ARS)` ni moneda en copy. Contexto implícito del tab global (ver `design-system.md` → Currency Context Rules).
 
 ### 4. Estructura de las Tablas y Lógica de Datos (Escenario Real Fotovoltaico)
 Para el diseño de las tablas aplicamos una curva de estacionalidad fotovoltaica real para el hemisferio sur (altos ingresos en verano, bajos en invierno), manteniendo consistencia exacta con las tarjetas superiores.
 
 #### Pestaña A: "Histórico" (Orden Descendente desde el pasado cercano)
-*   **Columnas:** Período | Cap. Recuperado Mensual (DOLAR/ARS) | Cap. Recuperado Acumulado (DOLAR/ARS) | % de Recuperación Global
+*   **Columnas:** Período | Cap. Recuperado Mensual | Recupero Acumulado | Avance de Recuperación
 *   **Lógica de Datos (Muestra de Filas):**
     *   *Abril 2026:* $210.000 | $6.000.000 | 28.5% (Hito que coincide con la KPI general)
     *   *Marzo 2026:* $260.000 | $5.790.000 | 27.6%
@@ -36,7 +37,7 @@ Para el diseño de las tablas aplicamos una curva de estacionalidad fotovoltaica
     *   *Noviembre 2025:* $310.000 | $4.430.000 | 21.1%
 
 #### Pestaña B: "Proyectado" (Orden Cronológico hacia el futuro)
-*   **Columnas:** Período | Ahorro Estimado (DOLAR/ARS) | Pendiente de Recuperar (DOLAR/ARS) | Progreso Estimado (%) | Estado
+*   **Columnas:** Período | Ahorro Estimado | Pendiente de Recuperar | Avance de Recuperación | Estado
 *   **Lógica de Datos (Muestra de Filas):**
     *   *Mayo 2026:* $180.000 | $15.000.000 | 28.5% | Tag: `[En Curso]` (Empieza la cuenta regresiva e iguala la KPI)
     *   *Junio 2026:* $140.000 | $14.820.000 | 29.4% | Tag: `[Estimado]` (Temporada baja / invierno)

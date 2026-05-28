@@ -18,6 +18,9 @@ import { IconBadge } from "@/components/ui/icon-badge"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
+import { KpiProgressBar } from "@/components/ui/kpi-progress-bar"
+import { KpiWithAsset } from "@/components/ui/kpi-with-asset"
+import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
 import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
 import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { PeriodSelectorLocal } from "@/components/ui/period-selector"
@@ -29,6 +32,22 @@ import { StatList, type StatListItem } from "@/components/ui/stat-list"
 import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTable"
 import { InputWithIconButton } from "@/components/ui/input-with-icon-button"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import {
+  SheetContentDetail,
+  SheetContentTable,
+  SheetOpsNotificationsHeader,
+} from "@/components/ui/sheet-ops"
+import {
+  GddRoiRecuperoTable,
+  type GddRoiTableVariant,
+} from "@/components/gdd/GddRoiRecuperoTable"
+import { sheetContentClassName } from "@/lib/sheet-layout"
+import {
+  socioRoiHistorico,
+  socioRoiProyectado,
+} from "@/data/gdcv-socio-mock"
+import { TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
 import {
   generationSparklineConfig,
   parkEnergyBarChartConfig,
@@ -69,6 +88,17 @@ const BAR_DEMO = [
   { label: "Mar 26", generated: 168 },
   { label: "Abr 26", generated: 180 },
 ]
+
+const ROI_TIMELINE_DEMO = {
+  inicio: { label: "Inicio", fecha: "Mayo 2024" },
+  hoy: {
+    label: "Hoy · 28.5%",
+    fecha: "Mayo 2026",
+    pct: 28.5,
+    elapsedYears: "2.0",
+  },
+  payback: { label: "Payback", fecha: "Mayo 2031" },
+} as const
 
 const STAT_LIST_DEMO: StatListItem[] = [
   { name: "Potencia utilizada", value: "NN kWh" },
@@ -112,6 +142,10 @@ function Showcase({
 
 export default function DevComponentsPage() {
   const sparkForKpi = generationSparklinePoints.map((p) => ({ value: p.value }))
+  const [sheetTableOpen, setSheetTableOpen] = useState(false)
+  const [sheetDetailOpen, setSheetDetailOpen] = useState(false)
+  const [sheetNotifOpen, setSheetNotifOpen] = useState(false)
+  const [sheetTablaTab, setSheetTablaTab] = useState<GddRoiTableVariant>("proyectado")
 
   return (
     <div className="min-h-screen bg-background">
@@ -309,7 +343,7 @@ export default function DevComponentsPage() {
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Horizontal (default)
                 </p>
-                <FeatureItem label="Ahorro generado" value="$1,250.50" />
+                <FeatureItem label="Ahorro generado" value="$ 1.250,50" />
               </div>
               <div>
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -411,7 +445,7 @@ export default function DevComponentsPage() {
               <KpiPrimaryCompact
                 icon={WalletIcon}
                 label="Ahorro"
-                value="$74.400"
+                value="$ 74.400"
                 sparklineData={sparkForKpi}
               />
               <KpiPrimaryCompact
@@ -444,6 +478,61 @@ export default function DevComponentsPage() {
           >
             <div className="max-w-[10rem] rounded-lg border border-border bg-white p-4">
               <KpiSecondaryMetric label="Cap. Instalada" value="1.250 kWp" />
+            </div>
+          </Showcase>
+
+          <Showcase
+            title="KpiProgressBar"
+            file="components/ui/kpi-progress-bar.tsx"
+          >
+            <div className="max-w-md rounded-lg border border-border bg-white p-4">
+              <KpiProgressBar
+                percent={28.5}
+                bottomLabels={{
+                  left: { value: "u$s 0" },
+                  right: { label: "Total Invertido:", value: "u$s 21.000.000" },
+                }}
+              />
+            </div>
+          </Showcase>
+
+          <Showcase
+            title="KpiWithAsset"
+            file="components/ui/kpi-with-asset.tsx"
+          >
+            <div className="grid max-w-2xl grid-cols-1 gap-4">
+              <KpiWithAsset
+                label="Inversión Recuperada"
+                value="u$s 6.000.000"
+                bottomLabel="Pendiente de recuperar"
+                bottomValue="u$s 15.000.000"
+                asset={
+                  <KpiProgressBar
+                    percent={28.5}
+                    bottomLabels={{
+                      left: { value: "u$s 0" },
+                      right: {
+                        label: "Total Invertido:",
+                        value: "u$s 21.000.000",
+                      },
+                    }}
+                  />
+                }
+              />
+            </div>
+          </Showcase>
+
+          <Showcase
+            title="KpiWithTimeline"
+            file="components/ui/kpi-with-timeline.tsx"
+          >
+            <div className="max-w-md">
+              <KpiWithTimeline
+                label="Recupero Estimado"
+                value="7.0 años"
+                metricBadge="Payback"
+                timelineData={ROI_TIMELINE_DEMO}
+              />
             </div>
           </Showcase>
 
@@ -600,6 +689,81 @@ export default function DevComponentsPage() {
             </div>
           </Showcase>
 
+          <Showcase
+            title="SheetOps — drill-down"
+            file="components/ui/sheet-ops.tsx · lib/sheet-layout.ts"
+          >
+            <p className="text-sm text-muted-foreground">
+              Tres perfiles canónicos. Spec:{" "}
+              <code className="text-xs">components.md § SheetOps</code>.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" onClick={() => setSheetDetailOpen(true)}>
+                Abrir detalle
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSheetNotifOpen(true)}
+              >
+                Abrir notificaciones
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSheetTableOpen(true)}
+              >
+                Abrir tabla
+              </Button>
+            </div>
+
+            <SheetContentDetail
+              open={sheetDetailOpen}
+              onOpenChange={setSheetDetailOpen}
+              title="Detalle de ejemplo"
+              scrollVariant="flush"
+            >
+              <div className="flex flex-col gap-4 p-6 pt-0">
+                <CardWire>
+                  <p className="text-sm text-foreground">
+                    Contenido con <code>scrollVariant=&quot;flush&quot;</code> y
+                    padding interno.
+                  </p>
+                </CardWire>
+              </div>
+            </SheetContentDetail>
+
+            <Sheet open={sheetNotifOpen} onOpenChange={setSheetNotifOpen}>
+              <SheetContent className={sheetContentClassName("notifications")}>
+                <SheetOpsNotificationsHeader
+                  title="Notificaciones"
+                  description="Avisos del sistema. Solo lectura."
+                />
+                <p className="p-6 text-sm text-muted-foreground">
+                  Panel de notificaciones (placeholder).
+                </p>
+              </SheetContent>
+            </Sheet>
+
+            <SheetContentTable
+              open={sheetTableOpen}
+              onOpenChange={setSheetTableOpen}
+              title="Tabla Recupero (demo)"
+              showFooter
+            >
+              <GddRoiRecuperoTable
+                layout="embedded"
+                showColumnVisibility={false}
+                variant={sheetTablaTab}
+                onVariantChange={setSheetTablaTab}
+                currency="usd"
+                proyectadoData={socioRoiProyectado}
+                historicoData={socioRoiHistorico}
+                tipoCambio={TIPO_CAMBIO_ARS}
+              />
+            </SheetContentTable>
+          </Showcase>
+
           <section className="rounded-xl border border-dashed border-muted-foreground/40 bg-muted/30 p-6">
             <h2 className="text-lg font-semibold text-foreground">
               Documentados en components.md (ver detalle en archivo)
@@ -616,10 +780,6 @@ export default function DevComponentsPage() {
               <li>
                 <span className="font-mono text-foreground">KpiSecondaryCompact</span> —{" "}
                 <span className="font-mono">components/ui/kpi-secondary.tsx (variante)</span>
-              </li>
-              <li>
-                <span className="font-mono text-foreground">KpiWithTimeline</span> —{" "}
-                <span className="font-mono">components/ui/kpi-with-timeline.tsx</span>
               </li>
               <li>
                 <span className="font-mono text-foreground">PageHeader</span> —{" "}

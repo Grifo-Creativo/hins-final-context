@@ -90,33 +90,25 @@ Referencia visual: GDCV__admin_03.png
 
 **Bloque 1 — KPIs ROI (grid 3 columnas):**
 
-Layout: `grid grid-cols-3 gap-6`
+Layout: `grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_auto]`  
+Implementación: `/components/gdcv/GdcvRoiView.tsx` · Mismo patrón que GDD ROI (`context/components.md` → KpiWithAsset, KpiWithTimeline, Card 3 custom)
 
-- Columna 1 — 2 KpiSecondary apiladas (flex flex-col gap-6):
-  - KpiSecondary 1:
-    - Icon: TrendingUpIcon
-    - Label: "Inversión Inicial"
-    - Value: "$38.000.000"
-    - Delta: (sin delta)
-  - KpiSecondary 2:
-    - Icon: DollarSignIcon
-    - Label: "Ahorrado Total (en facturas)"
-    - Value: "$8.933.000"
-    - Delta: (sin delta)
+| Col | Componentes | Datos Río Cuarto (base USD) |
+|---|---|---|
+| 1 | `KpiWithAsset` + `KpiProgressBar` | Recuperado `14.200.000` · Pendiente `23.800.000` · Total `38.000.000` · 37% |
+| 2 | `KpiWithTimeline` | Recupero `6.8 años` · Payback Mar 2030 · TIR en Col 3 |
+| 3 | `Card` + 3× `KpiSecondaryMetric` | TIR `18.50%` · Plazo `25 años` · Invertido compacto |
 
-- Columna 2 — Card con métricas de recuperación:
-  - Label: "Cap. Recuperado" | Value grande: "$14.200.000"
-  - Label: "Pendiente" | Value: "$23.800.000"
-  - Progress bar: 37% recuperado (label "37% recuperado" debajo)
-  - Usar tokens: barra filled → `--chart-3` | barra track → `--border`
+**Header ROI:** toggle **DOLAR | ARS** en `GdcvPageHeading` (mismo patrón que GDD).
 
-- Columna 3 — Card "Recupero Estimado":
-  - Badge derecha: "TIR 18.5"
-  - Value grande: "6.8 años"
-  - Label: "Recupero Estimado"
-  - Timeline component (ver spec abajo)
+**Bloque 2 — Tabla Dual: Proyectado | Histórico**
 
-**Spec: Timeline de Payback (componente inline — NO interactivo, NO slider)**
+- Reutiliza `GddRoiRecuperoTable` con mock `gdcvRoiProyectado` / `gdcvRoiHistorico` (`data/gdcv-agc-mock.ts`)
+- Mismas columnas y reglas de moneda que GDD (`flows/GDD/flow.md` Bloque 2)
+
+**Deprecado:** layout anterior (KpiCard + `RoiRecoveryLineChart`). La curva permanece en mock para `/dev/components` y charts sueltos.
+
+**Spec legacy timeline (referencia):**
 
 ```
 [●————————●· · · · · · · · · · ○]
@@ -128,20 +120,13 @@ Mar 2024       May 2026         Mar 2030
 - Línea filled (Inicio → Hoy): `#27500A` (verde oscuro — chart-3 equiv)
 - Nodo Inicio (izquierda): círculo 10px filled `#27500A`
 - Nodo Hoy (centro en 37%): círculo 12px filled `#27500A` + ring `var(--background)`
-  - Tooltip (HinsTooltip — click/tap, NO hover): "Hoy · 2.2 años · 37% recuperado"
+  - Tooltip en nodo Hoy: `"May 2026 · 2.2 Años"` (mes/año + tiempo transcurrido; sin %)
 - Nodo Payback (derecha): círculo 10px `--border` (sin llegar)
 - Labels debajo de cada nodo: título (bold) + fecha (muted)
 - NO es slider, NO es stepper, NO es interactivo excepto el tooltip
 
-**Bloque 2 — Curva de Recuperación Acumulada:**
-- CardWithContent full width:
-  - Title: "Curva de Recuperación Acumulada"
-  - Subtitle: "Crédito acumulado vs Inversión inicial"
-  - Reutilizar chart existente (`RoiRecoveryLineChart`) sin cambios
-  - Mock data alineado con KPIs superiores:
-    - Inversión referencia: $38.000.000
-    - Punto actual (May 2026): ~$14.200.000 recuperado (37%)
-    - Payback proyectado: Mar 2030
+**Bloque 2 — Curva de Recuperación Acumulada (solo dev / legacy):**
+- Chart `RoiRecoveryLineChart` — ya no en vista producto; mock `curvaRecuperacionData` en `data/gdcv-agc-mock.ts`
 
 ---
 
@@ -149,7 +134,7 @@ Mar 2024       May 2026         Mar 2030
 
 - Tab "Performance del Parque" → `/gdcv/performance`
 - Tab "Retorno de Inversión" → `/gdcv/roi` (esta vista)
-- Tooltip en nodo "Hoy" del timeline → HinsTooltip (click/tap) mostrando "Hoy · 2.2 años · 37% recuperado"
+- Tooltip en nodo "Hoy" del timeline → `"May 2026 · 2.2 Años"` (vía `formatPaybackTooltipText`)
 - Botón export: acción placeholder
 
 ---
@@ -157,21 +142,23 @@ Mar 2024       May 2026         Mar 2030
 ## Mock data requerido
 
 ```ts
-// GDCV_admin_03 — ROI
-roi: {
-  inversionInicial: "$38.000.000",
-  ahorradoTotal: "$8.933.000",
-  capRecuperado: "$14.200.000",
-  pendiente: "$23.800.000",
+// GDCV_admin_03 — ROI (base USD numérico → UI con formatRoiFromUsd)
+gdcvRoiKpis: {
+  totalInvertido: 38_000_000,
+  inversionRecuperada: 14_200_000,
+  pendienteRecuperar: 23_800_000,
   porcentajeRecuperado: 37,
   recuperoEstimado: "6.8 años",
-  tir: "18.5",
+  tir: "18.50%",
+  plazo: "25 años",
   timeline: {
     inicio: { label: "Inicio", fecha: "Mar 2024" },
-    hoy: { label: "Hoy · 37%", fecha: "May 2026", pct: 37, tooltipText: "Hoy · 2.2 años · 37% recuperado" },
+    hoy: { label: "Hoy", fecha: "May 2026", pct: 37, elapsedYears: "2.2" },
+    // tooltip: "May 2026 · 2.2 Años"
     payback: { label: "Payback", fecha: "Mar 2030" },
   },
 }
+// UI ejemplos (DOLAR): u$s 14.200.000 · u$s 23,8M (compact)
 
 // Curva recuperación — valores alineados con KPIs
 curvaRecuperacionData: [

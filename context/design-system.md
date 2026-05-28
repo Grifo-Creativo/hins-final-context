@@ -133,7 +133,7 @@ Colores semánticos propios del negocio energético. No son chart colors ni UI c
 | **H3** | `text-lg font-semibold` | 18px | 600 | `--foreground` | Títulos de cards y bloques |
 | **H4** | `text-base font-semibold` | 16px | 600 | `--foreground` | Subtítulos dentro de cards |
 | **Metric** | `text-4xl font-bold` | 36px | 700 | `#0A0A0A` | Valores KPI destacados (830.17 kWh) |
-| **Metric SM** | `text-xl font-semibold` | 20px | 600 | `#0A0A0A` | Valores KPI secundarios ($66.400) |
+| **Metric SM** | `text-xl font-semibold` | 20px | 600 | `#0A0A0A` | Valores KPI secundarios (`$ 66.400`) |
 | **Body** | `text-sm font-normal` | 14px | 400 | `--foreground` | Filas de tabla, valores |
 | **Label** | `text-sm font-medium` | 14px | 500 | `--muted-foreground` | Headers de tabla, etiquetas |
 | **Subtitle** | `text-sm font-normal` | 14px | 400 | `--muted-foreground` | Subtítulos bajo títulos de card |
@@ -255,19 +255,36 @@ ORGANISM: CardWithContent, StatList, Tables → usan Heading internamente
 
 ## 4. Anatomía del Shell
 
-### Shell — nativo shadcn/Tailwind (NO modificar)
+### Shell — nativo shadcn/Tailwind
 
 | Elemento | Notas |
 |---|---|
-| `Sidebar` | sidebar-07 — colapsa a íconos |
+| `Sidebar` | `collapsible="icon"` — rail de íconos (~3rem) o expandido (16rem) |
+| `SidebarProvider` + `SidebarInset` | Wrapper global; ver estado por defecto abajo |
 | `Navbar` | `bg-white`, `border-b border-[#E5E5E5]` — nativo |
-| `SidebarProvider` + `SidebarInset` | Wrapper global de todas las vistas |
+
+**No reescribir** la anatomía shadcn del Sidebar/Navbar. Sí está permitido configurar `defaultOpen`, cookie y tooltips según spec.
+
+#### Sidebar — estado por defecto (desktop)
+
+| Viewport | Comportamiento | Estado inicial |
+|---|---|---|
+| **Desktop / tablet ≥768px** | Rail de íconos o sidebar expandido | **Colapsado** (`SidebarProvider` → `defaultOpen={false}`) |
+| **Mobile &lt;768px** | Sheet overlay desde `SidebarTrigger` | **Cerrado** (sin cambios respecto al patrón mobile) |
+
+- El usuario expande con `SidebarTrigger`, `SidebarRail` o `Ctrl/Cmd + B`.
+- **Persistencia (solo desktop):** cookie `sidebar_state` — `true` = expandido, `false` = colapsado. Se restaura al montar la app; no afecta el Sheet mobile.
+- En modo ícono: labels ocultos; navegación con `SidebarMenuButton` + `tooltip` (nombre del ítem o usuario en footer).
+
+**Implementación detallada:** `engineering/tech-stack.md` → Sidebar (desktop vs mobile) · `context/components.md` → Shell — Sidebar (desktop).
+
+**Shells admin:** `MainLayoutShell`, `GddLayoutShell`, `GdcvLayoutShell`, `GdcLayoutShell`. **Socio** (`/gdcv/socio/*`): sin sidebar visible (`GdcvLayoutShellNoSidebar`).
 
 ### Estructura base de toda vista (obligatoria)
 
 ```
 HD_UI_Hins
-  Sidebar                    ← nativo, no tocar
+  Sidebar                    ← colapsado por defecto (desktop); expandir con trigger
   Main content               ← bg: lab(91 2.48 3.22 / 0.36)
     Navbar                   ← nativo, no tocar
     body
@@ -301,7 +318,7 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 | `DatePicker` | `/components/ui/date-picker.tsx` | → `components.md` |
 | `PeriodSelector` | `/components/ui/period-selector.tsx` | → `components.md` |
 | `Table` | `/components/ui/data-table.tsx` | ⏳ Refactor pendiente |
-| `Sheet` | shadcn/ui nativo | ver `ux-guidelines.md` §3 |
+| `Sheet` | `/components/ui/sheet.tsx` | Drill-down: `ux-guidelines.md` §3 · OPS: `lib/sheet-layout.ts`, `sheet-ops.tsx` · spec: `components.md` § Sheet |
 | `Button` | shadcn/ui nativo | ver reglas abajo |
 | `Badge` | shadcn/ui nativo | usar variante nativa |
 | `Alert` | shadcn/ui nativo | usar semantic states §1 |
@@ -387,7 +404,7 @@ Ciertos charts requieren semántica financiera que va más allá de la rampa ver
 - `ParkEnergyBarChart` → bar chart de generación del parque (rangos 1M–TODO) — **Spec completo:** `components.md`
 - `DailyGenerationChart` → area chart horario kW (vista 1D) — **Spec completo:** `components.md`
 - `DailyGenerationChartBlock` → bloque UI completo vista 1D (DatePicker + KPIs + nav + chart) — **Spec completo:** `components.md`
-- `ROIProjectionChart` → proyección financiera multi-escenario — **Paleta:** Zinc + Green + Rose
+- `ROIProjectionChart` → proyección financiera multi-escenario — montos vía `formatCurrency` (USD) — **Paleta:** Zinc + Green + Rose
 
 ### Formato monetario (ARS / USD)
 
@@ -404,10 +421,61 @@ Ciertos charts requieren semántica financiera que va más allá de la rampa ver
 | Modo | Uso | Ejemplo |
 |---|---|---|
 | `full` | KPI, tooltip, tablas | `$ 82.600` · `u$s 3.779` |
-| `compact` | Solo label sobre barra | `$ 82,6k` · `u$s 3,8k` |
+| `compact` | Label sobre barra; KPI ROI mobile ≥1M | `$ 82,6k` · `u$s 3,8k` |
 | `axis` | Eje Y chart | `$ 83k` · `u$s 4k` |
 
 **Por pantalla:** Socio Mi Ahorro → `ars`. GDD ROI → `usd` base, `ars` vía `formatRoiFromUsd` + `TIPO_CAMBIO_ARS`.
+
+### Currency Context Rules
+
+Reglas de contexto monetario para vistas financieras. Aplican a KPIs, tablas, charts, tooltips y summaries.
+
+#### Contexto global
+
+El selector superior (**DOLAR** | **ARS**) define la moneda de **toda** la vista. Todos los montos debajo heredan ese contexto automáticamente.
+
+#### Labels — qué comunicar
+
+| ✅ Correcto | ❌ Incorrecto |
+|---|---|
+| Inversión Recuperada | Inversión Recuperada (DOLAR) |
+| Capital Pendiente | Capital Pendiente (ARS) |
+| Ahorro Estimado | Ahorro Estimado USD |
+
+Los labels describen **conceptos de negocio**, no moneda, unidades ni formatos técnicos.
+
+#### Representación monetaria
+
+La moneda se comunica **solo** mediante:
+
+1. Tab activo global (`DOLAR` | `ARS`)
+2. Prefijo del valor renderizado (`u$s ` | `$ `)
+
+Ejemplos: `u$s 180.000` · `$ 180.000`
+
+#### No duplicación contextual
+
+Nunca repetir moneda simultáneamente en tab + label + valor.
+
+#### Casing
+
+| Contexto | Formato |
+|---|---|
+| Tabs | `DOLAR` · `ARS` (uppercase) |
+| Valores | `u$s` · `$` (nunca USD, usd, U$S, dólar, pesos) |
+
+#### Excepciones permitidas
+
+Moneda en labels **solo** cuando:
+
+- Coexisten múltiples monedas en la misma vista
+- Exports técnicos (CSV, PDF) → `currencyExportColumnLabel`
+- Comparativas multi-currency documentadas
+- Tooltips financieros avanzados con escenarios cruzados
+
+Fuera de esos casos → **prohibido** repetir moneda en labels.
+
+**Spec de helpers:** `context/components.md` → [FormatCurrency](#formatcurrency).
 
 ### Formato de horas en charts diarios
 
@@ -420,6 +488,20 @@ Convención fija para vista **1D / DIA** (chip de rango en header de card) — h
 | Pico compuesto | `value · N Hrs` | `1,4 kW · 12 Hrs` |
 
 ❌ No usar `"12h"` ni omitir `Hrs` en tooltips.
+
+### Formato de unidades energéticas
+
+Convención SI en UI — spec completa: `context/components.md` → [FormatEnergy](#formatenergy--unidades-energéticas).
+
+| Unidad | Casing | Ejemplo |
+|---|---|---|
+| Energía | `kWh` | `830 kWh` |
+| Potencia instalada | `kWp` | `980 kWp` |
+| Potencia instantánea | `kW` | `1,4 kW · 12 Hrs` |
+
+❌ No usar `Kwh`, `KWH` ni `kwh` como sufijo de unidad.
+
+Locale numérico: `es-AR` (miles `.`, decimales `,`) antes del espacio + unidad.
 
 ### Animación en charts
 
@@ -470,5 +552,5 @@ Convención fija para vista **1D / DIA** (chip de rango en header de card) — h
 - Crear variantes de TabsForBlocks fuera del spec
 - Más de una `KpiPrimary` héroe por vista
 - Botones sin `shadow-sm`
-- Modificar estructura del Sidebar o Navbar (son nativos)
+- Reescribir anatomía del Sidebar o Navbar (son nativos shadcn) — la configuración `defaultOpen`/cookie está documentada en §4
 - Confiar SOLO en color para diferenciar series en charts (usar patrón visual también)

@@ -16,8 +16,10 @@ Referencia rápida para alinear UI, mocks y flows. Valores numéricos pueden cam
 
 | Contexto | Fuente | Vista |
 |---|---|---|
-| Inversión del **socio** | `SOCIO_INVERSION_INICIAL_USD` → `formatCurrency(…, "usd")` (ej. `u$s 5,7M`) | ROI Mi Espacio + fila 2 bajo chart en parque |
+| Inversión del **socio** | `SOCIO_INVERSION_INICIAL_USD` → `formatRoiFromUsdResponsive` con tab DOLAR\|ARS en header de sección ROI | `/gdcv/socio` — `SocioRoiView` |
 | CAPEX parque AGC | `gdcv-mock` ($4.27 M) | Solo admin GDCV — no mezclar en Socio |
+
+Montos de ahorro en StatList / energía siguen en ARS fijo; el toggle de la sección ROI aplica a KPIs de inversión/recupero (base USD × TC).
 
 ## Íconos en `FeatureItem` (parque y KPIs)
 

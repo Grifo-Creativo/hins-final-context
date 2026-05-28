@@ -43,7 +43,7 @@
 
 /lib
   utils.ts                  → cn() y utilidades compartidas
-  format-currency.ts        → ARS/USD: formatCurrency, formatRoiFromUsd (locale es-AR)
+  format-currency.ts        → ARS/USD: formatCurrency, formatRoiFromUsd, formatRoiFromUsdResponsive (locale es-AR)
 
 /styles
   globals.css               → Tokens CSS (design system completo)
@@ -80,9 +80,38 @@
 
 ### Formato monetario
 - Usar `/lib/format-currency.ts` — no armar `$` / `u$s` + `toLocaleString` a mano.
-- Tabs de moneda: labels **DOLAR** / **ARS** (`currencyTabLabel`); montos: `$ ` / `u$s ` con espacio.
-- Modos: `full` (UI completa), `compact` (solo label sobre barra), `axis` (eje Y).
-- Spec: `context/components.md` → FormatCurrency; principios: `context/design-system.md`.
+- Tabs de moneda: labels **DOLAR** / **ARS** (`currencyTabLabel`); montos: `$ ` / `u$s ` **con espacio** (ej. `$ 74.400`, `u$s 5,7M`).
+- **Labels de KPI/tabla/chart:** solo concepto de negocio — sin `(DOLAR)`, `(ARS)` ni moneda en copy.
+- Modos: `full` (UI completa), `compact` (label barra + ROI mobile ≥1M), `axis` (eje Y).
+- Mocks display: `formatCurrency(n, "ars"|"usd", mode)` al exportar strings — no `"$74.400"` manual.
+- Spec: `context/components.md` → FormatCurrency + Currency Context Rules; principios: `context/design-system.md`.
+
+### Unidades energéticas
+- Casing SI: `kWh`, `kWp`, `kW` — nunca `Kwh`.
+- Spec: `context/components.md` → FormatEnergy.
+
+### Sheet drill-down (OPS)
+- Anchos: `sheetContentClassName("detail" | "notifications" | "table")` en `/lib/sheet-layout.ts`.
+- Recetas: `SheetContentTable`, `SheetContentDetail`, `SheetOpsNotificationsHeader` en `/components/ui/sheet-ops.tsx`.
+- UX: `context/ux-guidelines.md` §3 · spec: `components.md` § Sheet + § SheetOps · demo: `/app/dev/components`.
+- No modificar defaults globales de `/components/ui/sheet.tsx`.
+
+### Sidebar (desktop vs mobile)
+
+Implementación: `components/ui/sidebar.tsx` (shadcn Sidebar) + shells en `components/layout/*LayoutShell.tsx`.
+
+| Viewport | Comportamiento | Estado inicial |
+|---|---|---|
+| **Desktop / tablet ≥768px** | `collapsible="icon"` — rail de íconos (~3rem) o expandido (16rem) | **Colapsado** (`defaultOpen={false}`) |
+| **Mobile &lt;768px** | Sheet overlay — **no modificar** | Cerrado hasta `SidebarTrigger` |
+
+**Persistencia (solo desktop):** cookie `sidebar_state` (`true` = expandido, `false` = colapsado). Se lee en mount (`useLayoutEffect`) y se escribe al togglear. No afecta `openMobile`.
+
+**Toggle:** `SidebarTrigger` en headers + `SidebarRail` (borde del sidebar) + atajo `Ctrl/Cmd + B`.
+
+**Tooltips en modo ícono:** `SidebarMenuButton` con prop `tooltip` — visible solo cuando `state === "collapsed"` y no mobile. Nav items y `NavUser` ya lo usan.
+
+**Shells con sidebar:** `MainLayoutShell`, `GddLayoutShell`, `GdcvLayoutShell`, `GdcLayoutShell` → `SidebarProvider defaultOpen={false}`. Socio (`GdcvLayoutShellNoSidebar`) sin sidebar visible.
 
 ---
 

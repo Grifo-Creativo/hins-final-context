@@ -54,7 +54,7 @@ Referencia visual: GDCV__socio_01.png
 - CardWithContent:
   - Icon: DollarSignIcon
   - Title: "Mi Ahorro en abril"
-  - Value: "$74.400,03"
+  - Value: "$ 74.400,03"
   - Delta: "+12% vs mes anterior"
   - Tabs chips: 1M / 3M / 6M (default 6M)
   - Chart: bar chart 6 meses (Nov 25–Abr 26), período actual destacado en --chart-1
@@ -71,40 +71,23 @@ Referencia visual: GDCV__socio_01.png
     - Sparkline: trend data
   - Bottom section: TabsForBlocks dentro de Card
     - Tab 1 "Inyección": StatList con items:
-      - { icon: DollarSignIcon, name: "Por autoconsumo virtual", value: "$54.200" }
-      - { icon: DollarSignIcon, name: "Por Energía Inyectada", value: "$20.200" }
-      - { icon: WalletIcon, name: "Total Ahorro en Abril", value: "$74.400", subtitle: "De mi 15% del parque" (`socioCuotaDelParqueSubtitle`) }
+      - { icon: DollarSignIcon, name: "Por autoconsumo virtual", value: "$ 54.200" }
+      - { icon: DollarSignIcon, name: "Por Energía Inyectada", value: "$ 20.200" }
+      - { icon: WalletIcon, name: "Total Ahorro en Abril", value: "$ 74.400", subtitle: "De mi 15% del parque" (`socioCuotaDelParqueSubtitle`) }
     - Tab 2 "Energía": StatList con items:
       - { icon: ZapIcon, name: "Energía asignada", value: "207.5 kWh" }
       - { icon: ZapIcon, name: "Energía neteada", value: "185.3 kWh" }
       - { icon: WalletIcon, name: "Total kWh en Abril", value: "207.5 kWh", subtitle: "De mi 15% del parque" }
 
 **Bloque 3 — Retorno de la Inversión (ROI):**
-- SectionHeader: "Retorno de la Inversión (ROI)" size="md" + ícono menú (⋮)
-- Dos filas de cards:
-  - Fila 1 (3 cards):
-    - Card 1: Icon + "Total Ahorrado" | $1.24 M | "+8% anual"
-    - Card 2: Icon + "Inversión inicial" | `u$s` compact (`socioRoiMetrics`) | "37% recuperada"
-    - Card 3: Icon + "Payback estimado" | 5.5 años | "Desde Marzo 2024"
-  - Fila 2 (2 cards):
-    - Card 1: "TIR (actualizada)" | 18.5%
-    - Card 2: "Inicio de operaciones" | Marzo 2024
+- `SectionHeader` `level="h2"`: "Retorno de la Inversión (ROI)" + `TabsForBlocks` DOLAR | ARS (`?currency=`, mismo patrón que GDD/GDCV ROI)
+- Grid KPI = paridad GDD (`SocioRoiView` + `socioRoiKpis`):
+  - Card 1: Inversión Recuperada + `KpiProgressBar`
+  - Card 2: Recupero Estimado + badge `Payback` + `KpiPaybackTimeline`
+  - Card 3: col `340px` (alineada al panel energía arriba). `lg`: TIR|Plazo fila 1, Mi Inversión fila 2, botón abajo. Mobile: TIR|Plazo, Mi Inversión full, botón
+  - Botón «Ver Tabla de Recupero» → `SheetContentTable` (`showFooter={false}`) + `GddRoiRecuperoTable` `layout="embedded"`, `showColumnVisibility={false}`, `onCurrencyChange={handleCurrencyChange}`. La moneda DOLAR \| ARS es un tab **clickeable** en la toolbar de la tabla (mismo contenedor que Proyectado \| Histórico): convierte los valores y sincroniza `?currency=` igual que `/gdcv/roi`. Mocks `socioRoiProyectado` / `socioRoiHistorico`; anchos `lib/sheet-layout.ts`
 
-**Bloque 4 — Curva de Recuperación Acumulada:**
-- CardWithContent (REUTILIZAR del ROI AGC):
-  - Title: "Curva de Recuperación Acumulada"
-  - Subtitle: "Crédito acumulado vs Inversión inicial"
-  - Chart: **Usar RoiRecoveryLineChart (o equivalente del ROI GDD/GDCV-agc)**
-    - Línea sólida: Real (--chart-1)
-    - Línea punteada: Proyectada (--chart-2)
-    - Línea horizontal de referencia: Inversión ($4.27M)
-    - Marker Payback: visible con label "Payback 5.5 años"
-    - Eje Y: $1k–$6k
-    - Eje X: Mar 24 – JUN 27
-    - Relleno bajo la línea real (gris suave)
-  - Legend: "Real" | "Proyectada"
-
-**Bloque 5 — Historial de Compensaciones:**
+**Bloque 4 — Historial de Compensaciones:**
 - SectionHeader: "Historial de Compensaciones" size="md"
 - Tabla con columnas: Período | Energía Generada | Ahorro por Autoconsumo | Ahorro por Inyección | Ahorro Total Generado | Estado | acciones (⋮)
 - Características:
@@ -207,15 +190,15 @@ Referencia visual: GDCV__socio_02.png
     { mes: "Mar 26", ahorro: 47200 },
     { mes: "Abr 26", ahorro: 74400 }, // actual — destacado
   ],
-  ahorroAbril: { value: "$74.400,03", delta: "+12% vs mes anterior" },
+  ahorroAbril: { value: "$ 74.400,03", delta: "+12% vs mes anterior" },
   
   // Bloque 2 — Mi Energía Generada
   energiaGenerada: { value: "830.17", unit: "kWh", period: "Abril 2026 · En Curso" },
   energiaSparkline: [42, 58, 53, 67, 61, 74, 83],
   ahorroInyeccion: [
-    { icon: "DollarSignIcon", name: "Por autoconsumo virtual", value: "$54.200" },
-    { icon: "DollarSignIcon", name: "Por Energía Inyectada", value: "$20.200" },
-    { icon: "WalletIcon", name: "Total Ahorro en Abril", value: "$74.400", subtitle: "De mi 15% del parque" },
+    { icon: "DollarSignIcon", name: "Por autoconsumo virtual", value: "$ 54.200" },
+    { icon: "DollarSignIcon", name: "Por Energía Inyectada", value: "$ 20.200" },
+    { icon: "WalletIcon", name: "Total Ahorro en Abril", value: "$ 74.400", subtitle: "De mi 15% del parque" },
   ],
   ahorroEnergia: [
     { icon: "ZapIcon", name: "Energía asignada", value: "207.5 kWh" },
@@ -225,7 +208,7 @@ Referencia visual: GDCV__socio_02.png
   
   // Bloque 3 — ROI
   roi: {
-    totalAhorrado: "$1.24 M",
+    totalAhorrado: "$ 2,1M",
     totalAhorradoDelta: "+8% anual",
     inversionInicial: "u$s 5,7M",
     inversionRecuperada: "29%",
@@ -235,7 +218,7 @@ Referencia visual: GDCV__socio_02.png
     inicioOperaciones: "Marzo 2024",
   },
   
-  // Bloque 4 — Curva recuperación (USAR MISMO CHART DEL ROI AGC)
+  // Curva recuperación — mock `socioCurvaRecuperacion` (no en vista Mi Espacio; dev/charts)
   curvaRecuperacionData: [
     { fecha: "Mar 24", real: 1100, proyectada: 1200 },
     { fecha: "DIC 24", real: 1800, proyectada: 2100 },
@@ -247,14 +230,14 @@ Referencia visual: GDCV__socio_02.png
   ],
   curvaRecuperacionInversion: 4270,
   
-  // Bloque 5 — Historial de Compensaciones
+  // Bloque 4 — Historial de Compensaciones
   historicoCompensaciones: [
-    { periodo: "Abril 2026", energiaGenerada: "372 kWh", ahorroAutoconsumo: "$54.200", ahorroInyeccion: "$20.200", ahorroTotal: "$74.400", estado: "En Curso" },
-    { periodo: "Marzo 2026", energiaGenerada: "236 kWh", ahorroAutoconsumo: "$47.200", ahorroInyeccion: "$0", ahorroTotal: "$47.200", estado: "Aplicado" },
-    { periodo: "Febrero 2026", energiaGenerada: "256 kWh", ahorroAutoconsumo: "$51.200", ahorroInyeccion: "$0", ahorroTotal: "$51.200", estado: "Aplicado" },
-    { periodo: "Enero 2026", energiaGenerada: "302 kWh", ahorroAutoconsumo: "$60.400", ahorroInyeccion: "$0", ahorroTotal: "$60.400", estado: "Aplicado" },
-    { periodo: "Diciembre 2025", energiaGenerada: "361 kWh", ahorroAutoconsumo: "$72.200", ahorroInyeccion: "$0", ahorroTotal: "$72.200", estado: "Aplicado" },
-    { periodo: "Noviembre 2025", energiaGenerada: "413 kWh", ahorroAutoconsumo: "$82.600", ahorroInyeccion: "$0", ahorroTotal: "$82.600", estado: "Aplicado" },
+    { periodo: "Abril 2026", energiaGenerada: "372 kWh", ahorroAutoconsumo: "$ 54.200", ahorroInyeccion: "$ 20.200", ahorroTotal: "$ 74.400", estado: "En Curso" },
+    { periodo: "Marzo 2026", energiaGenerada: "236 kWh", ahorroAutoconsumo: "$ 47.200", ahorroInyeccion: "$ 0", ahorroTotal: "$ 47.200", estado: "Aplicado" },
+    { periodo: "Febrero 2026", energiaGenerada: "256 kWh", ahorroAutoconsumo: "$ 51.200", ahorroInyeccion: "$ 0", ahorroTotal: "$ 51.200", estado: "Aplicado" },
+    { periodo: "Enero 2026", energiaGenerada: "302 kWh", ahorroAutoconsumo: "$ 60.400", ahorroInyeccion: "$ 0", ahorroTotal: "$ 60.400", estado: "Aplicado" },
+    { periodo: "Diciembre 2025", energiaGenerada: "361 kWh", ahorroAutoconsumo: "$ 72.200", ahorroInyeccion: "$ 0", ahorroTotal: "$ 72.200", estado: "Aplicado" },
+    { periodo: "Noviembre 2025", energiaGenerada: "413 kWh", ahorroAutoconsumo: "$ 82.600", ahorroInyeccion: "$ 0", ahorroTotal: "$ 82.600", estado: "Aplicado" },
   ],
   
   // GDCV_socio_02 — Performance del Parque
@@ -307,7 +290,7 @@ Referencia visual: GDCV__socio_02.png
 - ✅ SectionHeader — h3 con acciones
 - ✅ StatList — items con inyección/energía (ya existe)
 - ✅ Bar chart "Energía generada" — REUTILIZAR del GDCV-agc (misma data, misma visual)
-- ✅ RoiRecoveryLineChart (o el chart ROI actual) — REUTILIZAR exactamente como está en GDD/GDCV-agc
+- ⚠️ RoiRecoveryLineChart — no en `/gdcv/socio`; mock `socioCurvaRecuperacion` solo dev/charts
 - ✅ Tabla con Column Sorting + Column Visibility + Row Actions — Pattern documentado en `components.md`
 
 ### Consistencia visual:

@@ -15,6 +15,7 @@ import {
 } from "recharts"
 
 import { chartColors } from "@/lib/chart-colors"
+import { formatCurrency } from "@/lib/format-currency"
 import {
   calcularFechaRecupero,
   type ROIDataPoint,
@@ -34,10 +35,9 @@ function formatFecha(fecha: string): string {
   return `${MONTHS_ES[parseInt(month, 10) - 1]} ${year}`
 }
 
-function formatMoney(v: number): string {
-  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(2)}m`
-  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}k`
-  return `$${v}`
+/** Montos del chart en USD — locale `es-AR` vía `formatCurrency`. */
+function formatMoney(v: number, mode: "full" | "axis" = "full"): string {
+  return formatCurrency(v, "usd", mode)
 }
 
 /** Etiqueta dos líneas para la línea de inversión (sin prefijo "Meta:"). */
@@ -51,7 +51,7 @@ function MetaInvestmentLabel({
   if (viewBox == null || viewBox.x == null || viewBox.width == null) return null
   const x = viewBox.x + viewBox.width
   const y = viewBox.y ?? 0
-  const amount = `$${(meta / 1_000_000).toFixed(2)}m`
+  const amount = formatCurrency(meta, "usd", "compact")
   return (
     <text
       textAnchor="end"
@@ -485,11 +485,7 @@ export function ROIProjectionChart({
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
-              tickFormatter={(v: number) => {
-                if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}m`
-                if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}k`
-                return `$${v}`
-              }}
+              tickFormatter={(v: number) => formatMoney(v, "axis")}
               width={56}
             />
 

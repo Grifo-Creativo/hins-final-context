@@ -12,7 +12,11 @@ import { parkName } from "@/data/gdd-performance-mock"
 
 const navTabs = [
   { value: "/gdd/performance", label: "Performance" },
-  { value: "/gdd/roi", label: "Retorno de Inversión" },
+  {
+    value: "/gdd/roi",
+    label: "Retorno de Inversión",
+    labelMobile: "ROI",
+  },
 ]
 
 const currencyTabs = [
@@ -28,7 +32,6 @@ export function GddPageHeading() {
   const isRoiView = pathname === "/gdd/roi"
 
   function handleNavChange(path: string) {
-    // Al navegar, preservar el currency param si existe
     const params = searchParams.toString()
     router.push(params ? `${path}?${params}` : path)
   }
@@ -41,7 +44,7 @@ export function GddPageHeading() {
       params.set("currency", newCurrency)
     }
     const qs = params.toString()
-    router.push(qs ? `${pathname}?${qs}` : pathname)
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
   }
 
   return (
@@ -55,12 +58,15 @@ export function GddPageHeading() {
       <div className="flex w-full min-w-0 items-center gap-4 sm:w-auto sm:gap-6">
         {isRoiView && (
           <TabsForBlocks
+            width="fit"
+            className="shrink-0"
             tabs={currencyTabs}
             value={currency}
             onValueChange={handleCurrencyChange}
           />
         )}
         <TabsForBlocks
+          width="fill"
           className="min-w-0 flex-1 sm:flex-initial"
           tabs={navTabs}
           value={pathname}

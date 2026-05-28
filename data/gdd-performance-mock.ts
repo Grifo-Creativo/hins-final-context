@@ -4,6 +4,7 @@ import {
   getChartRangeSubtitle,
   sliceChartRangeSeries,
 } from "@/lib/chart-range-resolve"
+import { formatCurrency } from "@/lib/format-currency"
 import type { ChartRangeChip } from "@/types/chart-range"
 
 export type PerformancePeriod = ChartRangeChip
@@ -84,13 +85,13 @@ export const generationSparklinePoints = [
 
 export const savingsCardMock = {
   label: "Ahorro acumulado en Abril",
-  amount: "$66.400",
+  amount: formatCurrency(66_400, "ars", "full"),
   deltaBadge: "+36% Mes",
 }
 
 export const tariffCardMock = {
   label: "Valor de Tarifa Actual",
-  value: "$80",
+  value: formatCurrency(80, "ars", "full"),
   unit: "/ kWh",
   deltaBadge: "+ 1.6% Mes",
 }
@@ -110,47 +111,47 @@ export const consumptionHistoryMock: ConsumptionHistoryRow[] = [
     energyGenerated: "830 kWh",
     energyPurchased: "60 kWh",
     coveragePercent: "93%",
-    totalConsumption: "890 Kwh",
-    coverageMoney: "$66.400",
+    totalConsumption: "890 kWh",
+    coverageMoney: formatCurrency(66_400, "ars", "full"),
   },
   {
     period: "Marzo 2026",
     energyGenerated: "610 kWh",
     energyPurchased: "220 kWh",
     coveragePercent: "73%",
-    totalConsumption: "830 Kwh",
-    coverageMoney: "$48.800",
+    totalConsumption: "830 kWh",
+    coverageMoney: formatCurrency(48_800, "ars", "full"),
   },
   {
     period: "Febrero 2026",
     energyGenerated: "690 kWh",
     energyPurchased: "189 kWh",
     coveragePercent: "78.5%",
-    totalConsumption: "879 Kwh",
-    coverageMoney: "$55.200",
+    totalConsumption: "879 kWh",
+    coverageMoney: formatCurrency(55_200, "ars", "full"),
   },
   {
     period: "Enero 2026",
     energyGenerated: "780 kWh",
     energyPurchased: "20 kWh",
     coveragePercent: "97.5%",
-    totalConsumption: "800 Kwh",
-    coverageMoney: "$62.400",
+    totalConsumption: "800 kWh",
+    coverageMoney: formatCurrency(62_400, "ars", "full"),
   },
   {
     period: "Diciembre 2025",
     energyGenerated: "870 kWh",
     energyPurchased: "0 kWh",
     coveragePercent: "100%",
-    totalConsumption: "870 Kwh",
-    coverageMoney: "$69.600",
+    totalConsumption: "870 kWh",
+    coverageMoney: formatCurrency(69_600, "ars", "full"),
   },
   {
     period: "Noviembre 2025",
     energyGenerated: "920 kWh",
     energyPurchased: "4.2 kWh",
     coveragePercent: "99.5%",
-    totalConsumption: "924 Kwh",
-    coverageMoney: "$73.600",
+    totalConsumption: "924 kWh",
+    coverageMoney: formatCurrency(73_600, "ars", "full"),
   },
 ]

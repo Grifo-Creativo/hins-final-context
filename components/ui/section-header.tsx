@@ -5,9 +5,13 @@ import { cn } from "@/lib/utils"
 interface SectionHeaderProps {
   title: string
   /**
-   * Jerarquía semántica.
-   * md = h3 (card principal, títulos de contenido unitario)
-   * sm = no recomendado — usar directamente <Heading level="h3"> en su lugar
+   * Jerarquía semántica del título.
+   * - `h3` (default): bloques/cards — `Heading` `text-lg`
+   * - `h2`: sección de vista (ej. ROI socio) — tag `h2`, misma escala visual que `h3` en bloques ROI
+   */
+  level?: "h2" | "h3"
+  /**
+   * @deprecated Usar `level`. Mantenido por compatibilidad (`size="sm"` → estilos pequeños en h3).
    */
   size?: "md" | "sm"
   /** Slot libre — TabsForBlocks, DropdownMenu, Button, Select, etc. */
@@ -28,27 +32,36 @@ interface SectionHeaderProps {
  */
 export function SectionHeader({
   title,
+  level = "h3",
   size = "md",
   action,
   className,
 }: SectionHeaderProps) {
   const isMd = size === "md"
-
-  // md = H3 (default, recomendado)
-  // sm = pequeño, deprecated
-  const headingLevel = isMd ? ("h3" as const) : ("h3" as const)
+  const titleClassName =
+    level === "h2"
+      ? "text-lg font-semibold text-foreground"
+      : isMd
+        ? undefined
+        : "text-sm font-medium"
 
   return (
-    <div className={cn("flex items-center justify-between gap-4", className)}>
-      <Heading
-        level={headingLevel}
-        className={isMd ? "" : "text-sm font-medium"}
-      >
-        {title}
-      </Heading>
-      {action && (
-        <div className="ml-auto flex-shrink-0">{action}</div>
+    <div
+      className={cn(
+        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+        className
       )}
+    >
+      {level === "h2" ? (
+        <h2 className={cn("min-w-0 text-balance", titleClassName)}>{title}</h2>
+      ) : (
+        <Heading level="h3" className={titleClassName}>
+          {title}
+        </Heading>
+      )}
+      {action ? (
+        <div className="flex w-full shrink-0 sm:ml-auto sm:w-auto">{action}</div>
+      ) : null}
     </div>
   )
 }

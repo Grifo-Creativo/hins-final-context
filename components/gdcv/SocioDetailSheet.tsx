@@ -2,20 +2,14 @@
 "use client"
 
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
 import { CardWire } from "@/components/ui/card-wire"
 import { FeatureItem } from "@/components/ui/feature-item"
 import { IconBadge } from "@/components/ui/icon-badge"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { SheetContentDetail } from "@/components/ui/sheet-ops"
 import { StatList, type StatListItem } from "@/components/ui/stat-list"
 import type { SocioRow } from "@/data/gdcv-mock"
-import { ParkingMeter, PlugZap, XIcon } from "lucide-react"
+import { formatCurrency } from "@/lib/format-currency"
+import { ParkingMeter, PlugZap } from "lucide-react"
 
 /** Fila de tabla / trigger del sheet — alias local para props públicas. */
 export type Socio = SocioRow
@@ -53,7 +47,7 @@ const DETAIL_MAP: Record<
     autoconsumoKwh: 21.0,
     inyectadaKwh: 10.0,
     totalKwh: 31.0,
-    ahorroGenerado: "$62.000",
+    ahorroGenerado: formatCurrency(62_000, "ars", "full"),
     potenciaUtilizada: "NN kWh",
     fechaDeAlta: "NN",
     nombreResponsable: "NN",
@@ -116,35 +110,13 @@ export function SocioDetailSheet({
   const infoItems = buildInfoItems(detail)
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="right"
-        showCloseButton={false}
-        className="flex h-full max-h-dvh w-full max-w-sm flex-col gap-0 overflow-hidden p-0"
-      >
-        <div className="flex min-h-0 flex-1 flex-col">
-          {/* 1. Header */}
-          <SheetHeader className="shrink-0 space-y-0 p-6 text-left">
-            <div className="flex flex-row items-start justify-between gap-4">
-              <SheetTitle className="pr-2 text-2xl font-semibold leading-tight text-foreground">
-                {socio.nombre}
-              </SheetTitle>
-              <SheetClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className="size-8 shrink-0 shadow-xs"
-                  aria-label="Cerrar"
-                >
-                  <XIcon className="size-4" aria-hidden />
-                </Button>
-              </SheetClose>
-            </div>
-          </SheetHeader>
-
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="flex flex-col gap-6 p-6 pt-0">
+    <SheetContentDetail
+      open={open}
+      onOpenChange={onOpenChange}
+      title={socio.nombre}
+      scrollVariant="flush"
+    >
+      <div className="flex flex-col gap-6 p-6 pt-0">
               {/* 2. Alert — no tocar */}
               {socio.tipo === "Virtual" && (
                 <Alert variant="warning" className="w-full p-4">
@@ -242,22 +214,7 @@ export function SocioDetailSheet({
 
               {/* 6. Más información del socio */}
               <StatList title="Más información del socio" items={infoItems} />
-            </div>
-          </div>
-
-          {/* 7. Footer */}
-          <div className="shrink-0 border-t border-border bg-popover p-6">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => onOpenChange(false)}
-            >
-              Cerrar
-            </Button>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+      </div>
+    </SheetContentDetail>
   )
 }

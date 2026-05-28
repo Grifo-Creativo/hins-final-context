@@ -44,6 +44,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { currencyTabsForBlocks } from "@/components/ui/currency-context-indicator"
 import {
   gddRoiHistorico,
   gddRoiProyectado,
@@ -54,11 +55,8 @@ import {
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
 
-import {
-  currencyColumnLabel,
-  formatRoiFromUsd,
-  type CurrencyCode,
-} from "@/lib/format-currency"
+import { formatRoiFromUsdResponsive, type CurrencyCode } from "@/lib/format-currency"
+import { useIsMobile } from "@/hooks/use-is-mobile"
 
 export type GddRoiCurrency = CurrencyCode
 export type GddRoiTableVariant = "proyectado" | "historico"
@@ -107,8 +105,11 @@ function actionsColumn<T extends { periodo: string }>(): ColumnDef<T> {
   }
 }
 
-function buildProyectadoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiProyectadoRow>[] {
-  const label = currencyColumnLabel(currency)
+function buildProyectadoColumns(
+  currency: GddRoiCurrency,
+  tipoCambio: number,
+  isMobile: boolean
+): ColumnDef<GddRoiProyectadoRow>[] {
   return [
     {
       accessorKey: "periodo",
@@ -125,14 +126,15 @@ function buildProyectadoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiProye
     {
       accessorKey: "ahorroEstimado",
       enableSorting: false,
-      meta: { label: `Ahorro Estimado (${label})` },
-      header: `Ahorro Estimado (${label})`,
+      meta: { label: "Ahorro Estimado" },
+      header: "Ahorro Estimado",
       cell: ({ row }) => (
         <span className="tabular-nums">
-          {formatRoiFromUsd(
+          {formatRoiFromUsdResponsive(
             row.original.ahorroEstimado,
             currency,
-            TIPO_CAMBIO_ARS
+            tipoCambio,
+            isMobile
           )}
         </span>
       ),
@@ -140,14 +142,15 @@ function buildProyectadoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiProye
     {
       accessorKey: "pendienteRecuperar",
       enableSorting: false,
-      meta: { label: `Pendiente de Recuperar (${label})` },
-      header: `Pendiente de Recuperar (${label})`,
+      meta: { label: "Pendiente de Recuperar" },
+      header: "Pendiente de Recuperar",
       cell: ({ row }) => (
         <span className="tabular-nums">
-          {formatRoiFromUsd(
+          {formatRoiFromUsdResponsive(
             row.original.pendienteRecuperar,
             currency,
-            TIPO_CAMBIO_ARS
+            tipoCambio,
+            isMobile
           )}
         </span>
       ),
@@ -155,8 +158,8 @@ function buildProyectadoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiProye
     {
       accessorKey: "progresoEstimado",
       enableSorting: false,
-      meta: { label: "Progreso Estimado (%)" },
-      header: "Progreso Estimado (%)",
+      meta: { label: "Avance de Recuperación" },
+      header: "Avance de Recuperación",
       cell: ({ row }) => (
         <span className="tabular-nums">
           {row.original.progresoEstimado.toFixed(1)}%
@@ -181,8 +184,11 @@ function buildProyectadoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiProye
   ]
 }
 
-function buildHistoricoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiHistoricoRow>[] {
-  const label = currencyColumnLabel(currency)
+function buildHistoricoColumns(
+  currency: GddRoiCurrency,
+  tipoCambio: number,
+  isMobile: boolean
+): ColumnDef<GddRoiHistoricoRow>[] {
   return [
     {
       accessorKey: "periodo",
@@ -199,14 +205,15 @@ function buildHistoricoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiHistor
     {
       accessorKey: "capRecuperado",
       enableSorting: false,
-      meta: { label: `Cap. Recuperado (${label})` },
-      header: `Cap. Recuperado (${label})`,
+      meta: { label: "Cap. Recuperado" },
+      header: "Cap. Recuperado",
       cell: ({ row }) => (
         <span className="tabular-nums">
-          {formatRoiFromUsd(
+          {formatRoiFromUsdResponsive(
             row.original.capRecuperado,
             currency,
-            TIPO_CAMBIO_ARS
+            tipoCambio,
+            isMobile
           )}
         </span>
       ),
@@ -214,14 +221,15 @@ function buildHistoricoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiHistor
     {
       accessorKey: "capRecuperadoAcumulado",
       enableSorting: false,
-      meta: { label: `Cap. Recuperado Acumulado (${label})` },
-      header: `Cap. Recuperado Acumulado (${label})`,
+      meta: { label: "Recupero Acumulado" },
+      header: "Recupero Acumulado",
       cell: ({ row }) => (
         <span className="tabular-nums">
-          {formatRoiFromUsd(
+          {formatRoiFromUsdResponsive(
             row.original.capRecuperadoAcumulado,
             currency,
-            TIPO_CAMBIO_ARS
+            tipoCambio,
+            isMobile
           )}
         </span>
       ),
@@ -229,8 +237,8 @@ function buildHistoricoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiHistor
     {
       accessorKey: "porcentajeRecuperacion",
       enableSorting: false,
-      meta: { label: "Porcentaje de Recuperación (%)" },
-      header: "Porcentaje de Recuperación (%)",
+      meta: { label: "Avance de Recuperación" },
+      header: "Avance de Recuperación",
       cell: ({ row }) => (
         <span className="tabular-nums">{row.original.porcentajeRecuperacion}%</span>
       ),
@@ -239,18 +247,48 @@ function buildHistoricoColumns(currency: GddRoiCurrency): ColumnDef<GddRoiHistor
   ]
 }
 
+export type GddRoiRecuperoTableLayout = "page" | "embedded"
+
 interface GddRoiRecuperoTableProps {
   variant: GddRoiTableVariant
   onVariantChange: (variant: GddRoiTableVariant) => void
   currency: GddRoiCurrency
+  proyectadoData?: GddRoiProyectadoRow[]
+  historicoData?: GddRoiHistoricoRow[]
+  tipoCambio?: number
+  /**
+   * `page` (default): bloque en vista ROI — superficie blanca + sombra.
+   * `embedded`: dentro de Sheet (sin shell de página; título externo).
+   */
+  layout?: GddRoiRecuperoTableLayout
+  /**
+   * @deprecated Usar `layout="embedded"`.
+   * Oculta el título del bloque (p. ej. sheet con `SheetTitle` propio).
+   */
+  hideTitle?: boolean
+  /** Menú «Ver columnas» (visibilidad TanStack). Default `true` — GDD/GDCV ROI. */
+  showColumnVisibility?: boolean
+  /**
+   * Tabs DOLAR|ARS clickeables en la toolbar (mismo contenedor que Proyectado|Histórico).
+   * Convierte los valores de la tabla. Si se omite, no se muestra (GDD/GDCV ROI heredan moneda del heading).
+   */
+  onCurrencyChange?: (currency: GddRoiCurrency) => void
 }
 
 export function GddRoiRecuperoTable({
   variant,
   onVariantChange,
   currency,
+  proyectadoData = gddRoiProyectado,
+  historicoData = gddRoiHistorico,
+  tipoCambio = TIPO_CAMBIO_ARS,
+  layout = "page",
+  hideTitle = false,
+  showColumnVisibility = true,
+  onCurrencyChange,
 }: GddRoiRecuperoTableProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     setColumnVisibility({})
@@ -259,12 +297,12 @@ export function GddRoiRecuperoTable({
   const columns = useMemo(
     () =>
       variant === "proyectado"
-        ? buildProyectadoColumns(currency)
-        : buildHistoricoColumns(currency),
-    [variant, currency]
+        ? buildProyectadoColumns(currency, tipoCambio, isMobile)
+        : buildHistoricoColumns(currency, tipoCambio, isMobile),
+    [variant, currency, tipoCambio, isMobile]
   )
 
-  const data = variant === "proyectado" ? gddRoiProyectado : gddRoiHistorico
+  const data = variant === "proyectado" ? proyectadoData : historicoData
 
   const table = useReactTable({
     data,
@@ -279,17 +317,54 @@ export function GddRoiRecuperoTable({
       ? "Tabla recupero de inversión proyectado"
       : "Tabla recupero de inversión histórico"
 
-  return (
-    <div className="rounded-xl bg-white shadow-xs">
-      <div className="flex flex-col gap-4 p-6 pb-0 sm:flex-row sm:items-center sm:justify-between">
-        <Heading level="h3">Tabla Recupero de Inversión</Heading>
-        <div className="flex w-full min-w-0 items-center gap-4 sm:w-auto">
-          <TabsForBlocks
-            className="min-w-0 flex-1 sm:flex-initial"
-            tabs={[...variantTabs]}
-            value={variant}
-            onValueChange={(v) => onVariantChange(v as GddRoiTableVariant)}
-          />
+  const isEmbedded = layout === "embedded" || hideTitle
+  const stickySurface = isEmbedded ? "popover" : "background"
+
+  const variantTabsControl = (
+    <TabsForBlocks
+      width="fill"
+      className={cn(
+        "h-8 w-full min-w-0 shrink-0",
+        showColumnVisibility && !isEmbedded && "flex-1 sm:flex-initial"
+      )}
+      tabs={[...variantTabs]}
+      value={variant}
+      onValueChange={(v) => onVariantChange(v as GddRoiTableVariant)}
+    />
+  )
+
+  const currencyControl = onCurrencyChange ? (
+    <TabsForBlocks
+      width="fit"
+      className="h-8 shrink-0"
+      tabs={currencyTabsForBlocks}
+      value={currency}
+      onValueChange={(v) => onCurrencyChange(v as GddRoiCurrency)}
+    />
+  ) : null
+
+  const toolbar = isEmbedded ? (
+    <div
+      className={cn(
+        "pb-4",
+        currencyControl &&
+          "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      )}
+    >
+      {variantTabsControl}
+      {currencyControl}
+    </div>
+  ) : (
+    <div className="flex flex-col gap-4 p-6 pb-0 sm:flex-row sm:items-center sm:justify-between">
+      <Heading level="h3">Tabla Recupero de Inversión</Heading>
+      <div
+        className={cn(
+          "flex w-full min-w-0 items-center gap-4",
+          showColumnVisibility ? "sm:ml-auto sm:w-auto" : "w-full"
+        )}
+      >
+        {variantTabsControl}
+        {showColumnVisibility ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -317,10 +392,14 @@ export function GddRoiRecuperoTable({
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        ) : null}
       </div>
+    </div>
+  )
 
-      <div className="space-y-6 p-6 pt-4">
+  const tableBlock = (
+    <div className={cn("space-y-6", isEmbedded ? "pt-0" : "p-6 pt-4")}>
+      <div className={cn(isEmbedded && "min-w-0 overflow-x-auto")}>
         <Table aria-label={tableAriaLabel}>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
@@ -330,7 +409,10 @@ export function GddRoiRecuperoTable({
                     key={header.id}
                     className={cn(
                       "text-sm font-medium text-muted-foreground",
-                      stickyStartCellClassName(header.column.columnDef.meta)
+                      stickyStartCellClassName(
+                        header.column.columnDef.meta,
+                        { surface: stickySurface }
+                      )
                     )}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -345,7 +427,10 @@ export function GddRoiRecuperoTable({
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    className={stickyStartCellClassName(cell.column.columnDef.meta)}
+                    className={stickyStartCellClassName(
+                      cell.column.columnDef.meta,
+                      { surface: stickySurface }
+                    )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -354,29 +439,45 @@ export function GddRoiRecuperoTable({
             ))}
           </TableBody>
         </Table>
-
-        <Pagination className="justify-end">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">1</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#">2</PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                3
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
       </div>
+
+      <Pagination className="justify-end">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious href="#" />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#">1</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#">2</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#" isActive>
+              3
+            </PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href="#" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  )
+
+  if (isEmbedded) {
+    return (
+      <div className="flex min-h-0 flex-col">
+        {toolbar}
+        {tableBlock}
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-xl bg-white shadow-xs">
+      {toolbar}
+      {tableBlock}
     </div>
   )
 }

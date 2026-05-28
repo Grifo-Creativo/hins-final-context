@@ -1,115 +1,111 @@
 // components/gdcv/GdcvRoiView.tsx
 "use client"
 
-import { RoiRecoveryLineChart } from "@/components/charts/RoiRecoveryLineChart"
-import { CardWithContent } from "@/components/ui/card-with-content"
-import { KpiCard } from "@/components/ui/kpi-card"
-import { SoftBadge } from "@/components/ui/soft-badge"
-import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
-import { roiRecoveryChartConfig } from "@/data/chart-config"
+import { useState } from "react"
+import { useSearchParams } from "next/navigation"
+
 import {
-  curvaRecuperacionData,
-  curvaRecuperacionInversion,
-  roiKpis,
+  GddRoiRecuperoTable,
+  type GddRoiCurrency,
+} from "@/components/gdd/GddRoiRecuperoTable"
+import { Card } from "@/components/ui/card"
+import { KpiProgressBar } from "@/components/ui/kpi-progress-bar"
+import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
+import { KpiWithAsset } from "@/components/ui/kpi-with-asset"
+import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
+
+import {
+  gdcvRoiHistorico,
+  gdcvRoiKpis,
+  gdcvRoiProyectado,
 } from "@/data/gdcv-agc-mock"
-import { DollarSignIcon, TrendingUpIcon } from "lucide-react"
+import { TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
+import { useIsMobile } from "@/hooks/use-is-mobile"
+import {
+  formatCurrency,
+  formatRoiFromUsdResponsive,
+} from "@/lib/format-currency"
 
 export function GdcvRoiView() {
+  const searchParams = useSearchParams()
+  const currency = (searchParams.get("currency") ?? "usd") as GddRoiCurrency
+  const isMobile = useIsMobile()
+  const [tablaTab, setTablaTab] = useState<"proyectado" | "historico">("proyectado")
+
+  const fmt = (valueUsd: number, desktopMode: "full" | "axis" = "full") =>
+    formatRoiFromUsdResponsive(
+      valueUsd,
+      currency,
+      TIPO_CAMBIO_ARS,
+      isMobile,
+      desktopMode
+    )
+
+  const pct = gdcvRoiKpis.porcentajeRecuperado
+  const totalInvertidoCompact = fmt(gdcvRoiKpis.totalInvertido, "axis")
+
   return (
     <div className="flex flex-1 flex-col gap-6">
-      {/* Block 1 — ROI KPIs */}
-      <div className="grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Col 1 — Inversión + Ahorrado en una card */}
-        <KpiCard>
-          <div className="flex min-h-0 flex-1 flex-col gap-6">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-background-subtle text-green-600">
-                  <TrendingUpIcon className="size-5" aria-hidden />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <p className="text-sm font-normal text-[#737373]">Inversión Inicial</p>
-                  <p className="text-xl font-semibold text-[#0A0A0A] tabular-nums">
-                    {roiKpis.inversionInicial}
-                  </p>
-                </div>
-              </div>
-              <SoftBadge className="flex-shrink-0">Marzo 2024</SoftBadge>
-            </div>
+      <div className="grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_auto]">
+        <KpiWithAsset
+          label="Inversión Recuperada"
+          value={fmt(gdcvRoiKpis.inversionRecuperada)}
+          asset={
+            <KpiProgressBar
+              percent={pct}
+              bottomLabels={{
+                left: { value: formatCurrency(0, currency) },
+                right: {
+                  label: "Total Invertido:",
+                  value: fmt(gdcvRoiKpis.totalInvertido),
+                },
+              }}
+            />
+          }
+          bottomLabel="Pendiente de recuperar"
+          bottomValue={fmt(gdcvRoiKpis.pendienteRecuperar)}
+        />
 
-            <div className="flex items-start gap-3">
-              <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-background-subtle text-green-600">
-                <DollarSignIcon className="size-5" aria-hidden />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="text-sm font-normal text-[#737373]">Total Ahorrado en Facturas</p>
-                <p className="text-xl font-semibold text-[#0A0A0A] tabular-nums">
-                  {roiKpis.ahorradoTotal}
-                </p>
-              </div>
-            </div>
-          </div>
-        </KpiCard>
-
-        {/* Col 2 — métricas arriba, barra al borde inferior (mt-auto; sin flex-1 vacío) */}
-        <KpiCard>
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="flex shrink-0 items-start justify-between gap-4">
-              <div className="flex flex-col gap-1">
-                <p className="text-sm text-muted-foreground">Cap. Recuperado</p>
-                <p className="text-xl font-semibold text-foreground tabular-nums">
-                  {roiKpis.capRecuperado}
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-1 items-end">
-                <p className="text-sm text-muted-foreground">Pendiente</p>
-                <p className="text-xl font-semibold text-foreground tabular-nums">
-                  {roiKpis.pendiente}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-auto flex shrink-0 flex-col gap-2">
-              <p className="text-left text-sm text-muted-foreground">
-                {roiKpis.porcentajeRecuperado}% recuperado
-              </p>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-border">
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${roiKpis.porcentajeRecuperado}%`,
-                    backgroundColor: "var(--chart-3)",
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </KpiCard>
-
-        {/* Col 3 — Recupero Estimado con Timeline */}
         <KpiWithTimeline
           label="Recupero Estimado"
-          value={roiKpis.recuperoEstimado}
-          metricBadge={`TIR ${roiKpis.tir}`}
-          timelineData={{
-            inicio: roiKpis.timeline.inicio,
-            hoy: roiKpis.timeline.hoy,
-            payback: roiKpis.timeline.payback,
-          }}
+          value={gdcvRoiKpis.recuperoEstimado}
+          metricBadge="Payback"
+          timelineData={gdcvRoiKpis.timeline}
         />
+
+        <Card className="flex h-full min-h-0 flex-col bg-white p-6 shadow-xs ring-0 rounded-xl">
+          <div className="grid min-h-0 flex-1 grid-cols-3 gap-4 lg:grid-cols-1 lg:gap-6 lg:content-between">
+            <KpiSecondaryMetric
+              label="TIR"
+              value={gdcvRoiKpis.tir}
+              size="standard"
+              valueClassName="text-green-600"
+              className="min-w-0"
+            />
+            <KpiSecondaryMetric
+              label="Plazo"
+              value={gdcvRoiKpis.plazo}
+              size="standard"
+              className="min-w-0 lg:items-start lg:text-left items-center text-center"
+            />
+            <KpiSecondaryMetric
+              label="Invertido"
+              value={totalInvertidoCompact}
+              size="standard"
+              className="min-w-0 items-end text-right lg:items-start lg:text-left"
+            />
+          </div>
+        </Card>
       </div>
 
-      {/* Block 2 — Curva */}
-      <CardWithContent
-        title="Curva de Recuperación Acumulada"
-      >
-        <RoiRecoveryLineChart
-          data={curvaRecuperacionData}
-          chartConfig={roiRecoveryChartConfig}
-          investmentReference={curvaRecuperacionInversion}
-        />
-      </CardWithContent>
+      <GddRoiRecuperoTable
+        variant={tablaTab}
+        onVariantChange={setTablaTab}
+        currency={currency}
+        proyectadoData={gdcvRoiProyectado}
+        historicoData={gdcvRoiHistorico}
+        tipoCambio={TIPO_CAMBIO_ARS}
+      />
     </div>
   )
 }
