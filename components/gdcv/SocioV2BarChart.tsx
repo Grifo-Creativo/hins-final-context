@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-is-mobile"
 import { getChartBarDensity } from "@/lib/chart-bar-density"
+import { formatCurrency } from "@/lib/format-currency"
 import { cn } from "@/lib/utils"
 
 export type SocioV2BarChartRow = {
@@ -45,7 +46,14 @@ function barFill(index: number, total: number): string {
 
 function formatBarLabel(value: number, unit: "dinero" | "energia"): string {
   if (unit === "dinero") {
-    return `$${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
+    return formatCurrency(value, "ars", "compact")
+  }
+  if (value >= 1_000) {
+    const k = value / 1_000
+    return `${k.toLocaleString("es-AR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })}k kWh`
   }
   return `${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })} kWh`
 }

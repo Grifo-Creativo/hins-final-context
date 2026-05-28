@@ -1,6 +1,7 @@
 // components/charts/MonetaryBarChart.tsx
 "use client"
 
+import { useMemo } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts"
 
 import {
@@ -9,25 +10,92 @@ import {
 } from "@/components/ui/chart"
 import { useIsMobile } from "@/hooks/use-is-mobile"
 import { getChartBarDensity } from "@/lib/chart-bar-density"
+import {
+  formatCurrency,
+  type CurrencyCode,
+} from "@/lib/format-currency"
 import { cn } from "@/lib/utils"
 
 type MonetaryBarChartProps = {
   data: { label: string; autoconsumo: number; inyectada: number }[]
   chartConfig: ChartConfig
   unit?: "dinero" | "energia"
+  /** Ahorro socio / facturación en ARS por defecto. */
+  currency?: CurrencyCode
   className?: string
-}
-
-function formatMoney(value: number): string {
-  return `$${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
 }
 
 function formatEnergy(value: number): string {
   return `${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })} kWh`
 }
 
-function formatValue(value: number, unit: "dinero" | "energia"): string {
-  return unit === "energia" ? formatEnergy(value) : formatMoney(value)
+function formatEnergyAxis(value: number): string {
+  if (value >= 1_000) {
+    return `${(value / 1_000).toLocaleString("es-AR", { maximumFractionDigits: 0 })}k`
+  }
+  return `${value}`
+}
+
+function formatEnergyCompact(value: number): string {
+  if (value >= 1_000) {
+    const k = value / 1_000
+    return `${k.toLocaleString("es-AR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })}k`
+  }
+  return value.toLocaleString("es-AR", { maximumFractionDigits: 0 })
+}
+
+type MonetaryBarRow = {
+  label: string
+  autoconsumo: number
+  inyectada: number
+  total: number
+}
+
+type StackBarLabelProps = {
+  x?: number
+  y?: number
+  width?: number
+  index?: number
+}
+
+function renderStackTotalLabel(
+  unit: "dinero" | "energia",
+  currency: CurrencyCode,
+  rows: MonetaryBarRow[]
+) {
+  return (props: StackBarLabelProps) => {
+    const index = props.index ?? -1
+    const row = rows[index]
+    if (
+      !row ||
+      props.x == null ||
+      props.y == null ||
+      props.width == null
+    ) {
+      return null
+    }
+
+    const label =
+      unit === "dinero"
+        ? formatCurrency(row.total, currency, "compact")
+        : formatEnergyCompact(row.total)
+
+    return (
+      <text
+        x={Number(props.x) + Number(props.width) / 2}
+        y={Number(props.y) - 6}
+        textAnchor="middle"
+        fill="var(--foreground)"
+        fontSize={10}
+        fontWeight={500}
+      >
+        {label}
+      </text>
+    )
+  }
 }
 
 type CustomTooltipProps = {
@@ -35,6 +103,7 @@ type CustomTooltipProps = {
   payload?: { dataKey?: string; value?: number }[]
   label?: string
   unit: "dinero" | "energia"
+  currency: CurrencyCode
 }
 
 function getStackColor(
@@ -51,6 +120,7 @@ function CustomTooltip({
   payload,
   label,
   unit,
+  currency,
   chartConfig,
 }: CustomTooltipProps & { chartConfig: ChartConfig }) {
   if (!active || !payload?.length) return null
@@ -72,6 +142,11 @@ function CustomTooltip({
     "var(--chart-stack-autoconsumo)"
   )
 
+  const formatPart = (value: number) =>
+    unit === "energia"
+      ? formatEnergy(value)
+      : formatCurrency(value, currency, "full")
+
   return (
     <div className="rounded-lg border border-border bg-popover p-3 text-sm shadow-md">
       <div className="mb-2 flex items-center gap-2">
@@ -81,7 +156,7 @@ function CustomTooltip({
         />
         <span className="text-foreground">Energía Inyectada</span>
         <span className="ml-auto font-semibold text-foreground">
-          {formatValue(inyectada, unit)}
+          {formatPart(inyectada)}
         </span>
       </div>
       <div className="mb-3 flex items-center gap-2">
@@ -91,14 +166,14 @@ function CustomTooltip({
         />
         <span className="text-foreground">Autoconsumo virtual</span>
         <span className="ml-auto font-semibold text-foreground">
-          {formatValue(autoconsumo, unit)}
+          {formatPart(autoconsumo)}
         </span>
       </div>
       <div className="border-t border-border pt-2">
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">{totalLabel}</span>
           <span className="font-semibold text-foreground">
-            {formatValue(total, unit)}
+            {formatPart(total)}
           </span>
         </div>
       </div>
@@ -110,10 +185,19 @@ export function MonetaryBarChart({
   data,
   chartConfig,
   unit = "dinero",
+  currency = "ars",
   className,
 }: MonetaryBarChartProps) {
   const isMobile = useIsMobile()
-  const n = data.length
+  const chartData = useMemo<MonetaryBarRow[]>(
+    () =>
+      data.map((row) => ({
+        ...row,
+        total: row.autoconsumo + row.inyectada,
+      })),
+    [data]
+  )
+  const n = chartData.length
   const density = getChartBarDensity(n, isMobile)
 
   return (
@@ -125,11 +209,11 @@ export function MonetaryBarChart({
       )}
     >
       <BarChart
-        data={data}
+        data={chartData}
         margin={{
           left: 4,
           right: 8,
-          top: 8,
+          top: density.showBarLabels ? 28 : 8,
           bottom: density.xAxisAngle ? 8 : 4,
         }}
       >
@@ -156,17 +240,19 @@ export function MonetaryBarChart({
           className="text-muted-foreground"
           tickFormatter={(v: number) =>
             unit === "energia"
-              ? v >= 1000
-                ? `${(v / 1000).toLocaleString("es-AR", { maximumFractionDigits: 0 })}k`
-                : `${v}`
-              : v >= 1000
-                ? `$${(v / 1000).toLocaleString("es-AR", { maximumFractionDigits: 0 })}k`
-                : `$${v}`
+              ? formatEnergyAxis(v)
+              : formatCurrency(v, currency, "axis")
           }
         />
         {density.showTooltip ? (
           <Tooltip
-            content={<CustomTooltip unit={unit} chartConfig={chartConfig} />}
+            content={
+              <CustomTooltip
+                unit={unit}
+                currency={currency}
+                chartConfig={chartConfig}
+              />
+            }
             cursor={{ fill: "rgba(0,0,0,0.05)" }}
           />
         ) : null}
@@ -191,6 +277,11 @@ export function MonetaryBarChart({
           )}
           radius={n <= 16 ? [6, 6, 0, 0] : 0}
           barSize={density.barSize}
+          label={
+            density.showBarLabels
+              ? renderStackTotalLabel(unit, currency, chartData)
+              : false
+          }
         />
       </BarChart>
     </ChartContainer>

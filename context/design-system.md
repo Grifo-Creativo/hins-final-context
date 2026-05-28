@@ -389,9 +389,29 @@ Ciertos charts requieren semántica financiera que va más allá de la rampa ver
 - `DailyGenerationChartBlock` → bloque UI completo vista 1D (DatePicker + KPIs + nav + chart) — **Spec completo:** `components.md`
 - `ROIProjectionChart` → proyección financiera multi-escenario — **Paleta:** Zinc + Green + Rose
 
+### Formato monetario (ARS / USD)
+
+**Helper:** `/lib/format-currency.ts` — única fuente para montos en UI y charts.  
+**Spec de implementación (API, consumidores, excepciones):** `context/components.md` → [FormatCurrency](#formatcurrency).
+
+| Moneda | Prefijo en montos | Label en tabs / toggles |
+|---|---|---|
+| ARS | `$ ` (con espacio) | `ARS` |
+| USD | `u$s ` (con espacio) | `DOLAR` |
+
+**Números (locale `es-AR`):** miles `.` · decimales `,` · sin `,00` en montos operativos (centavos ARS omitidos salvo TC/tarifa con `decimals: 2`).
+
+| Modo | Uso | Ejemplo |
+|---|---|---|
+| `full` | KPI, tooltip, tablas | `$ 82.600` · `u$s 3.779` |
+| `compact` | Solo label sobre barra | `$ 82,6k` · `u$s 3,8k` |
+| `axis` | Eje Y chart | `$ 83k` · `u$s 4k` |
+
+**Por pantalla:** Socio Mi Ahorro → `ars`. GDD ROI → `usd` base, `ars` vía `formatRoiFromUsd` + `TIPO_CAMBIO_ARS`.
+
 ### Formato de horas en charts diarios
 
-Convención fija para vista **1D / DIARIO** — helpers en `/lib/chart-day-format.ts`:
+Convención fija para vista **1D / DIA** (chip de rango en header de card) — helpers en `/lib/chart-day-format.ts`:
 
 | Contexto | Formato | Ejemplo |
 |---|---|---|

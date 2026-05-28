@@ -1,127 +1,66 @@
 // data/gdd-roi-mock.ts
 
-import type { ChartRangeChip } from "@/types/chart-range"
-
+// Re-exportado: otros módulos (gdcv-agc-mock, lib/roi-curve-to-projection) dependen de este tipo
 export type RoiCurvePoint = {
   label: string
   real: number | null
   projected: number | null
-  /** Si el backend provee escenario optimista por punto — si no, se deriva desde `projected`. */
   projectedOptimista?: number | null
-  /** Si el backend provee escenario conservador por punto — si no, se deriva desde `projected`. */
   projectedConservador?: number | null
 }
 
-export const roiSummaryCards = {
-  totalSavings: {
-    label: "Ahorro total generado",
-    value: "$14.200.000",
-    badge: "+8% anual",
-  },
-  initialInvestment: {
-    label: "Inversión inicial",
-    value: "$38.000.000",
-    recoveredPercent: 37,
-  },
-  payback: {
-    label: "Payback estimado",
-    value: "6,8 años",
-    subtitle: "Desde Marzo 2024",
-  },
-}
-
-export const roiSecondaryMetrics = {
-  irr: {
-    label: "TIR (actualizada)",
-    value: "16.2%",
-  },
-  operationsStart: {
-    label: "Inicio de operaciones",
-    value: "Junio 2023",
+export const gddRoiKpis = {
+  totalInvertido: 21_000_000,
+  inversionRecuperada: 6_000_000,
+  porcentajeRecuperado: 28.5,
+  pendienteRecuperar: 15_000_000,
+  recuperoEstimado: "7.0 años",
+  tir: "15.00%",
+  plazo: "20 años",
+  timeline: {
+    inicio: { label: "Inicio", fecha: "Mayo 2024" },
+    hoy: {
+      label: "Hoy",
+      fecha: "Mayo 2026",
+      pct: 28.5,
+      tooltipText: "Mayo 2026 · 2.0 Años",
+    },
+    payback: { label: "Payback", fecha: "Mayo 2031" },
   },
 }
 
-/**
- * Serie canónica mensual — valores en **miles de ARS** (coherente con KPIs: ÷1000 → $M en leyendas).
- * 6M = últimos 6 puntos; 3M = últimos 3; 1M = serie semanal aparte — §5 UX.
- */
-const ROI_CURVE_MONTHLY_CANONICAL: readonly RoiCurvePoint[] = [
-  { label: "SEP 24", real: 4472, projected: null },
-  { label: "DIC 24", real: 7265, projected: null },
-  { label: "MAR 25", real: 9246, projected: null },
-  { label: "JUN 25", real: 11558, projected: null },
-  { label: "SEP 25", real: 12879, projected: null },
-  { label: "DIC 25", real: 14200, projected: 14200 },
-  { label: "MAR 26", real: null, projected: 15500 },
-  { label: "JUN 26", real: null, projected: 22000 },
-  { label: "SEP 26", real: null, projected: 28000 },
-  { label: "DIC 26", real: null, projected: 32000 },
-  { label: "MAR 27", real: null, projected: 35000 },
-  { label: "JUN 27", real: null, projected: 38500 },
+export type GddRoiProyectadoRow = {
+  periodo: string
+  ahorroEstimado: number
+  pendienteRecuperar: number
+  progresoEstimado: number
+  estado: "En Curso" | "Estimado"
+}
+
+export const gddRoiProyectado: GddRoiProyectadoRow[] = [
+  { periodo: "Mayo 2026", ahorroEstimado: 180_000, pendienteRecuperar: 15_000_000, progresoEstimado: 28.5, estado: "En Curso" },
+  { periodo: "Junio 2026", ahorroEstimado: 140_000, pendienteRecuperar: 14_820_000, progresoEstimado: 29.4, estado: "Estimado" },
+  { periodo: "Julio 2026", ahorroEstimado: 150_000, pendienteRecuperar: 14_680_000, progresoEstimado: 30.1, estado: "Estimado" },
+  { periodo: "Agosto 2026", ahorroEstimado: 190_000, pendienteRecuperar: 14_530_000, progresoEstimado: 30.8, estado: "Estimado" },
+  { periodo: "Septiembre 2026", ahorroEstimado: 270_000, pendienteRecuperar: 14_340_000, progresoEstimado: 32.1, estado: "Estimado" },
+  { periodo: "Octubre 2026", ahorroEstimado: 320_000, pendienteRecuperar: 14_070_000, progresoEstimado: 33.0, estado: "Estimado" },
 ]
 
-/** Cuatro puntos semanales sobre el tramo **real** más reciente (diciembre hacia punta Mensual). */
-const ROI_CURVE_WEEKLY_TRAILING: readonly RoiCurvePoint[] = [
-  { label: "3–10 Dic", real: 13336, projected: null },
-  { label: "11–17 Dic", real: 13605, projected: null },
-  { label: "18–24 Dic", real: 13910, projected: null },
-  { label: "25–31 Dic", real: 14200, projected: null },
+export type GddRoiHistoricoRow = {
+  periodo: string
+  capRecuperado: number
+  capRecuperadoAcumulado: number
+  porcentajeRecuperacion: number
+}
+
+export const gddRoiHistorico: GddRoiHistoricoRow[] = [
+  { periodo: "Abril 2026", capRecuperado: 210_000, capRecuperadoAcumulado: 6_000_000, porcentajeRecuperacion: 28.5 },
+  { periodo: "Marzo 2026", capRecuperado: 260_000, capRecuperadoAcumulado: 5_790_000, porcentajeRecuperacion: 27.6 },
+  { periodo: "Febrero 2026", capRecuperado: 340_000, capRecuperadoAcumulado: 5_530_000, porcentajeRecuperacion: 26.3 },
+  { periodo: "Enero 2026", capRecuperado: 390_000, capRecuperadoAcumulado: 5_190_000, porcentajeRecuperacion: 24.7 },
+  { periodo: "Diciembre 2025", capRecuperado: 370_000, capRecuperadoAcumulado: 4_800_000, porcentajeRecuperacion: 22.9 },
+  { periodo: "Noviembre 2025", capRecuperado: 310_000, capRecuperadoAcumulado: 4_430_000, porcentajeRecuperacion: 21.1 },
 ]
 
-function sliceLastMonths(points: readonly RoiCurvePoint[], count: 3 | 6): RoiCurvePoint[] {
-  return points.slice(-count).map((p) => ({ ...p }))
-}
-
-export function getRoiCurveSeries(range: ChartRangeChip): RoiCurvePoint[] {
-  switch (range) {
-    case "1m":
-      return ROI_CURVE_WEEKLY_TRAILING.map((p) => ({ ...p }))
-    case "6m":
-      return sliceLastMonths(ROI_CURVE_MONTHLY_CANONICAL, 6)
-    default:
-      return []
-  }
-}
-
-/** Payback sobre el chart completo; ocultar en 1M (ventana solo real reciente). */
-export function getRoiPaybackDotForRange(
-  range: ChartRangeChip
-): { label: string; value: number; text: string } | null {
-  if (range === "1m") return null
-  return paybackPoint
-}
-
-export function getRoiRecoveryChartSubtitle(range: ChartRangeChip): string {
-  switch (range) {
-    case "1m":
-      return "Agregación semanal (cuatro semanas sobre crédito acumulado observado)."
-    case "6m":
-      return "Agregación mensual — últimos 6 meses hasta la proyección."
-    default:
-      return ""
-  }
-}
-
-/** Compatibilidad: curva legacy de referencia = vista 6M. */
-export const roiCurveData: RoiCurvePoint[] = getRoiCurveSeries("6m")
-
-/**
- * Sparkline para KpiPrimary "Ahorro Total Generado" en GDD_02.
- * Derivado de los valores reales de la curva canónica — tendencia ascendente.
- */
-export const roiSavingsSparklinePoints: { value: number }[] = [
-  { value: 4472 },
-  { value: 7265 },
-  { value: 9246 },
-  { value: 11558 },
-  { value: 12879 },
-  { value: 14200 },
-]
-
-export const investmentReferenceValue = 38000
-
-export const paybackPoint = {
-  label: "JUN 27",
-  value: 38500,
-  text: "Payback\n(6,8 años)",
-}
+// Tasa de cambio fija para prototipo (ARS por USD)
+export const TIPO_CAMBIO_ARS = 1200

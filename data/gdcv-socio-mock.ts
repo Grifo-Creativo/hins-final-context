@@ -3,7 +3,7 @@ import {
   getChartRangeSubtitle,
   sliceChartRangeSeries,
 } from "@/lib/chart-range-resolve"
-import { GDCV_ENERGY_MONTHLY_CANONICAL } from "@/data/gdcv-mock"
+import { gdcvParkDetails, GDCV_ENERGY_MONTHLY_CANONICAL } from "@/data/gdcv-mock"
 import {
   getDailyGenerationData24,
   getDailyPeak,
@@ -15,7 +15,11 @@ import {
 import type { ChartRangeChip } from "@/types/chart-range"
 import type { RoiCurvePoint } from "@/data/gdd-roi-mock"
 import type { StatListItem } from "@/components/ui/stat-list"
+import { formatCurrency } from "@/lib/format-currency"
 import { DollarSignIcon, WalletIcon, ZapIcon } from "lucide-react"
+
+/** Inversión inicial del socio — canónico en USD (UI: `formatCurrency` → `u$s`). */
+export const SOCIO_INVERSION_INICIAL_USD = 5_700_000
 
 // ─── Identidad ──────────────────────────────────────────────────────────────
 
@@ -23,8 +27,44 @@ export const socioNombre = "Agro Sur Industrial"
 export const socioPorcentaje = 15
 export const socioParkName = "Parque Río Cuarto"
 
-/** Mismo inicio de operaciones que el parque GDCV. */
+/** Subtitle StatList / KPIs — cuota del socio en el parque. */
+export const socioCuotaDelParqueSubtitle = `De mi ${socioPorcentaje}% del parque`
+
+/**
+ * Terminología (prototipo):
+ * - Totales 980/815 kWp (`gdcvParkDetails`) → `/gdcv/socio/parque` bajo el chart.
+ * - 380/310 kWp (`socioPotencia*`) → Mi Espacio; potencia asignada al socio (no es 15% × total).
+ * - Inversión bajo chart en parque = `socioRoiMetrics` (inversión del socio), no CAPEX AGC.
+ */
 export const socioOperationsStartLabel = "Marzo 2024"
+
+/** Potencia asignada al socio — Mi Espacio (`socioParkDetails`). */
+export const socioPotenciaInstalada = "380 kWp"
+export const socioPotenciaAcople = "310 kWp"
+
+/** Totales del parque (AGC) — `SocioPerformanceView` fila 1 bajo chart. */
+export const socioParquePotenciaTotalInstalada = gdcvParkDetails.metrics[0].value
+export const socioParquePotenciaTotalAcople = gdcvParkDetails.metrics[1].value
+
+export type SocioParqueChartMetric = { label: string; value: string }
+
+/** Copy corto de equipo en `ParkDetailsCard` Mi Espacio. */
+export const socioParkEquipoLabel = "Solar HiKu7 655W"
+
+/**
+ * Detalle del parque — Mi Espacio (`/gdcv/socio`, columna 1).
+ * Grid 2×2: participación + mi instalada | equipo + mi acople. Sin último mantenimiento.
+ */
+export const socioParkDetails = {
+  imageSrc: "/images/png-assets/asset_gdcv.png",
+  imageAlt: "Parque Río Cuarto",
+  metrics: [
+    { label: "Mi Potencia Instalada", value: socioPotenciaInstalada },
+    { label: "Mi participación", value: `${socioPorcentaje}%` },
+    { label: "Equipo", value: socioParkEquipoLabel },
+    { label: "Potencia de Acople", value: socioPotenciaAcople },
+  ],
+} as const
 
 const AHORRO_PER_KWH = 599
 const PARQUE_KWH_FACTOR = 1.79
@@ -135,7 +175,7 @@ export function getSocioEnergiaGeneradaSeries(
 
 const SOCIO_ENERGIA_SHARE = socioPorcentaje / 100
 
-/** Generación horaria del socio (cuotaparte) — vista DIARIO en Mi Energía Generada. */
+/** Generación horaria del socio (cuotaparte) — vista DIA (chip `1d`) en Mi Energía Generada. */
 export function getSocioEnergiaGeneradaDailySeries(day: Date): DailyPoint[] {
   return getSocioParqueDailySeries(day).map(({ hour, kw }) => ({
     hour,
@@ -180,7 +220,7 @@ export const socioStatListInyeccion: StatListItem[] = [
     icon: WalletIcon,
     name: "Total Ahorro en Abril",
     value: "$74.400",
-    subtitle: "De mi 15% del parque",
+    subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
 
@@ -191,7 +231,7 @@ export const socioStatListEnergia: StatListItem[] = [
     icon: WalletIcon,
     name: "Total kWh en Abril",
     value: "207.5 kWh",
-    subtitle: "De mi 15% del parque",
+    subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
 
@@ -203,7 +243,7 @@ export const socioStatListAhorroEnergia: StatListItem[] = [
     icon: WalletIcon,
     name: "Total kWh en Abril",
     value: "830 kWh",
-    subtitle: "De mi 15% del parque",
+    subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
 
@@ -215,7 +255,7 @@ export const socioStatListV2Dinero: StatListItem[] = [
     icon: WalletIcon,
     name: "Total Ahorro Abril",
     value: "$74.400",
-    subtitle: "De mi 15% del parque",
+    subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
 
@@ -226,7 +266,7 @@ export const socioStatListV2Energia: StatListItem[] = [
     icon: WalletIcon,
     name: "Total Ahorro Abril",
     value: "830 kWh",
-    subtitle: "De mi 15% del parque",
+    subtitle: socioCuotaDelParqueSubtitle,
   },
 ]
 
@@ -261,7 +301,7 @@ export const socioRoiMetrics = {
   },
   inversionInicial: {
     label: "Inversión inicial",
-    value: "$5.70 M",
+    value: formatCurrency(SOCIO_INVERSION_INICIAL_USD, "usd", "compact"),
     recoveredPercent: 37,
     recoveredLabel: "37% recuperada",
   },
@@ -274,8 +314,29 @@ export const socioRoiMetrics = {
 
 export const socioRoiSecondaryMetrics = {
   tir: { label: "TIR (actualizada)", value: "18.5%" },
-  inicioOperaciones: { label: "Inicio de operaciones", value: "Marzo 2024" },
+  inicioOperaciones: { label: "Inicio de operaciones", value: socioOperationsStartLabel },
 }
+
+/** Grid 2×2 bajo chart — `SocioPerformanceView` (`/gdcv/socio/parque`). */
+export const socioParqueChartMetricRows: readonly [
+  readonly [SocioParqueChartMetric, SocioParqueChartMetric],
+  readonly [SocioParqueChartMetric, SocioParqueChartMetric],
+] = [
+  [
+    { label: "Potencia total instalada", value: socioParquePotenciaTotalInstalada },
+    { label: "Potencia total de acople", value: socioParquePotenciaTotalAcople },
+  ],
+  [
+    {
+      label: socioRoiMetrics.inversionInicial.label,
+      value: socioRoiMetrics.inversionInicial.value,
+    },
+    {
+      label: socioRoiSecondaryMetrics.inicioOperaciones.label,
+      value: socioRoiSecondaryMetrics.inicioOperaciones.value,
+    },
+  ],
+] as const
 
 // ─── Curva de Recuperación ────────────────────────────────────────────────────
 // Values in thousands of ARS (1 unit = $1.000)
@@ -394,21 +455,10 @@ export { MOCK_TODAY as socioMockToday }
 export const socioEnergiaPark = {
   value: "204.59",
   unit: "kWh",
-  delta: "13.556 kWh desde el Inicio",
+  delta: "+10 kWh vs mes anterior",
 }
 
 export const socioEnergiaParkSparkline = [75, 92, 88, 110, 105, 130, 204].map((v) => ({ value: v }))
-
-export const socioPotenciaInstalada = "380 kWp"
-export const socioPotenciaAcople = "310 kWp"
-
-/** Segunda fila del bloque KPI bajo el chart — reemplazar labels/values cuando estén definidos */
-export const socioParqueKpiRow2 = {
-  leftLabel: "—",
-  leftValue: "—",
-  rightLabel: "—",
-  rightValue: "—",
-} as const
 
 export const socioCantidadSocios = "6 Cuotapartes"
 

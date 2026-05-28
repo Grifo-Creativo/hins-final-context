@@ -217,6 +217,7 @@ app/
 - ✅ Props interface (TypeScript tipado)
 - ✅ Casos de uso (ejemplos de código)
 - ✅ Notas para el agente (restricciones, evoluciones futuras)
+- ✅ Montos monetarios → sección **FormatCurrency** en `components.md` + `lib/format-currency.ts` (no duplicar formateo)
 
 ### Luego:
 - ✅ Implementar en `/components` siguiendo spec
@@ -273,7 +274,7 @@ Estos patterns se usan en múltiples vistas. Están documentados una sola vez, s
 ## 9. El Actor Socio (Contexto Crítico)
 
 ### Quién es
-Socio/Cesionario — Participante del parque GDCV con cuotaparte porcentual (ej: 25%).
+Socio/Cesionario — Participante del parque GDCV con cuotaparte porcentual (ej: 15% — `socioPorcentaje`).
 
 ### Pregunta clave que responde
 ¿Me está rindiendo la inversión? ¿Qué impacto real está teniendo en mi factura?

@@ -1,6 +1,11 @@
 // components/ui/kpi-with-timeline.tsx (VERSIÓN SIMPLIFICADA)
 import { Card } from "@/components/ui/card"
-import { HinsTooltip } from "@/components/ui/hins-tooltip"
+import { SoftBadge } from "@/components/ui/soft-badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface TimelineData {
   inicio: { label: string; fecha: string }
@@ -39,9 +44,7 @@ export function KpiWithTimeline({
               </p>
             </div>
             {metricBadge && (
-              <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-semibold text-foreground flex-shrink-0">
-                {metricBadge}
-              </span>
+              <SoftBadge className="flex-shrink-0">{metricBadge}</SoftBadge>
             )}
           </div>
         </div>
@@ -65,21 +68,28 @@ export function KpiWithTimeline({
               style={{ backgroundColor: timelineAccent }}
             />
 
-            {/* Node: Hoy (with HinsTooltip) */}
+            {/* Node: Hoy — tooltip (Provider global en app/layout.tsx) */}
             <div className="absolute -translate-x-1/2" style={{ left: `${pct}%` }}>
-              <HinsTooltip
-                trigger={
-                  <div
-                    className="size-3 rounded-full cursor-pointer"
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="size-3 cursor-pointer rounded-full border-0 bg-transparent p-0"
+                    aria-label="Ver detalle del período actual"
                     style={{
                       backgroundColor: timelineAccent,
                       border: "2px solid var(--background)",
                       boxShadow: `0 0 0 2px ${timelineAccent}`,
                     }}
                   />
-                }
-                content={timelineData.hoy.tooltipText}
-              />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-foreground text-background text-xs font-normal rounded-md py-2 px-3"
+                >
+                  {timelineData.hoy.tooltipText}
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             {/* Node: Payback */}
@@ -96,10 +106,10 @@ export function KpiWithTimeline({
             </div>
 
             <p
-              className="text-[11px] font-medium -translate-x-1/2 absolute"
+              className="absolute -translate-x-1/2 text-[11px] font-medium"
               style={{ left: `${pct}%`, color: timelineAccent }}
             >
-              {timelineData.hoy.fecha}
+              {timelineData.hoy.label}
             </p>
 
             <div className="flex flex-col gap-0.5 items-end text-right">

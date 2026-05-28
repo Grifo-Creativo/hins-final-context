@@ -8,6 +8,7 @@ import { KpiRoiCard } from "@/components/ui/kpi-roi-card"
 import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
 import { roiRecoveryChartConfig } from "@/data/chart-config"
 import {
+  SOCIO_INVERSION_INICIAL_USD,
   SOCIO_INVERSION_REFERENCIA,
   socioCurvaRecuperacion,
   socioRoiMetrics,
@@ -17,7 +18,7 @@ import { DollarSignIcon, TrendingUpIcon } from "lucide-react"
 
 export function SocioRoiView() {
   // Calcular métricas derivadas
-  const inversionInicial = 5_700_000 // $5.70M
+  const inversionInicial = SOCIO_INVERSION_INICIAL_USD
   const capitalRecuperado = 2_130_000 // $2.13M (37% de inversión)
   const pendiente = inversionInicial - capitalRecuperado // $3.57M
   const porcentajeRecuperado = 37

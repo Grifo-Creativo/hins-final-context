@@ -22,6 +22,10 @@
 11. [KpiPrimary](#kpiprimary)
 12. [KpiPrimaryCompact](#kpiprimarycompact)
 13. [KpiSecondary](#kpisecondary)
+13b. [KpiSecondaryMetric](#kpisecondarymetric)
+13c. [ParkDetailsCard](#parkdetailscard)
+13d. [ChartRangeOptions](#chartrangeoptions)
+13e. [FormatCurrency](#formatcurrency)
 14. [SoftBadge](#softbadge)
 15. [StatusBadge](#statusbadge)
 16. [ModelBadge](#modelbadge)
@@ -523,7 +527,7 @@ const buttonVariants = cva(
 **Fuente:** shadcn/ui Tabs — variante Boxed (shadcn studio)
 
 ### Cuándo usar
-- Selector de período temporal (1M / 3M / 6M / 1A / TODO)
+- Selector de período temporal (DIA / 1M / 6M / 1A / TODO) — ver [ChartRangeOptions](#chartrangeoptions)
 - Navegación entre vistas dentro de una misma página
 - Filtro de contenido dentro de una card
 
@@ -633,6 +637,143 @@ export function TabsForBlocks({
 - El `defaultValue` lo define el flow que lo consume, no el componente.
 - Variante `icon`: tabs con `{ value, icon, ariaLabel }` — ver `SOCIO_V2_UNIT_TABS` en `socio-v2-constants.ts`.
 - Orden en header de chart: **rango primero**, toggle unidad después (slot `headerActions` de `CardWithContent`).
+
+---
+
+## ChartRangeOptions
+
+**Archivo:** `/components/gdd/chart-range-options.ts`
+**Estado:** ✅ Aprobado
+**Exporta:** `CHART_RANGE_CHIP_OPTIONS`, `CHART_RANGE_TABS` (mapeo listo para `CardWithContent` / `TabsForBlocks`)
+
+### Chips estándar (bar charts + vista diaria)
+
+| `id` (`ChartRangeChip`) | Label UI | Comportamiento |
+|---|---|---|
+| `1d` | **DIA** | Vista diaria → `DailyGenerationChartBlock` (no bar chart) |
+| `1m` | 1M | Serie acotada 1 mes |
+| `6m` | 6M | Default habitual en Performance |
+| `1a` | 1A | Último año |
+| `todo` | TODO | Desde inicio de operaciones |
+
+> **Wording:** el chip `1d` muestra **`DIA`** (no `DIARIO`) para ahorrar espacio en el header de la card.
+
+### Implementaciones que consumen `CHART_RANGE_TABS`
+
+| Vista | Archivo |
+|---|---|
+| GDD Performance | `components/gdd/ParkPerformanceView.tsx` |
+| GDCV AGC Performance | `components/gdcv/GdcvPerformanceView.tsx` |
+| GDCV Socio Mi Espacio | `components/gdcv/SocioEnergyView.tsx` |
+| GDCV Socio Performance (parque) | `components/gdcv/SocioPerformanceView.tsx` — sin `ParkDetailsCard` |
+| GDCV Socio Mi Energía | `components/gdcv/SocioEnergyView.tsx` (modo kWh; modo $ omite `1d`) |
+
+**No usar** este archivo para Socio V2 monetary/energy chips — ver `socio-v2-constants.ts` (`DIA` allí = rango `1m` semanal, distinto semántico).
+
+```tsx
+import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
+
+<CardWithContent
+  tabs={CHART_RANGE_TABS}
+  activeTab={period}
+  onTabChange={(v) => setPeriod(v as ChartRangeChip)}
+/>
+```
+
+---
+
+## FormatCurrency
+
+**Archivo:** `/lib/format-currency.ts`
+**Estado:** ✅ Aprobado
+**Principios visuales:** `context/design-system.md` → Formato monetario (ARS / USD)
+
+### Cuándo usar
+- Cualquier monto en UI: KPI, tooltip, tabla, label de barra, eje Y monetario.
+- ROI GDD con toggle de moneda (`formatRoiFromUsd` + `TIPO_CAMBIO_ARS`).
+- `MonetaryBarChart` / `SocioV2BarChart` en modo dinero.
+
+### Cuándo NO usar
+- Copy de tabs o botones de moneda → `currencyTabLabel` (literal **DOLAR** / **ARS**, sin prefijo numérico).
+- Strings mock estáticos en `data/*` (pueden coexistir hasta migración; **nuevos** montos dinámicos → helper).
+- `ROIProjectionChart` — aún usa formateo propio `k`/`m` US-style (excepción documentada; migrar en fase ROI charts).
+
+### Prefijos y locale (Argentina)
+
+| Moneda | Prefijo en montos | Label en `TabsForBlocks` / toggles |
+|---|---|---|
+| ARS | `$ ` (sí, con espacio) | `ARS` |
+| USD | `u$s ` (sí, con espacio) | `DOLAR` |
+
+| Regla numérica | Valor |
+|---|---|
+| Locale | `es-AR` siempre |
+| Miles | `.` (ej. `82.600`) |
+| Decimales | `,` (ej. `14,29`) |
+| Centavos ARS en KPI/ahorro | **No** — `decimals` default `0` |
+| Centavos / TC / tarifa | `formatCurrency(…, { decimals: 2 })` cuando el dato lo exige |
+
+### Modos (`CurrencyFormatMode`)
+
+| Modo | Uso | ARS ejemplo | USD ejemplo |
+|---|---|---|---|
+| `full` | KPI, tooltip, tablas, montos completos | `$ 82.600` | `u$s 3.779` |
+| `compact` | **Solo** label sobre barra (chart) | `$ 82,6k` | `u$s 3,8k` |
+| `axis` | Eje Y chart monetario | `$ 83k` | `u$s 4k` |
+
+> **Lectura compacta:** `$ 82,6k` = mismo valor que `$ 82.600` en `full`. El sufijo `k`/`M` evita ambigüedad con la coma decimal.
+
+### API
+
+```ts
+import {
+  formatCurrency,
+  formatRoiFromUsd,
+  currencyTabLabel,
+  currencyColumnLabel,
+  type CurrencyCode,
+  type CurrencyFormatMode,
+} from "@/lib/format-currency"
+
+// Monto ya en la moneda de visualización
+formatCurrency(74400, "ars", "full")        // "$ 74.400"
+formatCurrency(74400, "ars", "compact")     // "$ 74,4k"
+formatCurrency(74400, "ars", "axis")        // "$ 74k"
+
+// ROI: valor canónico en USD × tipo de cambio si ARS
+formatRoiFromUsd(100, "ars", TIPO_CAMBIO_ARS, "full")
+
+// Tabs header ROI (GddPageHeading)
+currencyTabLabel("usd")   // "DOLAR"
+currencyTabLabel("ars")   // "ARS"
+
+// Headers tabla: "Ahorro Estimado (DOLAR)"
+currencyColumnLabel(currency)
+```
+
+### Moneda por pantalla (negocio)
+
+| Vista | `CurrencyCode` | Notas |
+|---|---|---|
+| GDCV Socio — Mi Ahorro | `ars` | Ahorro en factura; default en `MonetaryBarChart` |
+| GDD ROI | `usd` / `ars` | Base USD en mock; `?currency=ars` en URL |
+| KPIs estáticos mock | — | Strings tipo `$74.400` sin espacio legado; preferir helper en código nuevo |
+
+### Implementaciones actuales
+
+| Consumidor | Función / prop |
+|---|---|
+| `MonetaryBarChart` | `currency` prop (default `"ars"`) |
+| `GddRoiView`, `GddRoiRecuperoTable` | `formatRoiFromUsd` |
+| `GddPageHeading` | tabs `DOLAR` / `ARS` |
+| `SocioV2BarChart` | `formatCurrency(…, "ars", "compact")` en labels |
+
+### Notas para el agente
+- No usar `$` genérico para USD — usar `u$s ` en montos.
+- No poner `u$s` ni `$` en labels de tabs — solo **DOLAR** / **ARS**.
+- No duplicar `toLocaleString("es-AR")` + prefijo manual en componentes; importar el helper.
+- `compact` solo en labels de barras; tooltip de la misma barra siempre `full`.
+- TIR, plazo, % y fechas no pasan por este helper.
 
 ---
 
@@ -805,6 +946,18 @@ export { CardWire }
 | `orientation="vertical"` | label arriba · value abajo | Datos únicos en grid (Medidor, Participación) |
 | `icon` (prop opcional) | ícono + label/value | KPIs de soporte en grid 2×2 (ej. Potencia Instalada) |
 
+### Íconos (`lucide-react`)
+
+| Concepto | Ícono | Ejemplos de label |
+|---|---|---|
+| Energía / potencia / kWh | `ZapIcon` | Potencia total instalada, Energía asignada, Total acumulado |
+| Ahorro / factura / crédito | `WalletIcon` | Total Ahorro en Abril, Ahorro Generado |
+| Monto $ (no ahorro) | `CircleDollarSignIcon` | Inversión inicial, Autoconsumo virtual ($) |
+| Fecha / operaciones | `CalendarIcon` | Inicio de operaciones |
+| Socios / cupos | `UsersIcon` | Cantidad de socios |
+
+> Desglose con ítems en $ sin ser “ahorro total”: `DollarSignIcon` en StatList (ej. Autoconsumo virtual).
+
 ### Spec
 
 | Propiedad | Valor | Tailwind |
@@ -874,19 +1027,32 @@ export function FeatureItem({
 // Vertical — en grid 2 columnas (Medidor | Participación)
 <div className="grid grid-cols-2 gap-4">
   <FeatureItem orientation="vertical" label="Nº de Medidor" value="3551118" />
-  <FeatureItem orientation="vertical" label="Participación (%)" value="25%" />
+  <FeatureItem orientation="vertical" label="Participación (%)" value="15%" />
 </div>
 
-// Con ícono — grid 2×2 bajo chart diario (Socio Performance)
+// Con ícono — `/gdcv/socio/parque` (`socioParqueChartMetricRows`)
 <div className="grid grid-cols-2 gap-4">
-  <FeatureItem label="Potencia Instalada" value="380 kWp" icon={ZapIcon} />
-  <FeatureItem label="Potencia de Acople" value="310 kWp" icon={CircleDollarSignIcon} />
+  <FeatureItem label="Potencia total instalada" value="980 kWp" icon={ZapIcon} />
+  <FeatureItem label="Potencia total de acople" value="815 kWp" icon={ZapIcon} />
 </div>
+<div className="grid grid-cols-2 gap-4">
+  <FeatureItem label="Inversión inicial" value="u$s 5,7M" icon={CircleDollarSignIcon} />
+  <FeatureItem label="Inicio de operaciones" value="Marzo 2024" icon={CalendarIcon} />
+</div>
+
+// Mi Espacio — panel 340px (`SocioEnergyView`): forzar columna en md+ (celdas estrechas)
+<div className="grid grid-cols-2 gap-4">
+  <FeatureItem icon={WalletIcon} label="Ahorro" value="$74.400" className="md:flex-col md:items-stretch" />
+  <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" className="md:flex-col md:items-stretch" />
+</div>
+
+// Parque — card ancha: default del componente (`md:flex-row`) sin className extra
 ```
 
 ### Notas para el agente
 - `orientation` default es `"horizontal"` — no hace falta declararlo para el caso estándar
 - Con `icon`, en mobile el layout colapsa a columna (ícono arriba) para permitir `grid-cols-2` sin overflow
+- En **md+** el default es `flex-row`. En columna **340px** (Mi Espacio) usar `className="md:flex-col md:items-stretch"` — no `min-h-24` ni `justify-center`
 - En `"vertical"` el label usa `text-xs` (12px) — es un caption, no un título
 - En `"vertical"` el value usa `text-[#0A0A0A]` — mismo que KpiSecondary para consistencia
 - `tabular-nums` en value siempre — alineación correcta de números
@@ -1371,6 +1537,185 @@ export function KpiSecondary({
 | Grid de KPIs vertical (default) | `vertical` (omitir prop) | GDD_01, GDCV_admin_01 |
 | KPIs apiladas horizontalmente | `layout="horizontal"` | GDCV_admin_03 Col 1 (Inversión + Ahorrado) |
 | Futuro: dashboard resumen | `horizontal` | Próximas vistas |
+
+---
+
+## KpiSecondaryMetric
+
+**Archivo:** `/components/ui/kpi-secondary-metric.tsx`
+**Estado:** ✅ Aprobado · integrado en `ParkDetailsCard`
+**Propósito:** Primitiva label + value heredada de `KpiSecondary` (bloque vertical) **sin** Card, `IconBadge`, `SoftBadge`, `HinsTooltip` ni delta.
+
+### Cuándo usar
+- Celdas de un grid 2×2 dentro de `ParkDetailsCard` (único uso producto hoy)
+- Cualquier bloque denso donde haga falta la misma jerarquía tipográfica sin mini-cards
+
+### Cuándo NO usar
+- KPI autónoma en grid de cards → `KpiSecondary` o `KpiSecondaryCompact`
+- Dato principal de la vista → `KpiPrimary`
+
+### Spec (tipografía vs `KpiSecondary`)
+
+| Elemento | `KpiSecondary` | `KpiSecondaryMetric` |
+|---|---|---|
+| Label | `text-sm font-normal text-[#737373]` | **igual** |
+| Value | `text-xl font-semibold text-[#0A0A0A]` | **`text-base font-semibold tabular-nums text-[#0A0A0A] break-words`** |
+| Contenedor | dentro de `Card` + `p-4` | `flex flex-col gap-1 min-w-0` |
+
+El value en **`text-base`** (no `text-lg` ni `text-xl`) evita saturación visual en grid 2×2 y ayuda a que labels largos (ej. *Ultimo Mantenimiento*) convivan con valores técnicos en columna estrecha.
+
+### Props
+
+```tsx
+interface KpiSecondaryMetricProps {
+  label: string
+  value: string
+  className?: string
+}
+```
+
+### Uso
+
+```tsx
+<KpiSecondaryMetric label="Cap. Instalada" value="1.250 kWp" />
+```
+
+### Notas para el agente
+- No envolver en `Card` — `ParkDetailsCard` aporta superficie (`CardWithContent`).
+- Colores `#737373` / `#0A0A0A` — misma convención que `KpiSecondary`; no introducir tokens nuevos.
+- `tabular-nums` solo en value.
+- No refactorizar `KpiSecondary` para componer esta primitiva salvo pedido explícito.
+
+---
+
+## ParkDetailsCard
+
+**Archivo:** `/components/ui/park-details-card.tsx`
+**Estado:** ✅ Aprobado · **integrado** en GDD (`/gdd/performance`), GDCV AGC (`/gdcv/performance`) y Socio Mi Espacio (`/gdcv/socio`)
+**Hijos:** `CardWithContent`, `KpiSecondaryMetric` × 4, `next/image`
+**Propósito:** Organismo de detalle del parque: asset isométrico arriba (full-width, proporcional) + grid 2×2 de métricas compactas.
+
+### Cuándo usar
+- Primera columna de la fila superior Performance (junto a chart + columna KPI).
+- GDD: `gddParkDetails` en `data/gdd-performance-mock.ts`.
+- GDCV AGC: `gdcvParkDetails` en `data/gdcv-mock.ts`.
+- GDCV Socio Mi Espacio: `socioParkDetails` en `data/gdcv-socio-mock.ts`.
+
+### Cuándo NO usar
+- KPIs con ícono/delta en cards separadas → `KpiSecondary`
+- `/gdcv/socio/parque` — sin columna de detalle; grid `SOCIO_PARQUE_TOP_ROW_GRID`
+- Reserva vacía → `PerformancePlaceholderCard` (solo donde aún no hay contenido de parque)
+
+### Anatomía
+
+```
+CardWithContent(title="", noPadding, h-full)
+└── flex h-full min-h-0 flex-col
+    ├── div.relative.w-full.shrink-0.leading-none
+    │   └── Image (width/height intrínsecos, block h-auto w-full)
+    └── div.p-4.flex-1
+        └── grid grid-cols-2 gap-4
+            └── KpiSecondaryMetric × 4
+```
+
+### Props
+
+```tsx
+type ParkDetailsMetric = { label: string; value: string }
+
+type ParkDetailsCardProps = {
+  imageSrc: string
+  imageAlt: string
+  metrics: readonly [ParkDetailsMetric, ParkDetailsMetric, ParkDetailsMetric, ParkDetailsMetric]
+  className?: string
+  imageWidth?: number   // default 478 (PNG GDD)
+  imageHeight?: number  // default 347 (PNG GDD)
+}
+```
+
+### Assets
+
+| Flujo | Ruta pública | Dimensiones default |
+|---|---|---|
+| GDD (en prod) | `/images/png-assets/asset_gdd.png` | 478 × 347 |
+| GDCV (en prod) | `/images/png-assets/asset_gdcv.png` | 478 × 347 |
+
+### Mock GDD (`gddParkDetails`)
+
+| Label | Value ejemplo |
+|---|---|
+| Cap. Instalada | 1.250 kWp |
+| Potencia Acople | 1.020 kWp |
+| Equipo | Jinko Tiger Neo 72HL4 |
+| Ultimo Mantenimiento | 12 Mar. 2026 |
+
+### Mock GDCV (`gdcvParkDetails`)
+
+| Label | Value ejemplo |
+|---|---|
+| Cap. Instalada | 980 kWp |
+| Potencia Acople | 815 kWp |
+| Equipo | Canadian Solar HiKu7 655W |
+| Ultimo Mantenimiento | 18 Feb. 2026 |
+
+`imageAlt`: **Parque GDCV**
+
+### Mock Socio Mi Espacio (`socioParkDetails`)
+
+Cuota e infraestructura **del socio** (no totales del parque). Sin **Ultimo Mantenimiento** (evita confusión de responsabilidad O&M con HINS).
+
+Orden = grid 2×2 (fila 1 → fila 2):
+
+| Celda | Label | Value ejemplo |
+|---|---|---|
+| 1 | Mi Potencia Instalada | 380 kWp |
+| 2 | Mi participación | 15% (`socioPorcentaje`) |
+| 3 | Equipo | Solar HiKu7 655W |
+| 4 | Potencia de Acople | 310 kWp |
+
+### Mock Socio parque (`socioParqueChartMetricRows` — `/gdcv/socio/parque`)
+
+| Fila | Labels | Fuente mock |
+|---|---|---|
+| 1 | Potencia total instalada · Potencia total de acople | `gdcvParkDetails` (980 / 815 kWp) |
+| 2 | Inversión inicial · Inicio de operaciones | `socioRoiMetrics` · `socioRoiSecondaryMetrics` |
+
+Íconos: Zap · Zap · CircleDollarSign · Calendar. Ver FeatureItem → Íconos.
+
+### Layout en página (GDD + GDCV Performance)
+
+> Grid de fila, proporciones `fr`, checklist de impacto y riesgos futuros: **`flows/performance/about-performance-layout.md`**
+
+- Grid: `GDD_PERFORMANCE_TOP_ROW_GRID` en `components/ui/performance-placeholder-card.tsx` (nombre histórico; usado también en GDCV).
+- Proporción desktop: **`1.15fr` · `1.85fr` · `340px`** — columna parque ~38% del espacio flexible.
+- Vistas: `ParkPerformanceView`, `GdcvPerformanceView`.
+
+```tsx
+import { ParkDetailsCard } from "@/components/ui/park-details-card"
+import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
+import { gddParkDetails } from "@/data/gdd-performance-mock"
+
+<div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
+  <ParkDetailsCard
+    imageSrc={gddParkDetails.imageSrc}
+    imageAlt={gddParkDetails.imageAlt}
+    metrics={gddParkDetails.metrics}
+    className="h-full"
+  />
+  {/* chart + KPIs */}
+</div>
+```
+
+### Dev showcase
+
+`app/dev/components/page.tsx` — solo el organismo en `max-w-sm` (sin simular grid completo de la fila).
+
+### Notas para el agente
+- Imagen: **sin** `h-*` fijo ni `object-cover`; `block h-auto w-full` + dimensiones intrínsecas → ancho 100% de la card, altura proporcional, pegada al top.
+- Esquinas superiores: `overflow-hidden` + `rounded-xl` de `Card` en `CardWithContent`.
+- `noPadding` obligatorio en wrapper; padding solo en bloque de métricas (`p-4`).
+- `gap-4` en grid interno; `gap-6` entre secciones de página.
+- No duplicar labels de métricas fuera del mock — una fuente por flujo.
 
 ---
 
@@ -2913,6 +3258,8 @@ Soporta perspectiva en dinero (`unit="dinero"`) o kWh (`unit="energia"`).
 | Tooltip | Custom con desglose autoconsumo / inyectada / total |
 | Hover cursor | `rgba(0,0,0,0.05)` |
 | Densidad | `getChartBarDensity` — tooltip off si hay demasiadas barras |
+| Labels sobre barra | `Bar` `label` — total vía `formatCurrency(…, "compact")` si `barCount ≤ 6` |
+| Moneda | Prop `currency` (default `ars`); ver [FormatCurrency](#formatcurrency) |
 
 ```tsx
 import { MonetaryBarChart } from "@/components/charts/MonetaryBarChart"
@@ -2929,6 +3276,8 @@ import { getSocioAhorroSeries } from "@/data/gdcv-socio-mock"
 ### Notas para el agente
 - Los tokens `--chart-stack-*` viven en `globals.css` — no confundir con `--energy-autoconsumo` / `--energy-inyectada` (dominio energético, no Recharts).
 - El segmento superior (`inyectada`) lleva `radius={[6,6,0,0}` cuando hay ≤16 barras.
+- Total del stack vía `label` en el `Bar` de `inyectada` (no `LabelList` — en apilados Recharts no alinea bien); `margin.top` 28px cuando hay labels.
+- Ver [FormatCurrency](#formatcurrency) para reglas ARS/USD y modos `full` / `compact` / `axis`.
 
 ---
 
@@ -2936,7 +3285,7 @@ import { getSocioAhorroSeries } from "@/data/gdcv-socio-mock"
 
 **Archivo:** `/components/charts/DailyGenerationChart.tsx`
 **Estado:** ✅ Aprobado
-**Usado en:** `DailyGenerationChartBlock` — vista **1D / DIARIO** de generación horaria
+**Usado en:** `DailyGenerationChartBlock` — vista **1D / DIA** (chip `1d` en `CHART_RANGE_TABS`) de generación horaria
 
 ### Cuándo usar
 Area chart de generación intradiaria (kW por hora). Render puro — siempre dentro de `DailyGenerationChartBlock`, nunca directo en la vista.
@@ -3326,13 +3675,13 @@ const ahorroItems: Record<string, StatListItem[]> = {
     { icon: DollarSignIcon, name: "Por autoconsumo virtual", value: "$54.200" },
     { icon: DollarSignIcon, name: "Por Energía Inyectada",   value: "$20.200" },
     { icon: WalletIcon,     name: "Total Ahorro en Abril",   value: "$74.400",
-      subtitle: "De mi 25% del parque" },
+      subtitle: "De mi 15% del parque" },
   ],
   energia: [
     { icon: DollarSignIcon, name: "Energía asignada",        value: "207.5 kWh" },
     { icon: ZapIcon,        name: "Energía neteada",         value: "185.3 kWh" },
     { icon: WalletIcon,     name: "Total kWh en Abril",      value: "207.5 kWh",
-      subtitle: "De mi 25% del parque" },
+      subtitle: "De mi 15% del parque" },
   ],
 }
 
@@ -3725,8 +4074,8 @@ export function SectionHeader({
   action={<StatusBadge status="current">En Curso</StatusBadge>}
 />
 <div className="grid grid-cols-2 gap-4">
-  <FeatureItem icon={WalletIcon} label="Ahorro" value="$74.400" />
-  <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" />
+  <FeatureItem icon={WalletIcon} label="Ahorro" value="$74.400" className="md:flex-col md:items-stretch" />
+  <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" className="md:flex-col md:items-stretch" />
 </div>
 ```
 
@@ -3883,7 +4232,7 @@ Selector de período mensual (ej. "Abril 2026") para filtrar tablas, KPIs o cual
 que dependa de un período activo. Siempre en el header de la sección que controla.
 
 ### Cuándo NO usar
-- Selector de rango temporal en bar charts (1M / 3M / 6M / 1A / TODO) → usar `TabsForBlocks` + `CHART_RANGE_TABS`. Densidad: `lib/chart-bar-density.ts` (tooltip off si >6 barras en mobile o >12 en desktop; labels top solo ≤6 barras).
+- Selector de rango temporal en bar charts → `CHART_RANGE_TABS` desde `chart-range-options.ts` (DIA / 1M / 6M / 1A / TODO). Densidad: `lib/chart-bar-density.ts` (tooltip off si >6 barras en mobile o >12 en desktop; labels top solo ≤6 barras).
 - Selección de día calendario en vista 1D → `DatePicker` dentro de `DailyGenerationChartBlock`
 - Filtros multi-selección → usar Checkbox
 - Navegación entre vistas → usar Sidebar o `TabsForBlocks`

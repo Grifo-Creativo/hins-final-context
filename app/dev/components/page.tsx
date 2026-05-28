@@ -18,6 +18,8 @@ import { IconBadge } from "@/components/ui/icon-badge"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiPrimaryCompact } from "@/components/ui/kpi-primary-compact"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
+import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
+import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { PeriodSelectorLocal } from "@/components/ui/period-selector"
 import { SectionHeader } from "@/components/ui/section-header"
 import { SoftBadge } from "@/components/ui/soft-badge"
@@ -43,6 +45,7 @@ import {
 } from "@/data/gdcv-roi-mock"
 import {
   consumptionHistoryMock,
+  gddParkDetails,
   generationSparklinePoints,
 } from "@/data/gdd-performance-mock"
 import Link from "next/link"
@@ -431,6 +434,25 @@ export default function DevComponentsPage() {
                 infoTooltip={{
                   content: "Porcentaje de energía asignada al socio en el parque.",
                 }}
+              />
+            </div>
+          </Showcase>
+
+          <Showcase
+            title="KpiSecondaryMetric"
+            file="components/ui/kpi-secondary-metric.tsx"
+          >
+            <div className="max-w-[10rem] rounded-lg border border-border bg-white p-4">
+              <KpiSecondaryMetric label="Cap. Instalada" value="1.250 kWp" />
+            </div>
+          </Showcase>
+
+          <Showcase title="ParkDetailsCard" file="components/ui/park-details-card.tsx">
+            <div className="w-full max-w-sm">
+              <ParkDetailsCard
+                imageSrc={gddParkDetails.imageSrc}
+                imageAlt={gddParkDetails.imageAlt}
+                metrics={gddParkDetails.metrics}
               />
             </div>
           </Showcase>

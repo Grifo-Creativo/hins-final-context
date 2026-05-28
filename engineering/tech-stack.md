@@ -43,6 +43,7 @@
 
 /lib
   utils.ts                  → cn() y utilidades compartidas
+  format-currency.ts        → ARS/USD: formatCurrency, formatRoiFromUsd (locale es-AR)
 
 /styles
   globals.css               → Tokens CSS (design system completo)
@@ -76,6 +77,12 @@
 - Separación obligatoria: `chartData` / `chartConfig` / `chartComponent`.
 - `chartConfig` siempre importado desde `/data/chart-config.ts`.
 - Nunca hardcodear colores de chart en componentes de renderizado.
+
+### Formato monetario
+- Usar `/lib/format-currency.ts` — no armar `$` / `u$s` + `toLocaleString` a mano.
+- Tabs de moneda: labels **DOLAR** / **ARS** (`currencyTabLabel`); montos: `$ ` / `u$s ` con espacio.
+- Modos: `full` (UI completa), `compact` (solo label sobre barra), `axis` (eje Y).
+- Spec: `context/components.md` → FormatCurrency; principios: `context/design-system.md`.
 
 ---
 

@@ -13,6 +13,18 @@ export const gdcvParkName = "Parque Río Cuarto"
 /** Inicio de operaciones — Parque Río Cuarto (GDCV). */
 export const gdcvOperationsStartLabel = "Marzo 2024"
 
+/** Datos de la card de detalle del parque (GDCV Performance — columna 1/3). */
+export const gdcvParkDetails = {
+  imageSrc: "/images/png-assets/asset_gdcv.png",
+  imageAlt: "Parque GDCV",
+  metrics: [
+    { label: "Cap. Instalada", value: "980 kWp" },
+    { label: "Potencia Acople", value: "815 kWp" },
+    { label: "Equipo", value: "Canadian Solar HiKu7 655W" },
+    { label: "Ultimo Mantenimiento", value: "18 Feb. 2026" },
+  ],
+} as const
+
 // ─── Energy chart ──────────────────────────────────────────────────────────
 
 export type GdcvEnergyRow = { label: string; generated: number }

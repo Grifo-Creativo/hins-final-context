@@ -10,6 +10,7 @@ import { ParticipacionDonutChart } from "@/components/charts/ParticipacionDonutC
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { SOCIO_PARQUE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { FeatureItem } from "@/components/ui/feature-item"
 import { IconBadge } from "@/components/ui/icon-badge"
 import {
@@ -30,16 +31,29 @@ import {
   socioMockToday,
   socioEnergiaPark,
   socioEnergiaParkSparkline,
-  socioPotenciaInstalada,
-  socioPotenciaAcople,
+  socioParqueChartMetricRows,
   participacionSocios,
 } from "@/data/gdcv-socio-mock"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { formatChartDayLong, formatDailyPeakLabel } from "@/lib/chart-day-format"
 import type { ChartRangeChip } from "@/types/chart-range"
-import { CircleDollarSignIcon, XIcon, ZapIcon } from "lucide-react"
+import {
+  CircleDollarSignIcon,
+  CalendarIcon,
+  XIcon,
+  ZapIcon,
+  type LucideIcon,
+} from "lucide-react"
 
 const TODAY = socioMockToday
+
+/** Íconos FeatureItem — ver `components.md` → FeatureItem → Íconos (lucide). */
+const SOCIO_PARQUE_FEATURE_ICONS: Record<string, LucideIcon> = {
+  "Potencia total instalada": ZapIcon,
+  "Potencia total de acople": ZapIcon,
+  "Inversión inicial": CircleDollarSignIcon,
+  "Inicio de operaciones": CalendarIcon,
+}
 
 export function SocioPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
@@ -84,26 +98,29 @@ export function SocioPerformanceView() {
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
+      <div className={SOCIO_PARQUE_TOP_ROW_GRID}>
         <CardWithContent
           title="Energía generada del parque"
+          subtitle={chartRange === "1d" ? undefined : chartSubtitle}
           tabs={CHART_RANGE_TABS}
           activeTab={chartRange}
           defaultTab="6m"
           onTabChange={(v) => setChartRange(v as ChartRangeChip)}
           className="h-full"
         >
-          <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <div className="flex h-full min-h-0 flex-col gap-4">
             {chartRange === "1d" ? (
-              <DailyGenerationChartBlock
-                activeDay={activeDay}
-                today={TODAY}
-                onActiveDayChange={setActiveDay}
-                data={dailyChartData}
-                totalLabel={dailyTotal}
-                peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
-                className="min-h-[300px] flex-1"
-              />
+              <div className="min-h-[300px] w-full flex-1">
+                <DailyGenerationChartBlock
+                  activeDay={activeDay}
+                  today={TODAY}
+                  onActiveDayChange={setActiveDay}
+                  data={dailyChartData}
+                  totalLabel={dailyTotal}
+                  peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
+                  className="h-full min-h-[300px] w-full"
+                />
+              </div>
             ) : (
               <div className="min-h-[300px] w-full flex-1">
                 <ParkEnergyBarChart
@@ -114,28 +131,26 @@ export function SocioPerformanceView() {
               </div>
             )}
 
-            <div className="grid shrink-0 grid-cols-2 gap-4">
-              <FeatureItem
-                label="Potencia Instalada"
-                value={socioPotenciaInstalada}
-                icon={CircleDollarSignIcon}
-              />
-              <FeatureItem
-                label="Potencia de Acople"
-                value={socioPotenciaAcople}
-                icon={ZapIcon}
-              />
-            </div>
-
-            <div className="grid shrink-0 grid-cols-2 gap-4">
-              <FeatureItem label="--" value="--" icon={CircleDollarSignIcon} />
-              <FeatureItem label="--" value="--" icon={ZapIcon} />
-            </div>
+            {socioParqueChartMetricRows.map((row, rowIndex) => (
+              <div
+                key={rowIndex}
+                className="grid shrink-0 grid-cols-2 gap-4"
+              >
+                {row.map((metric) => (
+                  <FeatureItem
+                    key={metric.label}
+                    label={metric.label}
+                    value={metric.value}
+                    icon={SOCIO_PARQUE_FEATURE_ICONS[metric.label]}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         </CardWithContent>
 
-        <div className="flex flex-col gap-4">
-          <Card className="overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
+        <div className="flex h-full min-h-0 flex-col gap-4">
+          <Card className="shrink-0 overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">
             <div className="flex flex-col gap-4 p-4">
               <div className="flex items-start gap-4">
                 <IconBadge icon={ZapIcon} size="lg" />
@@ -164,7 +179,7 @@ export function SocioPerformanceView() {
 
           <CardWithContent
             title="Participación por Socio"
-            className="h-fit"
+            className="flex min-h-0 flex-1 flex-col"
             allowTooltipOverflow
           >
             <div className="flex flex-col gap-4">

@@ -1,7 +1,9 @@
 # Flow: Socio / Cesionario — Parque GDCV
 
+> Terminología: `flows/GDCV-socio/terminology.md` (cuota vs total parque, inversión socio, íconos FeatureItem).
+
 ## Actor
-Socio GDCV — Participante del parque comunitario con cuotaparte porcentual.
+Socio GDCV — Participante del parque comunitario con cuotaparte porcentual (`socioPorcentaje` = 15% en prototipo).
 **Pregunta clave:** ¿Me está rindiendo la inversión? ¿Qué impacto real está teniendo en mi factura?
 
 **Restricción importante:** Sin Sidebar. Solo navega 2 tabs internos. No sale de aquí.
@@ -71,18 +73,18 @@ Referencia visual: GDCV__socio_01.png
     - Tab 1 "Inyección": StatList con items:
       - { icon: DollarSignIcon, name: "Por autoconsumo virtual", value: "$54.200" }
       - { icon: DollarSignIcon, name: "Por Energía Inyectada", value: "$20.200" }
-      - { icon: WalletIcon, name: "Total Ahorro en Abril", value: "$74.400", subtitle: "De mi 25% del parque" }
+      - { icon: WalletIcon, name: "Total Ahorro en Abril", value: "$74.400", subtitle: "De mi 15% del parque" (`socioCuotaDelParqueSubtitle`) }
     - Tab 2 "Energía": StatList con items:
       - { icon: ZapIcon, name: "Energía asignada", value: "207.5 kWh" }
       - { icon: ZapIcon, name: "Energía neteada", value: "185.3 kWh" }
-      - { icon: WalletIcon, name: "Total kWh en Abril", value: "207.5 kWh", subtitle: "De mi 25% del parque" }
+      - { icon: WalletIcon, name: "Total kWh en Abril", value: "207.5 kWh", subtitle: "De mi 15% del parque" }
 
 **Bloque 3 — Retorno de la Inversión (ROI):**
 - SectionHeader: "Retorno de la Inversión (ROI)" size="md" + ícono menú (⋮)
 - Dos filas de cards:
   - Fila 1 (3 cards):
     - Card 1: Icon + "Total Ahorrado" | $1.24 M | "+8% anual"
-    - Card 2: Icon + "Inversión inicial" | $4.27 M | "29% recuperada" (progress bar visual)
+    - Card 2: Icon + "Inversión inicial" | `u$s` compact (`socioRoiMetrics`) | "37% recuperada"
     - Card 3: Icon + "Payback estimado" | 5.5 años | "Desde Marzo 2024"
   - Fila 2 (2 cards):
     - Card 1: "TIR (actualizada)" | 18.5%
@@ -128,13 +130,14 @@ Referencia visual: GDCV__socio_02.png
 **Bloque 1 — Energía generada del parque (izquierda):**
 - CardWithContent (REUTILIZAR del performance AGC — GDCV_admin_01):
   - Title: "Energía generada del parque"
-  - Subtitle: "Períodos mensuales"
+  - Subtitle: dinámico vía `getSocioParqueChartSubtitle` (ej. rango desde Marzo 2024); oculto en tab 1D
   - Tabs chips: 1M / 3M / 6M (default 6M)
   - Chart: bar chart 6 meses (Nov 25–Abr 26)
   - Valores: 247.1 kWh (Nov), 91.2 kWh (Dic), 250 kWh (Ene), 182.6 kWh (Feb), 240.4 kWh (Mar), 204.59 kWh (Abr — actual)
-- Dos métricas debajo del chart (estilo KpiSecondary compacto):
-  - "Potencia Instalada" | 380 kWp
-  - "Potencia de Acople" | 310 kWp
+- Grid 2×2 debajo del chart (`socioParqueChartMetricRows` + `FeatureItem` + íconos lucide):
+  - Fila 1: Potencia total instalada | 980 kWp (`Zap`) · Potencia total de acople | 815 kWp (`Zap`)
+  - Fila 2: Inversión inicial | USD `u$s` (`CircleDollarSign`) · Inicio de operaciones | Marzo 2024 (`Calendar`)
+  - Totales = parque (`gdcvParkDetails`). Cuota 380/310 kWp → solo Mi Espacio (`socioParkDetails`).
 
 **Bloque 2 — Resumen del Parque (derecha):**
 - CardWithContent:
@@ -142,11 +145,9 @@ Referencia visual: GDCV__socio_02.png
   - Title: "Generada en Abril"
   - Value: "204.59"
   - Unit: "kWh"
-  - Delta: "+10 kWh vs mes anterior"
+  - Delta: "+10 kWh vs mes anterior" (`socioEnergiaPark.delta`)
   - Sparkline: trend data parque completo
-  - Dos métricas inline:
-    - "Total Acumulado" (desde inicio en Marzo 2024) | 455.22 kWh
-    - "Cantidad de Socios" | 6 Cuotapartes
+  - *(Opcional / no en UI prototipo)* Total acumulado 455.22 kWh · Cantidad de socios 6 Cuotapartes — solo en spec, no card extra
 - Sección: "Participación por Socio"
   - Lista con 4 socios mostrados:
     - Ferretería Catalán | 20%
@@ -188,7 +189,7 @@ Referencia visual: GDCV__socio_02.png
 ## Mock data requerido
 
 ```ts
-// Socio GDCV — Agro Sur Industrial, 25% participación, Parque Río Cuarto
+// Socio GDCV — Agro Sur Industrial, 15% participación, Parque Río Cuarto
 {
   socioNombre: "Agro Sur Industrial",
   participacionPorcentaje: 25,
@@ -214,19 +215,19 @@ Referencia visual: GDCV__socio_02.png
   ahorroInyeccion: [
     { icon: "DollarSignIcon", name: "Por autoconsumo virtual", value: "$54.200" },
     { icon: "DollarSignIcon", name: "Por Energía Inyectada", value: "$20.200" },
-    { icon: "WalletIcon", name: "Total Ahorro en Abril", value: "$74.400", subtitle: "De mi 25% del parque" },
+    { icon: "WalletIcon", name: "Total Ahorro en Abril", value: "$74.400", subtitle: "De mi 15% del parque" },
   ],
   ahorroEnergia: [
     { icon: "ZapIcon", name: "Energía asignada", value: "207.5 kWh" },
     { icon: "ZapIcon", name: "Energía neteada", value: "185.3 kWh" },
-    { icon: "WalletIcon", name: "Total kWh en Abril", value: "207.5 kWh", subtitle: "De mi 25% del parque" },
+    { icon: "WalletIcon", name: "Total kWh en Abril", value: "207.5 kWh", subtitle: "De mi 15% del parque" },
   ],
   
   // Bloque 3 — ROI
   roi: {
     totalAhorrado: "$1.24 M",
     totalAhorradoDelta: "+8% anual",
-    inversionInicial: "$4.27 M",
+    inversionInicial: "u$s 5,7M",
     inversionRecuperada: "29%",
     paybackEstimado: "5.5 años",
     paybackDesde: "Marzo 2024",

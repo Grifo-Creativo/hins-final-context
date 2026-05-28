@@ -8,11 +8,14 @@ import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationCh
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { ParkDetailsCard } from "@/components/ui/park-details-card"
+import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import { parkEnergyBarChartConfig } from "@/data/chart-config"
 import {
   consumptionHistoryMock,
+  gddParkDetails,
   generationSparklinePoints,
   getParkEnergyChartSubtitle,
   getParkEnergySeries,
@@ -62,7 +65,13 @@ export function ParkPerformanceView() {
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-[minmax(0,1fr)_340px]">
+      <div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
+        <ParkDetailsCard
+          imageSrc={gddParkDetails.imageSrc}
+          imageAlt={gddParkDetails.imageAlt}
+          metrics={gddParkDetails.metrics}
+          className="h-full"
+        />
         <CardWithContent
           title="Energía Generada del Parque"
           tabs={CHART_RANGE_TABS}

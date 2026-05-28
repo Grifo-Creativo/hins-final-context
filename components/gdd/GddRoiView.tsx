@@ -1,115 +1,137 @@
 // components/gdd/GddRoiView.tsx
 "use client"
 
-import { RoiRecoveryLineChart } from "@/components/charts/RoiRecoveryLineChart"
+import { useState } from "react"
+import { useSearchParams } from "next/navigation"
+
+import { GddRoiRecuperoTable, type GddRoiCurrency } from "@/components/gdd/GddRoiRecuperoTable"
 import { Card } from "@/components/ui/card"
-import { CardWithContent } from "@/components/ui/card-with-content"
-import { SoftBadge } from "@/components/ui/soft-badge"
+import { KpiCard } from "@/components/ui/kpi-card"
 import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
-import { roiRecoveryChartConfig } from "@/data/chart-config"
 import {
-  curvaRecuperacionData,
-  curvaRecuperacionInversion,
-  roiKpis,
-} from "@/data/gdcv-agc-mock"
-import { DollarSignIcon, TrendingUpIcon } from "lucide-react"
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+import { gddRoiKpis, TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
+import { formatRoiFromUsd } from "@/lib/format-currency"
 
 export function GddRoiView() {
+  const searchParams = useSearchParams()
+  const currency = (searchParams.get("currency") ?? "usd") as GddRoiCurrency
+  const [tablaTab, setTablaTab] = useState<"proyectado" | "historico">("proyectado")
+
+  const label = currency === "usd" ? "DOLAR" : "ARS"
+  const pct = gddRoiKpis.porcentajeRecuperado
+
   return (
     <div className="flex flex-1 flex-col gap-6">
-      {/* Block 1 — ROI KPIs */}
-      <div className="grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Col 1 — Inversión + Ahorrado en una card */}
-        <Card className="flex h-full min-h-0 flex-col bg-white py-0 shadow-xs ring-0 rounded-xl">
-          <div className="flex min-h-0 flex-1 flex-col gap-6 p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-background-subtle text-green-600">
-                  <TrendingUpIcon className="size-5" aria-hidden />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <p className="text-sm font-normal text-[#737373]">Inversión Inicial</p>
-                  <p className="text-xl font-semibold text-[#0A0A0A] tabular-nums">
-                    {roiKpis.inversionInicial}
-                  </p>
-                </div>
-              </div>
-              <SoftBadge className="flex-shrink-0">Marzo 2024</SoftBadge>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="flex size-9 flex-shrink-0 items-center justify-center rounded-md bg-background-subtle text-green-600">
-                <DollarSignIcon className="size-5" aria-hidden />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="text-sm font-normal text-[#737373]">Ahorrado Total Acumulado</p>
-                <p className="text-xl font-semibold text-[#0A0A0A] tabular-nums">
-                  {roiKpis.ahorradoTotal}
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Col 2 — métricas arriba, barra al borde inferior (mt-auto; sin flex-1 vacío) */}
-        <Card className="flex h-full min-h-0 flex-col bg-white p-6 shadow-xs ring-0 rounded-xl">
+      <div className="grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_auto]">
+        <KpiCard>
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex shrink-0 items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <p className="text-sm text-muted-foreground">Cap. Recuperado</p>
-                <p className="text-xl font-semibold text-foreground tabular-nums">
-                  {roiKpis.capRecuperado}
+                <p className="text-sm text-muted-foreground">
+                  Inversión Recuperada ({label})
+                </p>
+                <p className="text-xl font-semibold tabular-nums text-foreground">
+                  {formatRoiFromUsd(
+                    gddRoiKpis.inversionRecuperada,
+                    currency,
+                    TIPO_CAMBIO_ARS
+                  )}
                 </p>
               </div>
-
-              <div className="flex flex-col gap-1 items-end">
-                <p className="text-sm text-muted-foreground">Pendiente</p>
-                <p className="text-xl font-semibold text-foreground tabular-nums">
-                  {roiKpis.pendiente}
+              <div className="flex flex-col items-end gap-1">
+                <p className="text-sm text-muted-foreground">
+                  Pendiente de recuperar ({label})
+                </p>
+                <p className="text-xl font-semibold tabular-nums text-foreground">
+                  {formatRoiFromUsd(
+                    gddRoiKpis.pendienteRecuperar,
+                    currency,
+                    TIPO_CAMBIO_ARS
+                  )}
                 </p>
               </div>
             </div>
 
             <div className="mt-auto flex shrink-0 flex-col gap-2">
-              <p className="text-left text-sm text-muted-foreground">
-                {roiKpis.porcentajeRecuperado}% recuperado
-              </p>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-border">
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-border">
                 <div
                   className="h-full rounded-full"
                   style={{
-                    width: `${roiKpis.porcentajeRecuperado}%`,
+                    width: `${pct}%`,
                     backgroundColor: "var(--chart-3)",
                   }}
                 />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-0 bg-transparent p-0"
+                      style={{ left: `${pct}%` }}
+                      aria-label={`${pct}% recuperado`}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="rounded-md bg-foreground px-3 py-2 text-xs font-normal text-background"
+                  >
+                    {pct}% recuperado
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="flex justify-between">
+                <p className="text-xs text-muted-foreground">$ 0</p>
+                <p className="text-xs text-muted-foreground">
+                  Total Invertido:{" "}
+                  {formatRoiFromUsd(
+                    gddRoiKpis.totalInvertido,
+                    currency,
+                    TIPO_CAMBIO_ARS
+                  )}
+                </p>
               </div>
             </div>
           </div>
-        </Card>
+        </KpiCard>
 
-        {/* Col 3 — Recupero Estimado con Timeline */}
         <KpiWithTimeline
           label="Recupero Estimado"
-          value={roiKpis.recuperoEstimado}
-          metricBadge={`TIR ${roiKpis.tir}`}
-          timelineData={{
-            inicio: roiKpis.timeline.inicio,
-            hoy: roiKpis.timeline.hoy,
-            payback: roiKpis.timeline.payback,
-          }}
+          value={gddRoiKpis.recuperoEstimado}
+          metricBadge="Payback"
+          timelineData={gddRoiKpis.timeline}
         />
+
+        <Card className="flex h-full min-h-0 flex-col rounded-xl bg-white shadow-xs ring-0">
+          <div className="flex min-h-0 flex-1 items-start justify-between gap-4 p-6">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-normal text-muted-foreground">TIR</p>
+              <p
+                className="text-2xl font-bold tabular-nums"
+                style={{ color: "var(--color-green-600)" }}
+              >
+                {gddRoiKpis.tir}
+              </p>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <p className="text-sm font-normal text-muted-foreground">Plazo</p>
+              <p className="text-2xl font-bold tabular-nums text-foreground">
+                {gddRoiKpis.plazo}
+              </p>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      {/* Block 2 — Curva */}
-      <CardWithContent
-        title="Curva de Recuperación Acumulada"
-      >
-        <RoiRecoveryLineChart
-          data={curvaRecuperacionData}
-          chartConfig={roiRecoveryChartConfig}
-          investmentReference={curvaRecuperacionInversion}
-        />
-      </CardWithContent>
+      <GddRoiRecuperoTable
+        variant={tablaTab}
+        onVariantChange={setTablaTab}
+        currency={currency}
+      />
     </div>
   )
 }

@@ -51,6 +51,18 @@ export const highlightAprilCardMock = {
 
 export const parkName = "Parque General Roca"
 
+/** Datos de la card de detalle del parque (GDD Performance — columna 1/3). */
+export const gddParkDetails = {
+  imageSrc: "/images/png-assets/asset_gdd.png",
+  imageAlt: "Ilustración del parque fotovoltaico Parque General Roca",
+  metrics: [
+    { label: "Cap. Instalada", value: "1.250 kWp" },
+    { label: "Potencia Acople", value: "1.020 kWp" },
+    { label: "Equipo", value: "Jinko Tiger Neo 72HL4" },
+    { label: "Ultimo Mantenimiento", value: "12 Mar. 2026" },
+  ],
+} as const
+
 export function getParkEnergySeries(period: PerformancePeriod): ParkEnergyRow[] {
   return sliceChartRangeSeries(period, PARK_ENERGY_MONTHLY, PARK_ENERGY_WEEKLY)
 }

@@ -14,6 +14,8 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { ParkDetailsCard } from "@/components/ui/park-details-card"
+import { SOCIO_ENERGY_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { FeatureItem } from "@/components/ui/feature-item"
 import { StatList } from "@/components/ui/stat-list"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
@@ -30,8 +32,7 @@ import {
   socioMockToday,
   socioStatListInyeccion,
   socioStatListEnergia,
-  socioV2AhorroSparkline,
-  socioV2EnergiaSparkline,
+  socioParkDetails,
   socioV2PanelKpis,
 } from "@/data/gdcv-socio-mock"
 import { formatDailyPeakLabel } from "@/lib/chart-day-format"
@@ -93,7 +94,14 @@ export function SocioEnergyView() {
   }
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[400px_minmax(0,1fr)] xl:grid-cols-[420px_minmax(0,1fr)]">
+    <div className={SOCIO_ENERGY_TOP_ROW_GRID}>
+      <ParkDetailsCard
+        imageSrc={socioParkDetails.imageSrc}
+        imageAlt={socioParkDetails.imageAlt}
+        metrics={socioParkDetails.metrics}
+        className="h-full"
+      />
+
       <CardWithContent
         title={getSocioV2ChartTitle(chartUnit)}
         tabs={chartRangeTabs}
@@ -108,7 +116,7 @@ export function SocioEnergyView() {
             onValueChange={handleChartUnitChange}
           />
         }
-        className="h-full lg:order-2"
+        className="h-full"
       >
         <div className="min-h-[260px] w-full flex-1">
           {chartUnit === "dinero" ? (
@@ -141,7 +149,7 @@ export function SocioEnergyView() {
       <CardWithContent
         title={socioV2PanelKpis.periodLabel}
         headerActions={<StatusBadge status="current">En Curso</StatusBadge>}
-        className="h-full lg:order-1"
+        className="h-full"
       >
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
@@ -149,11 +157,13 @@ export function SocioEnergyView() {
               icon={WalletIcon}
               label={socioV2PanelKpis.ahorro.label}
               value={socioV2PanelKpis.ahorro.value}
+              className="md:flex-col md:items-stretch"
             />
             <FeatureItem
               icon={ZapIcon}
               label={socioV2PanelKpis.energiaGen.label}
               value={`${socioV2PanelKpis.energiaGen.value} ${socioV2PanelKpis.energiaGen.unit}`}
+              className="md:flex-col md:items-stretch"
             />
           </div>
 

@@ -8,6 +8,8 @@ import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { SocioDetailSheet } from "@/components/gdcv/SocioDetailSheet"
 import { SociosTable } from "@/components/gdcv/SociosTable"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { ParkDetailsCard } from "@/components/ui/park-details-card"
+import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import { gdcvEnergyBarChartConfig } from "@/data/chart-config"
@@ -15,6 +17,7 @@ import {
   gdcvAhorroTotalAbril,
   gdcvGeneradaAbril,
   gdcvGenerationSparkline,
+  gdcvParkDetails,
   gdcvPromedioPorUsuario,
   getGdcvEnergyChartSubtitle,
   getGdcvEnergySeries,
@@ -72,10 +75,13 @@ export function GdcvPerformanceView() {
   return (
     <div className="flex flex-1 flex-col gap-6">
 
-      {/* Top section: chart left + KPI column right */}
-      <div className="grid grid-cols-1 gap-6 items-stretch md:grid-cols-[minmax(0,1fr)_340px]">
-
-        {/* Left — bar chart card */}
+      <div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
+        <ParkDetailsCard
+          imageSrc={gdcvParkDetails.imageSrc}
+          imageAlt={gdcvParkDetails.imageAlt}
+          metrics={gdcvParkDetails.metrics}
+          className="h-full"
+        />
         <CardWithContent
           title="Energía Generada del Parque"
           tabs={CHART_RANGE_TABS}
