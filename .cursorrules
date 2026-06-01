@@ -8,14 +8,15 @@
 Antes de generar cualquier código o tomar cualquier decisión de diseño,
 leer los archivos en este orden:
 
-1. `/context/product-context.md` — qué es el producto, quiénes son los usuarios, reglas de negocio
-2. `/context/design-system.md` — tokens, principios y referencias de componentes
-3. `/context/components.md` — specs de implementación exacta (tiene la última palabra)
-4. `/context/ux-guidelines.md` — jerarquía, patrones, anti-patterns
-5. `/engineering/tech-stack.md` — stack, arquitectura, convenciones
-6. `/flows/[pantalla].md` — el flujo específico que se está implementando
-7. `/flows/performance/about-performance-layout.md` — si se toca la fila superior Performance, `ParkDetailsCard` o constantes `*_TOP_ROW_GRID`
-8. `/lib/format-currency.ts` y `context/components.md` → **FormatCurrency** — si se formatean montos, toggles DOLAR/ARS, tooltips o labels de charts monetarios
+1. `/context/kick-off.md` — arranque rápido: qué es el sistema, método de build, reglas críticas
+2. `/context/product-context.md` — qué es el producto, quiénes son los usuarios, reglas de negocio
+3. `/context/design-system.md` — tokens, principios y referencias de componentes
+4. `/context/components.md` — specs de implementación exacta (tiene la última palabra)
+5. `/context/ux-guidelines.md` — jerarquía, patrones, anti-patterns
+6. `/engineering/tech-stack.md` — stack, arquitectura, convenciones
+7. `/flows/[pantalla].md` — el flujo específico que se está implementando
+8. `/flows/performance/about-performance-layout.md` — si se toca la fila superior Performance, `ParkDetailsCard` o constantes `*_TOP_ROW_GRID`
+9. `/lib/format-currency.ts` y `context/components.md` → **FormatCurrency** — si se formatean montos, toggles DOLAR/ARS, tooltips o labels de charts monetarios
 
 ---
 

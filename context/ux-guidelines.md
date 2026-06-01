@@ -19,7 +19,7 @@ Tokens y geometría: `design-system.md`.
 
 - Fondo del shell: `bg-background-subtle`; cards de contenido: `bg-white`.
 - `--primary` solo en CTAs y focus — nunca en charts ni tabs activos.
-- Tabs de bloque (`TabsForBlocks`): activo = `bg-white shadow-sm`, no `--primary`.
+- Tabs de bloque (`TabsForBlocks`): activo = `bg-white shadow-xs`, no `--primary`.
 - Headings: el **tag semántico** define jerarquía (`h1` página, `h2` sección, `h3` bloque), no el tamaño visual (`SectionHeader` `level` en `components.md`).
 
 ---
@@ -139,7 +139,7 @@ No duplicar título: en sheets de tabla el título va en `SheetTitle`, no en un 
 - ❌ Hardcodear `font-family` en componentes
 - ❌ Tamaños de fuente menores a 0.75rem (12px)
 - ❌ Crear variantes de TabsForBlocks fuera del spec de `components.md`
-- ❌ Usar tab activo con `--primary` o color negro — siempre `bg-white shadow-sm`
+- ❌ Usar tab activo con `--primary` o color negro — siempre `bg-white shadow-xs`
 - ❌ Dejar columnas con altura auto en layouts multi-columna que requieren equal height
 - ❌ Table dentro de Card
 - ❌ Card con sombra **dentro** de Sheet envolviendo una tabla
