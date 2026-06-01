@@ -101,8 +101,7 @@ function CardWithContentHeader({
   return (
     <div
       className={cn(
-        "flex shrink-0 flex-col p-4 pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6",
-        hasHeaderActions ? "gap-3" : "gap-4"
+        "flex shrink-0 flex-row p-4 pb-0 items-center justify-between gap-2 sm:gap-4"
       )}
     >
       <div
