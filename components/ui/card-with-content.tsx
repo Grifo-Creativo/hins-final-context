@@ -101,13 +101,14 @@ function CardWithContentHeader({
   return (
     <div
       className={cn(
-        "flex shrink-0 flex-row p-4 pb-0 items-center justify-between gap-2 sm:gap-4"
+        "flex shrink-0 flex-col gap-3 p-4 pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        hasHeaderActions ? "gap-3" : "gap-4"
       )}
     >
       <div
         className={cn(
-          "flex min-w-0 w-full flex-col gap-1 sm:flex-1",
-          hasHeaderActions && "order-2 sm:order-1"
+          "flex min-w-0 w-full flex-col gap-1 sm:flex-1 order-1",
+          hasHeaderActions && "sm:order-1"
         )}
       >
         {showTitle ? (
@@ -127,7 +128,7 @@ function CardWithContentHeader({
         defaultTab={defaultTab}
         onTabChange={onTabChange}
         headerActions={headerActions}
-        className={hasHeaderActions ? "order-1 sm:order-2" : undefined}
+        className={hasHeaderActions ? "order-2 sm:order-2" : undefined}
       />
     </div>
   )
