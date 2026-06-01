@@ -265,7 +265,7 @@ Para optimizar espacio en viewports pequeños (<640px), los **elementos wrapper 
 
 | Nivel | Tailwind | Uso |
 |---|---|---|
-| **sm** | `shadow-sm` | Cards, botones — uso estándar |
+| **xs** | `shadow-xs` | Cards, botones — elevación sutil estándar |
 | **md** | `shadow-md` | Dropdowns, Popovers |
 | **lg** | `shadow-lg` | Sheet lateral |
 
@@ -357,7 +357,7 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 ### TabsForBlocks — resumen
 - Único componente de tabs/chips permitido en el producto
 - Fondo contenedor: `bg-stone-200/75` (#E7E5E4 @ 75%)
-- Tab activo: `bg-white shadow-sm`
+- Tab activo: `bg-white shadow-xs`
 - **Spec completo:** `components.md`
 
 ### SoftBadge — resumen
@@ -370,15 +370,15 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 ### Botones
 
 **Primary:**
-- Fondo: `--primary` (Zinc 900) / Texto: `--primary-foreground` / Shadow: `shadow-sm`
+- Fondo: `--primary` (Zinc 900) / Texto: `--primary-foreground` / Shadow: `shadow-xs`
 - Hover: Zinc 800 (`#27272A`) / Disabled: `opacity-50`
 - NUNCA usar colores de chart en botones
 
 **Secondary:**
-- Fondo: `--background` / Borde: `border border-input` / Shadow: `shadow-sm`
+- Fondo: `--background` / Borde: `border border-input` / Shadow: `shadow-xs`
 - Hover: `--accent`
 
-**Regla:** Todos los botones de acción llevan `shadow-sm` sin excepción.
+**Regla:** Todos los botones de acción llevan `shadow-xs` — elevación sutil intencional.
 
 ---
 
@@ -556,7 +556,7 @@ Locale numérico: `es-AR` (miles `.`, decimales `,`) antes del espacio + unidad.
 - `Card` siempre con `p-0` — padding lo define el contenido
 - `KpiPrimary` solo 1 por vista (héroe); `KpiPrimaryCompact` permitido en grid 2×N
 - `TabsForBlocks` con `bg-stone-200/75` — único componente de tabs
-- Todos los botones de acción con `shadow-sm`
+- Todos los botones de acción con `shadow-xs`
 - Respetar estructura `heading → container → [cards]` en toda vista
 - Usar patrón visual (sólido/punteado/grosor) además de color en charts
 
@@ -569,6 +569,6 @@ Locale numérico: `es-AR` (miles `.`, decimales `,`) antes del espacio + unidad.
 - Crear variantes de Card con padding o borde propios
 - Crear variantes de TabsForBlocks fuera del spec
 - Más de una `KpiPrimary` héroe por vista
-- Botones sin `shadow-sm`
+- Botones sin `shadow-xs`
 - Reescribir anatomía del Sidebar o Navbar (son nativos shadcn) — la configuración `defaultOpen`/cookie está documentada en §4
 - Confiar SOLO en color para diferenciar series en charts (usar patrón visual también)

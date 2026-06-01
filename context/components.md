@@ -455,7 +455,7 @@ const buttonVariants = cva(
 <Button
   variant="outline"
   size="icon"
-  className="shadow-sm"
+  className="shadow-xs"
   aria-label="Exportar datos"
 >
   <DownloadIcon className="size-4" aria-hidden />
@@ -467,7 +467,7 @@ const buttonVariants = cva(
 <Button
   variant="default"
   size="default"
-  className="gap-1.5 shadow-sm"
+  className="gap-1.5 shadow-xs"
   onClick={() => openDialog()}
 >
   <PlusCircleIcon className="size-4" aria-hidden />
@@ -481,7 +481,7 @@ const buttonVariants = cva(
   <Button
     variant="outline"
     size="icon"
-    className="size-8 shadow-sm"
+    className="size-8 shadow-xs"
     aria-label={`Acciones — ${row.getValue("periodo")}`}
   >
     <MoreHorizontalIcon className="size-4" aria-hidden />
@@ -522,7 +522,7 @@ const buttonVariants = cva(
 
 ### Notas para el agente
 
-- Siempre usar `shadow-sm` en botones de acción — es regla de design-system.md
+- Siempre usar `shadow-xs` en botones de acción — decisión de diseño validada
 - `ghost` es para hover states internos, no para botones de acción visibles
 - `icon` size es estándar para acciones en headers/tablas
 - Texto + ícono siempre llevan `gap-1.5` entre ellos
@@ -559,7 +559,7 @@ No crear variantes alternativas bajo ninguna circunstancia.
 | Border radius contenedor | 8px | `rounded-md` |
 | Padding contenedor | 4px | `p-1` |
 | Tab activo — background | #FFFFFF | `data-[state=active]:bg-white` |
-| Tab activo — shadow | sm | `data-[state=active]:shadow-sm` |
+| Tab activo — shadow | xs | `data-[state=active]:shadow-xs` |
 | Tab inactivo — texto | muted-foreground | nativo shadcn |
 | Height | Fill contenedor | `h-full` |
 | Variant `text` (default) | Labels de texto | chips de rango, navegación |
@@ -606,7 +606,7 @@ export function TabsForBlocks({
             className="
               h-full rounded-md text-sm font-medium
               data-[state=active]:bg-white
-              data-[state=active]:shadow-sm
+              data-[state=active]:shadow-xs
               data-[state=inactive]:text-muted-foreground
             "
           >
@@ -931,7 +931,7 @@ Superficie neutral que contiene: KpiPrimary, KpiPrimaryCompact, KpiSecondary, Ca
 | Background | #FFFFFF | `bg-white` |
 | Border | ninguno | — |
 | Border radius | 14px | `rounded-xl` |
-| Shadow | 0px 1px 2px -1px #000000 | `shadow-sm` |
+| Shadow | elevación sutil | `shadow-xs` |
 | Padding | 0 | `p-0` |
 | Overflow | hidden | `overflow-hidden` |
 
@@ -940,7 +940,7 @@ Superficie neutral que contiene: KpiPrimary, KpiPrimaryCompact, KpiSecondary, Ca
 // shadcn nativo — se usa directamente sin wrapper custom.
 // El shadcn nativo incluye py-4 por defecto. Overridear siempre con py-0.
 // Clases base que todo consumidor debe respetar:
-//   bg-white rounded-xl shadow-sm py-0 overflow-hidden
+//   bg-white rounded-xl shadow-xs py-0 overflow-hidden
 // ring-0 se agrega para neutralizar el ring nativo de shadcn.
 ```
 
@@ -957,7 +957,7 @@ para que el padding lo controle el contenido interno y no la Card.
 
 ```tsx
 // ✅ Correcto
-<Card className="py-0 shadow-sm">...</Card>
+<Card className="py-0 shadow-xs">...</Card>
 
 // ❌ Incorrecto — py-4 nativo se cuela y rompe el spacing
 <Card>...</Card>
@@ -1302,7 +1302,7 @@ Card [p-0, sin borde]
 
 | Elemento | Tailwind |
 |---|---|
-| Card wrapper | nativo (sin borde, solo shadow-sm) |
+| Card wrapper | nativo (sin borde, solo shadow-xs) |
 | Layout interno | `flex flex-col gap-4 p-4` |
 | Header row | `flex items-start gap-4` |
 | Text block | `flex flex-col gap-1 flex-1` |
@@ -1365,7 +1365,7 @@ export function KpiPrimary({
 ```
 
 ### Notas para el agente
-- Sin borde gradiente. Card neutral nativo (shadow-sm).
+- Sin borde gradiente. Card neutral nativo (shadow-xs).
 - Sparkline es edge-to-edge usando `mx-[-16px]` en wrapper.
 - Sparkline es opcional — solo se renderiza si `sparklineData.length > 0`.
 - `unit` es opcional.
@@ -1503,7 +1503,7 @@ Card [p-0]
 
 | Elemento | Vertical | Horizontal |
 |---|---|---|
-| Card wrapper | `bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full` | idem |
+| Card wrapper | `bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full` | idem |
 | Layout interno | `flex flex-col gap-2 p-4` | `flex items-start gap-3 p-4` |
 | IconBadge | `size-sm` (abajo) | `size-sm flex-shrink-0 mt-0.5` (izquierda, alineado) |
 | Content wrapper | N/A | `flex flex-col gap-1 flex-1 min-w-0` |
@@ -1544,7 +1544,7 @@ export function KpiSecondary({
 }: KpiSecondaryProps) {
   if (layout === "horizontal") {
     return (
-      <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
+      <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full">
         <div className="flex items-start gap-3 p-4">
           <IconBadge icon={icon} size="sm" className="flex-shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -1575,7 +1575,7 @@ export function KpiSecondary({
 
   // Default: vertical layout (original behavior — backward compatible)
   return (
-    <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
+    <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full">
       <div className="flex flex-col gap-2 p-4">
         <IconBadge icon={icon} size="sm" />
         <p className="text-sm font-normal text-[#737373]">{label}</p>
@@ -1891,7 +1891,7 @@ Card [p-0]
 
 | Elemento | Tailwind |
 |---|---|
-| Card wrapper | `bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full` |
+| Card wrapper | `bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full` |
 | Layout interno | `flex items-start gap-4 p-4` |
 | IconBadge | `size="md" flex-shrink-0 mt-0.5` |
 | Content wrapper | `flex flex-col gap-1 flex-1 min-w-0` |
@@ -1931,7 +1931,7 @@ export function KpiSecondaryCompact({
   const showDelta = Boolean(delta?.trim())
 
   return (
-    <Card className="bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden h-full">
+    <Card className="bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden h-full">
       <div className="flex items-start gap-4 p-4">
         <IconBadge icon={icon} size="md" className="flex-shrink-0 mt-0.5" />
         <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -2272,7 +2272,7 @@ Card [p-0, overflow-hidden]
 
 | Elemento | Tailwind |
 |---|---|
-| Card wrapper | `bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden` |
+| Card wrapper | `bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden` |
 | Layout interno | `flex flex-col gap-4` |
 | Header | `flex items-start justify-between p-6 pb-0` |
 | Title block | `flex flex-col gap-1 flex-1` |
@@ -2310,7 +2310,7 @@ export function CardWithContent({
   onTabChange, children, className,
 }: CardWithContentProps) {
   return (
-    <Card className={cn("bg-white py-0 shadow-sm ring-0 rounded-xl overflow-hidden", className)}>
+    <Card className={cn("bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden", className)}>
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between p-6 pb-0">
           <div className="flex flex-col gap-1 flex-1">
@@ -2544,7 +2544,7 @@ Siempre independiente — **nunca dentro de `Card`**.
 
 | Propiedad | Valor | Tailwind |
 |---|---|---|
-| Contenedor | Blanco, redondeado, shadow | `bg-white rounded-xl shadow-sm overflow-hidden` |
+| Contenedor | Blanco, redondeado, shadow | `bg-white rounded-xl shadow-xs overflow-hidden` |
 | Header sección | Título + acción derecha | `p-6 pb-0` |
 | Título | H3 | `text-lg font-semibold text-foreground` |
 | Alto de fila | 56px | `h-14` |
@@ -2622,14 +2622,14 @@ Reutilizable en cualquier tabla del producto como prop opcional.
 
 **Botón "Ver columnas"** — header de tabla, alineado a la derecha:
 - Ícono: `TableIcon` de `lucide-react`
-- Variante: `outline`, size `sm`, `shadow-sm`
+- Variante: `outline`, size `sm`, `shadow-xs`
 - Abre `DropdownMenu` con `DropdownMenuCheckboxItem` por cada columna ocultable
 
 ```tsx
 // Botón trigger
 <DropdownMenu>
   <DropdownMenuTrigger asChild>
-    <Button variant="outline" size="sm" className="gap-2 shadow-sm">
+    <Button variant="outline" size="sm" className="gap-2 shadow-xs">
       <TableIcon className="size-4" aria-hidden />
       Ver columnas
     </Button>
@@ -3058,7 +3058,7 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
   })
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-xs overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <h3 className="text-lg font-semibold text-foreground">
@@ -3066,7 +3066,7 @@ export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) 
         </h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2 shadow-sm">
+            <Button variant="outline" size="sm" className="gap-2 shadow-xs">
               <TableIcon className="size-4" aria-hidden />
               Ver columnas
             </Button>
@@ -4627,7 +4627,7 @@ export function SectionHeader({
   size="md"
   title="Historial de Generación"
   action={
-    <Button variant="outline" size="sm" className="gap-2 shadow-sm">
+    <Button variant="outline" size="sm" className="gap-2 shadow-xs">
       <TableIcon className="size-4" aria-hidden />
       Ver columnas
     </Button>
@@ -4830,7 +4830,7 @@ que dependa de un período activo. Siempre en el header de la sección que contr
 
 | Elemento | Tailwind |
 |---|---|
-| Trigger | `Button variant="outline" size="sm" gap-2 shadow-sm` |
+| Trigger | `Button variant="outline" size="sm" gap-2 shadow-xs` |
 | Ícono izquierdo | `CalendarIcon size-4 text-muted-foreground` |
 | Label | período activo como texto (`string`) |
 | Chevron | `ChevronDownIcon size-4 text-muted-foreground` |
@@ -4993,12 +4993,12 @@ interface DatePickerProps {
 | Elemento | Reglas |
 |---|---|
 | Contenedor | `min-h-[60vh]`, centrado, fondo hereda del shell socio |
-| Card | `rounded-xl bg-white shadow-sm p-6 max-w-md` |
+| Card | `rounded-xl bg-white shadow-xs p-6 max-w-md` |
 | H1 | `text-2xl font-semibold` — "Verificá tu acceso" |
 | Subtítulo | `text-sm text-muted-foreground` |
 | Label OTP | `text-sm font-medium text-muted-foreground` |
 | Slots OTP | 4 dígitos, `size-11`, `rounded-md`, `border-input`, `gap-2` |
-| Botón | Primary, `w-full shadow-sm`, disabled si OTP &lt; 4 |
+| Botón | Primary, `w-full shadow-xs`, disabled si OTP &lt; 4 |
 | Error | `text-sm text-destructive`, `role="alert"` |
 
 ### Validación (mock v1)

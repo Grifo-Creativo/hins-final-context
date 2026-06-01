@@ -108,8 +108,7 @@ Stack: Next.js App Router, shadcn/ui, TanStack Table, Recharts.
 - `ux-guidelines.md` §1–§10 restaurado (§3 Sheet OPS); ampliar si hace falta más detalle histórico
 - `product-context.md` §11 parcialmente desactualizado (Mantenimiento multi-modelo, estado Socio/GDC)
 - `PageHeader` en `components.md` sin archivo `components/ui/page-header.tsx`
-- `shadow-xs` vs `shadow-sm`: código ya usa `shadow-xs` en botones y cards; `design-system.md` §5 Botones y algunos ejemplos en `components.md` aún dicen `shadow-sm` — pendiente sincronizar docs con código (8 cambios mecánicos de texto, sin tocar código)
-- `CardWithContent` spec en `components.md` muestra `shadow-sm` en tabla y ejemplo de código — mismo mismatch anterior
+- `PageHeader` en `components.md` sin archivo `components/ui/page-header.tsx`
 
 **UI**
 - Headers duplicados: `GddPageHeading`, `GdcvPageHeading`, `SocioPageHeading`, inline en Mantenimiento
