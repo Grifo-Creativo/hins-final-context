@@ -48,19 +48,19 @@ export function SectionHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        "flex flex-row items-center justify-between gap-2 sm:gap-4",
         className
       )}
     >
       {level === "h2" ? (
-        <h2 className={cn("min-w-0 text-balance order-1", titleClassName)}>{title}</h2>
+        <h2 className={cn("min-w-0 truncate", titleClassName)}>{title}</h2>
       ) : (
-        <Heading level="h3" className={cn("order-1", titleClassName)}>
+        <Heading level="h3" className={cn("min-w-0 truncate", titleClassName)}>
           {title}
         </Heading>
       )}
       {action ? (
-        <div className="flex w-full shrink-0 order-2 sm:ml-auto sm:w-auto">{action}</div>
+        <div className="flex flex-shrink-0 ml-auto w-auto">{action}</div>
       ) : null}
     </div>
   )

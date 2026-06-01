@@ -48,7 +48,7 @@ function CardWithContentHeaderControls({
         defaultValue={activeTab ? undefined : defaultTab}
         onValueChange={onTabChange}
         className={cn(
-          "h-full w-full min-w-0 shrink-0 sm:ml-auto sm:w-auto",
+          "h-full flex-shrink-0 ml-auto w-auto",
           className
         )}
       />
@@ -58,7 +58,7 @@ function CardWithContentHeaderControls({
   return (
     <div
       className={cn(
-        "flex w-full min-w-0 flex-nowrap items-center gap-2 sm:ml-auto sm:w-auto sm:justify-end",
+        "flex flex-shrink-0 items-center gap-2 ml-auto w-auto",
         className
       )}
     >
@@ -68,10 +68,10 @@ function CardWithContentHeaderControls({
           value={activeTab}
           defaultValue={activeTab ? undefined : defaultTab}
           onValueChange={onTabChange}
-          className="min-w-0 flex-1 sm:flex-initial"
+          className="flex-shrink-0"
         />
       ) : null}
-      <div className="shrink-0">{headerActions}</div>
+      <div className="flex-shrink-0">{headerActions}</div>
     </div>
   )
 }
@@ -101,18 +101,16 @@ function CardWithContentHeader({
   return (
     <div
       className={cn(
-        "flex shrink-0 flex-col gap-3 p-4 pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
-        hasHeaderActions ? "gap-3" : "gap-4"
+        "flex shrink-0 flex-row p-4 pb-0 items-center justify-between gap-2 sm:gap-4"
       )}
     >
       <div
         className={cn(
-          "flex min-w-0 w-full flex-col gap-1 sm:flex-1 order-1",
-          hasHeaderActions && "sm:order-1"
+          "flex min-w-0 flex-col gap-1 order-1"
         )}
       >
         {showTitle ? (
-          <Heading level="h3" className="leading-snug">
+          <Heading level="h3" className="leading-snug min-w-0 truncate">
             {title}
           </Heading>
         ) : null}
