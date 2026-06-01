@@ -171,7 +171,7 @@ export default function DevComponentsPage() {
 
         <div className="flex flex-col gap-10">
           <Showcase title="Button" file="components/ui/button.tsx">
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 sm:gap-6">
               <div>
                 <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Variantes

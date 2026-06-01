@@ -25,7 +25,7 @@ export function SocioRoiView() {
   return (
     <div className="grid min-h-0 grid-cols-1 gap-6 md:grid-cols-2">
       {/* Col 1 — ROI KPIs con Cards individuales */}
-      <div className="flex h-full flex-col gap-6">
+      <div className="flex h-full flex-col gap-4 sm:gap-6">
         {/* Título fuera de la Card */}
         <h2 className="text-lg font-semibold text-foreground">
           Retorno de la Inversión (ROI)
@@ -116,7 +116,7 @@ export function SocioRoiView() {
       </div>
 
       {/* Col 2 — Curva de Recuperación */}
-      <div className="flex h-full flex-col gap-6">
+      <div className="flex h-full flex-col gap-4 sm:gap-6">
         {/* Título fuera de la Card */}
         <h2 className="text-lg font-semibold text-foreground">
           Curva de Recuperación Acumulada

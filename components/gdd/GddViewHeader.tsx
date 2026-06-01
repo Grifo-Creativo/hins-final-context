@@ -87,7 +87,7 @@ export function GddViewHeader() {
           </h1>
           <ModelBadge model="GDD" />
         </div>
-        <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <TabsForBlocks
             tabs={[...navTabs]}
             value={pathname}

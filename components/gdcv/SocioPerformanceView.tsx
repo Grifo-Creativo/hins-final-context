@@ -226,7 +226,7 @@ export function SocioPerformanceView() {
         title="Participación por Socio"
         scrollVariant="flush"
       >
-        <div className="flex flex-col gap-6 p-6 pt-0">
+        <div className="flex flex-col gap-4 sm:gap-6 p-6 pt-0">
                 <ParticipacionDonutChart cellKeyPrefix="sheet" />
 
                 <div className="flex flex-col">

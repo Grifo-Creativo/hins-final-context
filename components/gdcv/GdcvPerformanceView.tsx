@@ -73,7 +73,7 @@ export function GdcvPerformanceView() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
 
       <div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
         <ParkDetailsCard
@@ -114,7 +114,7 @@ export function GdcvPerformanceView() {
         </CardWithContent>
 
         {/* Right column — KPI primary + 2× secondary */}
-        <div className="flex flex-col gap-6 h-full">
+        <div className="flex flex-col gap-4 sm:gap-6 h-full">
           <KpiPrimary
             icon={ZapIcon}
             label={gdcvGeneradaAbril.title}

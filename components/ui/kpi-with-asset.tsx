@@ -43,7 +43,7 @@ export function KpiWithAsset({
       )}
     >
       {hasDualKpi ? (
-        <div className="flex justify-between gap-6">
+        <div className="flex justify-between gap-4 sm:gap-6">
           <KpiSecondaryMetric
             label={label}
             value={value}

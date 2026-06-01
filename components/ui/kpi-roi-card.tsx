@@ -21,7 +21,7 @@ export function KpiRoiCard({ items, sparklineData }: KpiRoiCardProps) {
 
   return (
     <KpiCard>
-      <div className="flex min-h-0 flex-1 flex-col gap-6">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-6">
         {items.map((item, idx) => {
           const Icon = item.icon
           const isLastItem = idx === items.length - 1

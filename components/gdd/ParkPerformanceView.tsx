@@ -64,7 +64,7 @@ export function ParkPerformanceView() {
       : getParkEnergyChartSubtitle(period)
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
       <div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
         <ParkDetailsCard
           imageSrc={gddParkDetails.imageSrc}
@@ -103,7 +103,7 @@ export function ParkPerformanceView() {
           )}
         </CardWithContent>
 
-        <div className="flex h-full flex-col gap-6">
+        <div className="flex h-full flex-col gap-4 sm:gap-6">
           <KpiPrimary
             icon={ZapIcon}
             label={highlightAprilCardMock.title}
@@ -118,7 +118,7 @@ export function ParkPerformanceView() {
             }))}
           />
 
-          <div className="grid flex-1 grid-cols-2 gap-6">
+          <div className="grid flex-1 grid-cols-2 gap-4 sm:gap-6">
             <KpiSecondary
               icon={DollarSignIcon}
               label={savingsCardMock.label}

@@ -74,7 +74,7 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
           <DialogTitle>Nuevo Proyecto</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6">
           {/* Nombre */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

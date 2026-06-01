@@ -36,7 +36,7 @@ export function KpiRoiDuo({
     <KpiCard>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Col 1: KPI 1 — Inversión + Ahorrado + Sparkline */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6">
           {items.map((item, idx) => {
             const Icon = item.icon
             const isLastItem = idx === items.length - 1
@@ -80,7 +80,7 @@ export function KpiRoiDuo({
         </div>
 
         {/* Col 2: KPI 2 — Cap Recuperado + Pendiente + Progress */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4 sm:gap-6">
           {/* Cap Recuperado + Pendiente */}
           <div className="flex shrink-0 items-start justify-between gap-4">
             <div className="flex flex-col gap-1">

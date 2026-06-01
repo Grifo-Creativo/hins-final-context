@@ -116,7 +116,7 @@ export function SocioDetailSheet({
       title={socio.nombre}
       scrollVariant="flush"
     >
-      <div className="flex flex-col gap-6 p-6 pt-0">
+      <div className="flex flex-col gap-4 sm:gap-6 p-6 pt-0">
               {/* 2. Alert — no tocar */}
               {socio.tipo === "Virtual" && (
                 <Alert variant="warning" className="w-full p-4">
@@ -135,9 +135,9 @@ export function SocioDetailSheet({
 
               {/* 4+5. Energía generada + Ahorro — CardWire */}
               <CardWire>
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4 sm:gap-6">
                     {/* Row energía */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4 sm:gap-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex min-w-0 flex-col gap-0.5">
                           <p className="text-sm font-medium text-foreground">Energía generada</p>

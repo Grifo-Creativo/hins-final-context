@@ -21,7 +21,7 @@ export function SocioPageHeading() {
     : "/gdcv/socio"
 
   return (
-    <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-4 sm:gap-6 sm:flex-row sm:items-center sm:justify-between">
       <h1 className="min-w-0 max-w-full text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
         {socioParkName}
       </h1>
