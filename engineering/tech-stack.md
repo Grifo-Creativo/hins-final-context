@@ -27,26 +27,45 @@
 ## 2. Arquitectura de Carpetas
 
 ```
-/app                        → Rutas (App Router de Next.js)
-  /[ruta]
-    page.tsx                → Una página por ruta
-    layout.tsx              → Layout compartido si aplica
+/app                          → Rutas (Next.js App Router)
+  globals.css                 → Tokens CSS del design system (fuente de verdad de variables)
+  /main                       → Vista HINS Admin (cartera de parques)
+  /gdd                        → Vistas Dueño GDD (performance, roi, mantenimiento)
+  /gdcv                       → Vistas AGC + Socio GDCV
+  /gdc                        → Vistas AGC GDC
+  /dev/components             → Playground de componentes (dev only)
 
 /components
-  /ui                       → Componentes base (shadcn/ui + custom)
-  /charts                   → Componentes de visualización de datos
-  /layout                   → Shell, sidebar, topbar, page header
+  /ui                         → Componentes base (shadcn/ui + custom HINS)
+  /charts                     → Componentes de visualización de datos
+  /layout                     → Shells, sidebars, headers por módulo
+  /gdd                        → Vistas y bloques específicos GDD
+  /gdcv                       → Vistas y bloques específicos GDCV (AGC + Socio)
+  /gdc                        → Vistas y bloques específicos GDC
+  /main                       → Vistas y bloques HINS Admin
+  /mantenimiento              → Componentes compartidos de Mantenimiento (transversal GDD/GDC/GDCV)
 
 /data
-  chart-config.ts           → Fuente de verdad de colores y config de charts
-  [dominio]-mock.ts         → Datos mock por dominio
+  chart-config.ts             → Colores y config de charts (única fuente para chartConfig)
+  [dominio]-mock.ts           → Datos mock por dominio (gdcv-mock, gdd-roi-mock, etc.)
 
 /lib
-  utils.ts                  → cn() y utilidades compartidas
-  format-currency.ts        → ARS/USD: formatCurrency, formatRoiFromUsd, formatRoiFromUsdResponsive (locale es-AR)
+  utils.ts                    → cn() y utilidades compartidas
+  format-currency.ts          → ARS/USD: formatCurrency, formatRoiFromUsd, formatRoiFromUsdResponsive (locale es-AR)
+  chart-day-format.ts         → Helpers de formato para vista diaria 1D
+  chart-bar-density.ts        → Lógica de densidad para bar charts (tooltips, labels)
+  sheet-layout.ts             → Anchos de Sheet drill-down (detail / notifications / table)
+  mantenimiento-format.ts     → Helpers de formato para el módulo Mantenimiento
+  table-utils.ts              → Utilidades para tablas TanStack
 
-/styles
-  globals.css               → Tokens CSS (design system completo)
+/public
+  /images                     → Logos e iconografía estática
+    logo-hins.png             → Logo principal HINS
+    logo-hins-dark.png        → Logo para tema oscuro
+
+/context                      → Documentación del design system y producto
+/flows                        → Wireframes anotados por flujo/pantalla
+/engineering                  → Documentación técnica (este archivo)
 ```
 
 ---
@@ -221,16 +240,7 @@ El header debe ser sticky top para que las acciones siempre sean accesibles al s
 No construir ninguna página fuera de este shell.
 
 
-## 7. Arquitectura de Carpetas
-
-/public
-  /images               → SVG, PNG, iconografía no usada en componentes
-    `logo-hins.png`     → Logo principal HINS
-    `logo-hins-dark.png` → Logo para tema oscuro
-  /fonts                → Alternativa por el momento usamos la declarada
-
-  
-## 8. Decisiones confirmadas (proyecto)
+## 7. Decisiones confirmadas (proyecto)
 
 | Tema | Decisión |
 |---|---|
