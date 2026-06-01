@@ -34,7 +34,7 @@ import {
 
 /** Col 3 = 340px — alineado a `SOCIO_ENERGY_TOP_ROW_GRID` (panel Abril arriba). */
 const SOCIO_ROI_KPI_GRID =
-  "grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_340px]"
+  "grid min-h-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_340px]"
 
 export function SocioRoiView() {
   const pathname = usePathname()
@@ -78,7 +78,7 @@ export function SocioRoiView() {
 
   return (
     <>
-      <section className="flex flex-col gap-6">
+      <section className="flex flex-col gap-4 sm:gap-6">
         <SectionHeader
           level="h2"
           title="Retorno de Inversión (ROI)"

@@ -45,8 +45,8 @@ export function GdcvRoiView() {
   const totalInvertidoCompact = fmt(gdcvRoiKpis.totalInvertido, "axis")
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <div className="grid min-h-0 grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr_auto]">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6">
+      <div className="grid min-h-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[1fr_1fr_auto]">
         <KpiWithAsset
           label="Inversión Recuperada"
           value={fmt(gdcvRoiKpis.inversionRecuperada)}
