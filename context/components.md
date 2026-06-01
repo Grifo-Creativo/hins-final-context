@@ -1189,7 +1189,7 @@ export function FeatureItem({
 - En `"vertical"` el value usa `text-[#0A0A0A]` — mismo que KpiSecondary para consistencia
 - `tabular-nums` en value siempre — alineación correcta de números
 - `bg-background-subtle` — mismo fondo sutil del shell, consistente con SoftBadge
-- Spacing en CardWire: `gap-6` entre rows, `gap-4` entre elementos internos
+- Spacing en CardWire: `gap-4 sm:gap-6` entre rows (responsive mobile), `gap-4` entre elementos internos
 
 ---
 
@@ -1441,7 +1441,7 @@ import { WalletIcon, ZapIcon } from "lucide-react"
 - **Border fade effect:** `.kpi-compact-border-fade` aplica dual inset `box-shadow` — borde sutil (1px inset) + disolución hacia abajo. Efecto visual: el borde se desvanece hacia el fondo (especialmente en bordes inferiores y laterales). Interior de la card siempre blanco y limpio.
 - Sparkline: **nunca** pasar `showTooltip={false}` — mismo comportamiento interactivo que `KpiPrimary`.
 - `delta` es opcional — omitir o string vacío si no hay comparativo.
-- Grid recomendado: `grid-cols-2 gap-4` — mismo token que grids 2×N de métricas (`FeatureItem`, `KpiPrimary` wire). No usar `gap-6` (reservado para separación entre secciones).
+- Grid recomendado: `grid-cols-2 gap-4` — mismo token que grids 2×N de métricas (`FeatureItem`, `KpiPrimary` wire). Para separación entre secciones/bloques usar `gap-4 sm:gap-6` (responsive mobile) — ver `design-system.md` § "Spacing Responsivo en Mobile".
 - N instancias por vista permitidas (a diferencia de `KpiPrimary`).
 - **CSS token:** `.kpi-compact-border-fade` definido en `app/globals.css` — no hardcodear inline `style={{}}` si el efecto necesita cambiar globalmente.
 
@@ -1852,7 +1852,7 @@ import { gddParkDetails } from "@/data/gdd-performance-mock"
 - Imagen: **sin** `h-*` fijo ni `object-cover`; `block h-auto w-full` + dimensiones intrínsecas → ancho 100% de la card, altura proporcional, pegada al top.
 - Esquinas superiores: `overflow-hidden` + `rounded-xl` de `Card` en `CardWithContent`.
 - `noPadding` obligatorio en wrapper; padding solo en bloque de métricas (`p-4`).
-- `gap-4` en grid interno; `gap-6` entre secciones de página.
+- `gap-4` en grid interno (siempre); `gap-4 sm:gap-6` entre secciones de página (responsive mobile).
 - No duplicar labels de métricas fuera del mock — una fuente por flujo.
 
 ---

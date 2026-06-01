@@ -217,6 +217,24 @@ ORGANISM: CardWithContent, StatList, Tables → usan Heading internamente
 - `gap-4` → separación **entre items del mismo grupo** en grid 2×N (`KpiPrimaryCompact`, `FeatureItem`, wire de `KpiPrimary`).
 - ❌ No usar `gap-3 sm:gap-4` responsive en grids de KPIs — un solo token (`gap-4`) en mobile y desktop.
 
+### Spacing Responsivo en Mobile — Wrappers de Primer Nivel
+
+Para optimizar espacio en viewports pequeños (<640px), los **elementos wrapper de primer nivel** (containers principales, cards, grids de bloques) utilizan patrón responsive:
+
+| Contexto | Mobile <640px | Desktop ≥640px | Tailwind |
+|---|---|---|---|
+| Gap entre bloques en wrappers | **gap-4** (16px) | **gap-6** (24px) | `gap-4 sm:gap-6` |
+| Padding de main content | **p-4** (16px) | **p-6** (24px) | `p-4 sm:p-6` |
+| Padding de CardWithContent | **p-4** (16px) | **p-6** (24px) | `p-4 sm:p-6` |
+
+**⚠️ IMPORTANTE:** Esta es una **extensión responsiva** de las reglas base:
+- **Desktop (≥640px):** se mantiene `gap-6` entre bloques (regla clásica sin cambios)
+- **Mobile (<640px):** se reduce a `gap-4` para optimizar real estate visual (nueva excepción controlada)
+
+**NO confundir con:**
+- Grids de KPIs/items internos → siempre `gap-4` (tanto mobile como desktop) — ver línea 218
+- Este patrón `gap-4 sm:gap-6` es **solo para wrappers**, no para grids internos
+
 ### Elementos de formulario — Tamaño estándar
 
 | Elemento | Tamaño | Altura | Padding | Font |

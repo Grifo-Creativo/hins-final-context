@@ -52,6 +52,7 @@ Cuando hay conflicto entre documentos, el orden de autoridad es:
 - Antes de crear cualquier componente, verificar si existe spec en `components.md`.
 - Si existe spec en `components.md` → usar ese spec exacto, sin interpretación.
 - Si no existe spec → mapear a shadcn/ui nativo antes de crear uno custom.
+- **Spacing responsivo (mobile):** Elementos wrapper de primer nivel usan `gap-4 sm:gap-6` y `p-4 sm:p-6` para optimizar mobile. Ver `design-system.md` → "Spacing Responsivo en Mobile — Wrappers de Primer Nivel".
 - Charts: separación obligatoria `chartData / chartConfig / chartComponent`.
 - Navegación: siempre `next/link`, nunca `<a href>` para rutas internas.
 - Íconos: solo `lucide-react`, no mezclar librerías.
