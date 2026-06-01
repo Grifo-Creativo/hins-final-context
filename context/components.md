@@ -9,45 +9,77 @@
 
 ## Índice
 
-1. [Heading (Atom)](#heading)
-2. [SectionHeader (Molecule)](#sectionheader)
-3. [Form Elements (Inputs, Selects, etc)](#form-elements)
-4. [InputWithIconButton](#inputwithiconbutton)
-5. [Button](#button)
-6. [TabsForBlocks](#tabsforblocks)
-7. [Card](#card)
-8. [CardWire](#cardwire)
-9. [FeatureItem](#featureitem)
-10. [IconBadge](#iconbadge)
-11. [KpiPrimary](#kpiprimary)
-12. [KpiPrimaryCompact](#kpiprimarycompact)
-13. [KpiSecondary](#kpisecondary)
-13b. [KpiSecondaryMetric](#kpisecondarymetric)
-13c. [ParkDetailsCard](#parkdetailscard)
-13d. [ChartRangeOptions](#chartrangeoptions)
-13e. [FormatCurrency](#formatcurrency)
-13e2. [FormatEnergy — unidades energéticas](#formatenergy--unidades-energéticas)
-13e3. [Shell — Sidebar (desktop)](#shell--sidebar-desktop)
-13j. [GddRoiRecuperoTable](#gddroirecuperotable)
-13k. [Sheet — drill-down y anchos](#sheet--drill-down-y-anchos)
-13l. [SheetOps — composición drill-down](#sheetops--composición-drill-down)
-13f. [KpiWithAsset](#kpiwithasset)
-13g. [KpiProgressBar](#kpiprogressbar)
-13h. [KpiPaybackTimeline](#kpipaybacktimeline)
-13i. [KpiWithTimeline](#kpiwithtimeline)
-14. [SoftBadge](#softbadge)
-15. [StatusBadge](#statusbadge)
-16. [ModelBadge](#modelbadge)
-17. [CardWithContent](#cardwithcontent)
-17b. [CardWithResponsiveTabs](#cardwithresponsivetabs)
-18. [Table](#table)
-19. [GenerationSparkline](#generationsparkline)
-20. [GenerationSparkbars](#generationsparkbars)
-21. [ParkEnergyBarChart](#parkenergybarchar)
-22. [MonetaryBarChart](#monetarybarchar)
-23. [DailyGenerationChart](#dailygenerationchart)
-24. [DailyGenerationChartBlock](#dailygenerationchartblock)
-25. [HinsTooltip](#hinstooltip)
+> Spec de implementación completa para cada componente.  
+> Buscar por categoría o `Ctrl+F` con el nombre exacto del componente.
+
+### Fundación
+1. [Heading](#heading) — H1/H2/H3 semántico, fuente única de estilos tipográficos
+2. [SectionHeader](#sectionheader) — H3/H2 + action slot (tabs, badges, botones)
+3. [Shell — Sidebar](#shell--sidebar-desktop) — layout base, estado colapsado/expandido, cookie
+
+### Inputs y Controles
+4. [Form Elements](#form-elements) — Input, Select, Textarea (tamaño lg único, `text-base` siempre)
+5. [InputWithIconButton](#inputwithiconbutton) — input con botón ícono integrado a la derecha
+6. [Button](#button) — variantes (default/outline/ghost), `shadow-xs`, cuándo usar cada variante
+7. [TabsForBlocks](#tabsforblocks) — único componente de tabs del producto (rango, navegación interna)
+8. [PeriodSelector](#periodselector) — selector de período mensual (DropdownMenu)
+9. [DatePicker](#datepicker) — selector de día calendario (Popover + Calendar, vista 1D)
+10. [ChartRangeOptions](#chartrangeoptions) — constantes de chips de rango (1D / 1M / 3M / 6M / 1A / TODO)
+
+### Cards y Contenedores
+11. [Card](#card) — superficie base (`p-0`, `shadow-xs`, `py-0` obligatorio)
+12. [CardWire](#cardwire) — card con layout interno estándar (ícono + datos estructurados)
+13. [CardWithContent](#cardwithcontent) — card con header + tabs + content slot
+14. [CardWithResponsiveTabs](#cardwithresponsivetabs) — tabs en footer en mobile (<640px)
+
+### KPIs y Métricas
+15. [KpiPrimary](#kpiprimary) — KPI héroe (1 por vista, sparkline edge-to-edge)
+16. [KpiPrimaryCompact](#kpiprimarycompact) — variante compacta en grid 2×N
+17. [KpiSecondary](#kpisecondary) — datos de soporte sin sparkline
+18. [KpiSecondaryMetric](#kpisecondarymetric) — métrica con formato numérico destacado
+19. [KpiSecondaryCompact](#kpisecondarycompact) — layout horizontal compacto
+20. [KpiWithAsset](#kpiwithasset) — KPI con imagen de asset (parque, instalación)
+21. [KpiProgressBar](#kpiprogressbar) — KPI con barra de progreso gradiente
+22. [KpiPaybackTimeline](#kpipaybacktimeline) — visualización de payback con timeline
+23. [KpiWithTimeline](#kpiwithtimeline) — KPI con línea temporal de proyección
+24. [ParkDetailsCard](#parkdetailscard) — card de detalles técnicos del parque
+25. [FeatureItem](#featureitem) — par etiqueta/valor (horizontal, vertical, o con ícono)
+26. [StatList](#statlist) — lista de stats con separadores
+
+### Badges e Indicadores
+27. [SoftBadge](#softbadge) — badge sutil (`rounded-full`, `bg-background-subtle`)
+28. [StatusBadge](#statusbadge) — badge de estado semántico (En Curso, Cerrado, etc.)
+29. [ModelBadge](#modelbadge) — badge de modelo de negocio (GDD / GDC / GDCV)
+30. [IconBadge](#iconbadge) — ícono en contenedor badge (sm/md/lg)
+
+### Tablas
+31. [Table](#table) — tabla TanStack con sort, columnas ocultables, sheet drill-down
+32. [GddRoiRecuperoTable](#gddroirecuperotable) — tabla de recupero ROI en Sheet (GDD)
+33. [MantenimientoHistorialTable](#mantenimientohistorialtable) — historial de mantenimiento (AGC/Admin)
+
+### Charts
+34. [GenerationSparkline](#generationsparkline) — sparkline en KpiPrimary (área, sin ejes)
+35. [GenerationSparkbars](#generationsparkbars) — sparkbars en KpiPrimaryCompact
+36. [ParkEnergyBarChart](#parkenergybarchar) — bar chart generación parque (rangos 1M–TODO)
+37. [MonetaryBarChart](#monetarybarchar) — bar chart apilado ahorro (autoconsumo + inyectada)
+38. [DailyGenerationChart](#dailygenerationchart) — area chart horario kW (vista 1D)
+39. [DailyGenerationChartBlock](#dailygenerationchartblock) — bloque UI completo vista 1D (DatePicker + nav + chart)
+
+### Drill-down y Sheets
+40. [Sheet — drill-down y anchos](#sheet--drill-down-y-anchos) — tres perfiles (detail / notifications / table)
+41. [SheetOps — composición](#sheetops--composición-drill-down) — recetas listas: SheetContentTable, SheetContentDetail
+
+### Feedback y Alertas
+42. [HinsTooltip](#hinstooltip) — tooltip custom con delay y contenido rico
+43. [HinsAlert](#hinsalert) — alerta contextual (warning/info/success/error), sin ícono ni dismiss
+
+### Vistas y Páginas
+44. [PageHeader](#pageheader) — header de página con H1 + breadcrumb + acciones
+45. [SocioAccessView](#socioaccessview) — pantalla OTP de acceso socio (`/gdcv/socio/acceso`)
+
+### Helpers y Utilidades
+46. [FormatCurrency](#formatcurrency) — ARS/USD, modos full/compact/axis, locale `es-AR`
+47. [FormatEnergy](#formatenergy--unidades-energéticas) — kWh/kWp/kW, casing SI, locale `es-AR`
 
 ---
 
@@ -107,82 +139,123 @@ import { Heading } from "@/components/ui/heading"
 
 ---
 
-## SectionHeader (Molecule)
+## SectionHeader
 
-**Archivo:** `/components/ui/section-header.tsx`  
-**Estado:** ✅ Refactorizado  
-**Patrón:** Atomic Design — Molecule (Heading atom + action slot)
-
-### Propósito
-
-Combina el `Heading` atom (H3) con un slot flexible para **acciones** (tabs, badges, botones, etc.). Patrón: Heading centered + optional action (ml-auto, flex-shrink-0).
+**Archivo:** `/components/ui/section-header.tsx`
+**Estado:** ✅ Aprobado
+**Patrón:** Atomic Design — Molecule (`Heading` atom + action slot)
 
 ### Cuándo usar
+- H3 con acciones/controles (tabs, badges, botones, selects)
+- Títulos de StatList, Tables, secciones con header controls
+- Para H3 **sin acciones** → usar directamente `<Heading level="h3">`
 
-- Cuando necesites un H3 **con acciones/controles**
-- Títulos de StatList, Tables, Sections con header controls
-- Para H3 **sin acciones**, usa directamente `<Heading level="h3">`
+### Cuándo NO usar
+- Títulos de página (H1) → layout de la vista directamente
+- Labels inline dentro de componentes → `<p>` con Tailwind
 
 ### Props
 
-| Prop | Tipo | Required | Default | Descripción |
-|---|---|---|---|---|
-| `title` | `string` | ✅ | — | Texto del heading |
-| `level` | `"h2"` \| `"h3"` | ❌ | `"h3"` | `h2` = sección de vista (ROI socio, `text-lg`); `h3` = card/bloque |
-| `action` | `React.ReactNode` | ❌ | — | Slot libre: TabsForBlocks, Badges, Buttons, etc. |
-| `size` | `"md"` \| `"sm"` | ❌ | `"md"` | **size="sm" deprecated** — usar `<Heading>` directo |
-| `className` | `string` | ❌ | — | Clases Tailwind adicionales |
+| Prop | Tipo | Default | Descripción |
+|---|---|---|---|
+| `title` | `string` | — | Texto del heading |
+| `level` | `"h2"` \| `"h3"` | `"h3"` | `h2` = sección de vista (ej. ROI socio); `h3` = card/bloque |
+| `action` | `React.ReactNode` | — | Slot libre: TabsForBlocks, Badge, Button, Select, etc. |
+| `size` | `"md"` \| `"sm"` | `"md"` | **deprecated** — usar `level` |
+| `className` | `string` | — | Clases Tailwind adicionales |
 
-### Spec
+### Spec visual
 
-**size="md" (recomendado):**
-- Usa `Heading level="h3"` internamente
-- `text-lg font-semibold`
-- Alineación: title centered, action ml-auto
+| Elemento | Tailwind |
+|---|---|
+| Contenedor | `flex flex-row items-center justify-between gap-2 sm:gap-4` |
+| Title H3 (`level="h3"`) | `text-lg font-semibold text-foreground` (vía `Heading` atom) |
+| Title H2 (`level="h2"`) | `text-lg font-semibold text-foreground` (tag `h2` directo) |
+| Action slot | `flex flex-shrink-0 ml-auto w-auto` |
 
-**size="sm" (deprecated):**
-- Mantiene backward compatibility
-- No recomendado para nuevos componentes
-- Usar directamente `<Heading>` en su lugar
-
-### Ejemplos
+### Implementación
 
 ```tsx
-import { SectionHeader } from "@/components/ui/section-header"
-import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+// /components/ui/section-header.tsx
+import { Heading } from "@/components/ui/heading"
+import { cn } from "@/lib/utils"
 
-// Sin acciones (usa Heading directamente, no SectionHeader):
+interface SectionHeaderProps {
+  title: string
+  level?: "h2" | "h3"
+  /** @deprecated usar `level` */
+  size?: "md" | "sm"
+  action?: React.ReactNode
+  className?: string
+}
+
+export function SectionHeader({ title, level = "h3", size = "md", action, className }) {
+  const isMd = size === "md"
+  const titleClassName =
+    level === "h2" ? "text-lg font-semibold text-foreground"
+    : isMd ? undefined
+    : "text-sm font-medium"
+
+  return (
+    <div className={cn("flex flex-row items-center justify-between gap-2 sm:gap-4", className)}>
+      {level === "h2" ? (
+        <h2 className={cn("min-w-0 truncate", titleClassName)}>{title}</h2>
+      ) : (
+        <Heading level="h3" className={cn("min-w-0 truncate", titleClassName)}>
+          {title}
+        </Heading>
+      )}
+      {action ? <div className="flex flex-shrink-0 ml-auto w-auto">{action}</div> : null}
+    </div>
+  )
+}
+```
+
+### Casos de uso
+
+```tsx
+// H3 sin acción — usar Heading directamente:
 <Heading level="h3">Título simple</Heading>
 
-// Con acciones (tabs):
+// H3 con tabs de rango (CardWithContent):
 <SectionHeader
-  title="Desglose de Ahorro"
+  title="Energía Generada del Parque"
   action={
     <TabsForBlocks
-      variant="icon"
-      tabs={[
-        { value: "dinero", icon: WalletIcon, ariaLabel: "Dinero" },
-        { value: "energia", icon: ZapIcon, ariaLabel: "Energía" }
-      ]}
-      onValueChange={handleTabChange}
+      tabs={[{ value: "1m", label: "1M" }, { value: "3m", label: "3M" }, { value: "6m", label: "6M" }]}
+      defaultValue="6m"
+      onValueChange={setRange}
     />
   }
 />
 
-// Con otros controles (badge, button):
+// H3 con botón (Table):
 <SectionHeader
-  title="Compensaciones"
-  action={<Badge>2 pendientes</Badge>}
+  title="Historial de Generación"
+  action={
+    <Button variant="outline" size="sm" className="gap-2 shadow-xs">
+      <TableIcon className="size-4" aria-hidden />
+      Ver columnas
+    </Button>
+  }
 />
+
+// H3 con badge de estado (GDCV Socio — período activo):
+<SectionHeader
+  title="Abril 2026"
+  action={<StatusBadge status="current">En Curso</StatusBadge>}
+/>
+
+// H2 — sección de vista (ROI Socio, nivel superior):
+<SectionHeader level="h2" title="Mi Retorno de Inversión" />
 ```
 
-### Notas de implementación
-
-- ✅ Usa `Heading` atom internamente (no h3 inline)
-- ✅ Flexible: action slot acepta cualquier React node
-- ✅ Responsive: acción se ajusta con ml-auto
-- ⚠️ **size="sm" deprecated** — plan: remover en futuro
-- ❌ No hardcodear acciones — pasar como prop
+### Notas para el agente
+- `level="h3"` (default) → usa `Heading` atom internamente; `level="h2"` → tag `h2` directo
+- `size` está deprecated — no usar en código nuevo; `level` es el prop correcto
+- `action` es slot libre — no acoplar tipos específicos
+- Gap responsivo: `gap-2 sm:gap-4` — el componente ya lo maneja, no sobrescribir
+- **Migración pendiente:** `CardWithContent`, `StatList` y `ConsumptionHistoryTable` deben migrar a usar `SectionHeader` internamente
 
 ---
 
@@ -4513,170 +4586,6 @@ Ver también [SheetOps — composición drill-down](#sheetops--composición-dril
 
 ---
 
-## SectionHeader
-
-**Archivo:** `/components/ui/section-header.tsx`
-**Estado:** ✅ Aprobado
-**Usado en:** `CardWithContent`, `StatList`, `ConsumptionHistoryTable` y cualquier bloque que necesite título + acción opcional.
-
-### Cuándo usar
-Siempre que un bloque, card o sección necesite un título con acción opcional a la derecha.
-Es el patrón unificado de header para todo el producto.
-
-### Cuándo NO usar
-- Títulos de página (`h1`) → usar directamente en el layout de la vista
-- Labels inline dentro de componentes → usar `<p>` con clases Tailwind
-
-### Spec
-
-**Dos tamaños según jerarquía semántica:**
-
-| size | Tag | Tailwind desktop | Tailwind mobile | Uso |
-|---|---|---|---|---|
-| `md` | `h3` | `text-lg font-semibold` | `text-base font-semibold` | Header principal de card o bloque |
-| `sm` | `h4` | `text-sm font-medium` | `text-sm font-medium` | Sub-sección dentro de card |
-
-**Slot `action` — acepta cualquier componente:**
-- `TabsForBlocks` — filtros de período o navegación
-- `Badge` — estado de período (ej. **En Curso** verde en panel socio GDCV)
-- `DropdownMenu` — acciones de tabla
-- `Button` — acción principal
-- `Select` — selector de período
-- `null` — sin acción (solo título)
-
-| Elemento | Tailwind |
-|---|---|
-| Contenedor | `flex items-center justify-between gap-4` |
-| Title `md` | `text-base font-semibold md:text-lg text-foreground` |
-| Title `sm` | `text-sm font-medium text-foreground` |
-| Action slot | `ml-auto flex-shrink-0` |
-
-```tsx
-// /components/ui/section-header.tsx
-import { cn } from "@/lib/utils"
-
-interface SectionHeaderProps {
-  title: string
-  /** Jerarquía semántica. md = h3 (card principal). sm = h4 (sub-sección). */
-  size?: "md" | "sm"
-  /** Slot libre — TabsForBlocks, DropdownMenu, Button, Select, etc. */
-  action?: React.ReactNode
-  className?: string
-}
-
-export function SectionHeader({
-  title,
-  size = "md",
-  action,
-  className,
-}: SectionHeaderProps) {
-  const isMd = size === "md"
-
-  const titleClass = isMd
-    ? "text-base font-semibold md:text-lg text-foreground"
-    : "text-sm font-medium text-foreground"
-
-  return (
-    <div className={cn("flex items-center justify-between gap-4", className)}>
-      {isMd ? (
-        <h3 className={titleClass}>{title}</h3>
-      ) : (
-        <h4 className={titleClass}>{title}</h4>
-      )}
-      {action && (
-        <div className="ml-auto flex-shrink-0">
-          {action}
-        </div>
-      )}
-    </div>
-  )
-}
-```
-
-### Casos de uso en el producto
-
-```tsx
-// CardWithContent — header principal (h3)
-<SectionHeader
-  size="md"
-  title="Energía Generada del Parque"
-  action={
-    <TabsForBlocks
-      tabs={[{ value: "1m", label: "1M" }, { value: "3m", label: "3M" }, { value: "6m", label: "6M" }]}
-      defaultValue="6m"
-      onValueChange={setRange}
-    />
-  }
-/>
-
-// StatList — sub-sección dentro de card (h4)
-<SectionHeader
-  size="sm"
-  title="Ahorro"
-  action={
-    <TabsForBlocks
-      tabs={[{ value: "inyeccion", label: "Inyección" }, { value: "energia", label: "Energía" }]}
-      defaultValue="inyeccion"
-      onValueChange={setTab}
-    />
-  }
-/>
-
-// Table — header principal sin acción de tabs (h3)
-<SectionHeader
-  size="md"
-  title="Historial de Generación"
-  action={
-    <Button variant="outline" size="sm" className="gap-2 shadow-xs">
-      <TableIcon className="size-4" aria-hidden />
-      Ver columnas
-    </Button>
-  }
-/>
-
-// Solo título, sin acción
-<SectionHeader size="md" title="Retorno de Inversión" />
-
-// Panel socio GDCV — período + badge estado (fuera de card, sobre shell)
-<SectionHeader
-  size="md"
-  title="Abril 2026"
-  action={
-    <Badge className="border-transparent bg-green-100 text-green-700 hover:bg-green-100">
-      En Curso
-    </Badge>
-  }
-/>
-```
-
-**Variante período + estado (`En Curso`):**
-- Título = label del mes en curso (`h3`, `size="md"`).
-- `action` = badge verde alineado a la derecha — **mismo token** que columna Estado en `CompensacionesTable`.
-- Layout: `justify-between` nativo del componente; título y badge en extremos opuestos.
-- Usar **fuera de `Card`** cuando el bloque siguiente son KPIs libres (`KpiPrimaryCompact`) + card de desglose.
-
-```tsx
-// GDCV Socio — /components/gdcv/SocioEnergyView.tsx
-<SectionHeader
-  size="md"
-  title={socioV2PanelKpis.periodLabel}
-  action={<StatusBadge status="current">En Curso</StatusBadge>}
-/>
-<div className="grid grid-cols-2 gap-4">
-  <FeatureItem icon={WalletIcon} label="Ahorro" value="$ 74.400" className="md:flex-col md:items-stretch" />
-  <FeatureItem icon={ZapIcon} label="Energía Gen." value="830 kWh" className="md:flex-col md:items-stretch" />
-</div>
-```
-
-### Notas para el agente
-- `size="md"` → `h3` semántico. `size="sm"` → `h4` semántico. Nunca invertir.
-- El tag semántico define jerarquía en el documento — ver `ux-guidelines.md` §10.
-- `action` es un slot libre — no acoplar tipos específicos.
-- En mobile, `size="md"` reduce de `text-lg` a `text-base` automáticamente.
-- `size="sm"` no cambia en mobile — 14px es legible en cualquier viewport.
-- ⚠️ Migración pendiente: `CardWithContent`, `StatList` y `ConsumptionHistoryTable` deben migrar a usar `SectionHeader` internamente en una siguiente iteración.
-
----
 
 ## PageHeader
 
@@ -5056,32 +4965,6 @@ interface DatePickerProps {
 
 ---
 
-## Índice actualizado
-
-1. [TabsForBlocks](#tabsforblocks)
-2. [Card](#card)
-3. [IconBadge](#iconbadge)
-4. [KpiPrimary](#kpiprimary)
-5. [KpiPrimaryCompact](#kpiprimarycompact)
-6. [KpiSecondary](#kpisecondary)
-6. [SoftBadge](#softbadge)
-7. [CardWithContent](#cardwithcontent)
-8. [Table](#table)
-9. [GenerationSparkline](#generationsparkline)
-10. [ParkEnergyBarChart](#parkenergybarchar)
-11. [DailyGenerationChart](#dailygenerationchart)
-12. [DailyGenerationChartBlock](#dailygenerationchartblock)
-13. [HinsTooltip](#hinstooltip)
-14. [StatList](#statlist)
-15. [SectionHeader](#sectionheader)
-16. [PageHeader](#pageheader)
-17. [PeriodSelector](#periodselector)
-18. [DatePicker](#datepicker)
-19. [SocioAccessView](#socioaccessview)
-20. [MantenimientoHistorialTable](#mantenimientohistorialtable)
-21. [HinsAlert](#hinsalert)
-
----
 
 ## HinsAlert
 
