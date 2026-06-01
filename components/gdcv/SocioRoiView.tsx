@@ -81,7 +81,7 @@ export function SocioRoiView() {
       <section className="flex flex-col gap-6">
         <SectionHeader
           level="h2"
-          title="Retorno de la Inversión (ROI)"
+          title="Retorno de Inversión (ROI)"
           action={
             <TabsForBlocks
               width="fit"
