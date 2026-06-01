@@ -21,6 +21,8 @@ interface CardWithResponsiveTabsProps {
   activeTab?: string
   onTabChange?: (value: string) => void
   headerActions?: React.ReactNode
+  /** Desktop (≥640px): si true, `headerActions` va antes de los chips de rango. Default: después. */
+  headerActionsBeforeRangeTabs?: boolean
   children: React.ReactNode
   className?: string
   noPadding?: boolean
@@ -37,6 +39,7 @@ function CardWithResponsiveTabsHeader({
   defaultTab,
   onTabChange,
   headerActions,
+  headerActionsBeforeRangeTabs = false,
 }: Pick<
   CardWithResponsiveTabsProps,
   | "title"
@@ -46,6 +49,7 @@ function CardWithResponsiveTabsHeader({
   | "defaultTab"
   | "onTabChange"
   | "headerActions"
+  | "headerActionsBeforeRangeTabs"
 >) {
   const showTitle = Boolean(title)
   const showSubtitle = Boolean(subtitle)
@@ -67,7 +71,10 @@ function CardWithResponsiveTabsHeader({
       </div>
 
       {/* Controls — siempre a la derecha */}
-      <div className="flex flex-shrink-0 items-center gap-2">
+      <div className="flex flex-shrink-0 items-center gap-2 sm:gap-4">
+        {headerActionsBeforeRangeTabs && headerActions ? (
+          <div className="hidden sm:flex flex-shrink-0">{headerActions}</div>
+        ) : null}
         {/* Range tabs: solo en desktop (≥640px) */}
         <div className="hidden sm:flex">
           <TabsForBlocks
@@ -78,9 +85,16 @@ function CardWithResponsiveTabsHeader({
             className="h-full flex-shrink-0"
           />
         </div>
-        {/* Header actions: siempre visibles */}
+        {/* Header actions: siempre visibles (mobile); desktop si no van antes del rango */}
         {headerActions ? (
-          <div className="flex-shrink-0">{headerActions}</div>
+          <div
+            className={cn(
+              "flex-shrink-0",
+              headerActionsBeforeRangeTabs && "sm:hidden"
+            )}
+          >
+            {headerActions}
+          </div>
         ) : null}
       </div>
     </div>
@@ -95,6 +109,7 @@ export function CardWithResponsiveTabs({
   activeTab,
   onTabChange,
   headerActions,
+  headerActionsBeforeRangeTabs = false,
   children,
   className,
   noPadding = false,
@@ -122,6 +137,7 @@ export function CardWithResponsiveTabs({
               activeTab={activeTab}
               onTabChange={onTabChange}
               headerActions={headerActions}
+              headerActionsBeforeRangeTabs={headerActionsBeforeRangeTabs}
             />
           ) : null}
           {children}
@@ -169,6 +185,7 @@ export function CardWithResponsiveTabs({
             activeTab={activeTab}
             onTabChange={onTabChange}
             headerActions={headerActions}
+            headerActionsBeforeRangeTabs={headerActionsBeforeRangeTabs}
           />
         ) : null}
         <div

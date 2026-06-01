@@ -21,10 +21,11 @@
 4. [Form Elements](#form-elements) — Input, Select, Textarea (tamaño lg único, `text-base` siempre)
 5. [InputWithIconButton](#inputwithiconbutton) — input con botón ícono integrado a la derecha
 6. [Button](#button) — variantes (default/outline/ghost), `shadow-xs`, cuándo usar cada variante
-7. [TabsForBlocks](#tabsforblocks) — único componente de tabs del producto (rango, navegación interna)
-8. [PeriodSelector](#periodselector) — selector de período mensual (DropdownMenu)
-9. [DatePicker](#datepicker) — selector de día calendario (Popover + Calendar, vista 1D)
-10. [ChartRangeOptions](#chartrangeoptions) — constantes de chips de rango (1D / 1M / 3M / 6M / 1A / TODO)
+7. [Switch](#switch) — toggle on/off (shadcn/Radix)
+8. [TabsForBlocks](#tabsforblocks) — único componente de tabs del producto (rango, navegación interna)
+9. [PeriodSelector](#periodselector) — selector de período mensual (DropdownMenu)
+10. [DatePicker](#datepicker) — selector de día calendario (Popover + Calendar, vista 1D)
+11. [ChartRangeOptions](#chartrangeoptions) — constantes de chips de rango (1D / 1M / 3M / 6M / 1A / TODO)
 
 ### Cards y Contenedores
 11. [Card](#card) — superficie base (`p-0`, `shadow-xs`, `py-0` obligatorio)
@@ -601,6 +602,62 @@ const buttonVariants = cva(
 - Texto + ícono siempre llevan `gap-1.5` entre ellos
 - `aria-label` es obligatorio en botones icon-only para accesibilidad
 - Focus state con ring-3 es nativo — no sobrescribir
+
+---
+
+## Switch
+
+**Archivo:** `/components/ui/switch.tsx`  
+**Estado:** ✅ Aprobado  
+**Fuente:** [shadcn/ui Switch](https://ui.shadcn.com/docs/components/radix/switch) (Radix) — instalar con `pnpm dlx shadcn@latest add switch`
+
+### Cuándo usar
+
+Toggle binario on/off en headers de cards o formularios (ej. discriminar cuotaparte en un chart).
+
+### Cuándo NO usar
+
+- Selección entre 2+ opciones con etiqueta visible → `TabsForBlocks`
+- Rango de período en charts → chips `CHART_RANGE_TABS`, nunca Switch
+
+### Patrón — label + Switch en `headerActions`
+
+```tsx
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+
+<div className="flex items-center gap-2">
+  <Label
+    htmlFor="socio-parque-mi-parte"
+    className="gap-1.5 text-sm font-medium text-muted-foreground"
+  >
+    {showMiParte ? (
+      <span
+        className="size-2 shrink-0 rounded-sm"
+        style={{ backgroundColor: "var(--chart-stack-inyectada)" }}
+        aria-hidden
+      />
+    ) : null}
+    Mi parte
+  </Label>
+  <Switch
+    id="socio-parque-mi-parte"
+    checked={showMiParte}
+    onCheckedChange={setShowMiParte}
+    disabled={chartRange === "1d"}
+    aria-label="Mostrar mi parte de la energía generada del parque"
+  />
+</div>
+```
+
+### Notas para el agente
+
+- Usar el componente del registry tal cual — no crear variantes custom.
+- Siempre `htmlFor` / `id` pareados con `Label`.
+- En `CardWithResponsiveTabs`: slot `headerActions`. Default desktop: a la derecha **después** de chips de rango; `headerActionsBeforeRangeTabs` invierte el orden (Socio parque «Mi parte»).
+- Deshabilitar en vistas donde el control no aplica (ej. tab `1d` con area chart).
+
+**Usado en:** `SocioPerformanceView` — «Energía generada del parque» (`/gdcv/socio/parque`).
 
 ---
 
@@ -2518,7 +2575,7 @@ Card
 | Header | `flex shrink-0 flex-row p-4 pb-0 items-center gap-2 sm:gap-4` |
 | Title block | `flex min-w-0 flex-1 flex-col gap-1` (title truncate) |
 | Subtitle | `hidden text-sm font-normal text-muted-foreground md:block` |
-| Controls (derecha) | `flex flex-shrink-0 items-center gap-2` |
+| Controls (derecha) | `flex flex-shrink-0 items-center gap-2 sm:gap-4` |
 | RangeTabs header | `hidden sm:flex` — oculto en mobile |
 | RangeTabs footer | `flex sm:hidden p-4 pt-0` (noPadding) ó `flex sm:hidden pt-4` (con padding) |
 | mobileContentAfterTabs | `flex sm:hidden flex-col p-4 pt-0` (noPadding) ó `flex sm:hidden flex-col pt-4` |
@@ -2535,6 +2592,7 @@ interface CardWithResponsiveTabsProps {
   activeTab?: string
   onTabChange?: (value: string) => void
   headerActions?: React.ReactNode      // controles extra (ej. toggle $/⚡) — siempre en header
+  headerActionsBeforeRangeTabs?: boolean  // desktop: headerActions antes de chips de rango
   children: React.ReactNode
   className?: string
   noPadding?: boolean                  // igual que CardWithContent
@@ -2564,11 +2622,13 @@ interface CardWithResponsiveTabsProps {
 
 ```tsx
 <CardWithResponsiveTabs
-  title={title}
+  title="Energía generada del parque"
   tabs={CHART_RANGE_TABS}
   activeTab={chartRange}
   onTabChange={setChartRange}
   headerActions={
+  /* Mi Espacio: toggle $/⚡ — ver SocioEnergyView */
+  /* Performance parque: Switch «Mi parte» — ver SocioPerformanceView + Switch */
     <TabsForBlocks variant="icon" tabs={UNIT_TABS} value={unit} onValueChange={setUnit} />
   }
   mobileContentAfterTabs={
@@ -2590,6 +2650,7 @@ interface CardWithResponsiveTabsProps {
 
 - **No duplicar TabsForBlocks** — el componente lo renderiza dos veces internamente (header oculto + footer oculto). Solo pasar `tabs` una vez via prop.
 - `headerActions` siempre visible en header (mobile y desktop) — usar para toggles de unidad ($ / ⚡), no para rango.
+- `headerActionsBeforeRangeTabs`: opcional — en desktop coloca `headerActions` **antes** de los chips de rango (ej. Switch «Mi parte» en `SocioPerformanceView`). Default `false` (rango primero).
 - **`noPadding`** aplica padding p-4 al footer de tabs; sin `noPadding`, el padding es pt-4.
 - El patrón `mobileContentAfterTabs` + children con `hidden sm:flex` resuelve reorden de elementos sin duplicar datos en el DOM.
 - `shadow-xs` — consistente con design-system (no `shadow-sm`).
@@ -3499,80 +3560,70 @@ export function GenerationSparkbars({
 
 **Archivo:** `/components/charts/ParkEnergyBarChart.tsx`
 **Estado:** ✅ Aprobado
-**Usado en:** GDD_01 — CardWithContent "Energía Generada del Parque"
+**Usado en:** GDD / GDCV AGC — generación del parque; GDCV Socio — «Energía generada del parque» (`variant` total o share)
 
 ### Cuándo usar
-Bar chart de generación de energía mensual/semanal del parque.
-Siempre dentro de `CardWithContent` con chips 1M/3M/6M.
+Bar chart de generación de energía mensual/semanal del parque (rangos distintos de `1d`).
+Siempre dentro de `CardWithContent` o `CardWithResponsiveTabs` con chips de rango.
 
-### Spec
+### Variantes
+
+| `variant` | Default | Datos | Uso |
+|---|---|---|---|
+| `total` | ✅ | `{ label, generated }[]` | Parque completo — una serie |
+| `share` | — | `{ label, generated, miParte, resto }[]` | Cuotaparte del socio apilada sobre el resto del parque |
+
+### Spec — `variant="total"`
 
 | Propiedad | Valor |
 |---|---|
 | Tipo | Recharts BarChart |
-| Altura | `h-[300px]` |
-| Barra actual (último índice) | `var(--chart-1)` — Green 500 |
-| Barras pasadas | `var(--chart-1-muted)` — Green 500 @ 40% |
-| Border radius barra | `[6, 6, 0, 0]` — redondeado solo arriba |
-| Bar size | `56px` |
-| Label | posición "top", formato `"N kWh"` |
-| Grid | vertical: false, `strokeDasharray="3 3"` |
-| Ejes | `tickLine: false`, `axisLine: false` |
+| Altura | `h-[300px]` min |
+| Barra actual (último índice) | `var(--chart-1)` |
+| Barras pasadas | `var(--chart-1-muted)` |
+| Border radius | `[6, 6, 0, 0]` si `n ≤ 16` |
+| Densidad | `getChartBarDensity` — labels/tooltip según cantidad de barras |
+| `chartConfig` | `gdcvEnergyBarChartConfig` / `parkEnergyBarChartConfig` |
+
+### Spec — `variant="share"` (GDCV Socio «Mi parte»)
+
+Alineado a [MonetaryBarChart](#monetarybarchar) — green base + amber tope (misma lectura visual que autoconsumo / inyectada).
+
+| Segmento | `dataKey` | Token |
+|---|---|---|
+| Base | `resto` | `var(--chart-stack-autoconsumo)` — resto del parque |
+| Tope | `miParte` | `var(--chart-stack-inyectada)` — cuotaparte del socio (amber) |
+| Altura barra | `generated` (= `miParte` + `resto`) | Label superior = total parque |
+| Tooltip | Custom | Total parque · Mi parte (swatch amber) · Resto (swatch green) · delta vs mes anterior |
+| `chartConfig` | `parkEnergyShareChartConfig` | `/data/chart-config.ts` |
+
+**Header:** con Switch ON, swatch `size-2 rounded-sm` con `--chart-stack-inyectada` antes del label «Mi parte» (referencia al chart).
+
+**Datos:** `getSocioParqueShareSeries(range)` en `/data/gdcv-socio-mock.ts` — deriva de `socioPorcentaje` (15% prototipo).
 
 ```tsx
-// /components/charts/ParkEnergyBarChart.tsx
-"use client"
+// Total (default)
+<ParkEnergyBarChart
+  data={getSocioParqueSeries("6m")}
+  chartConfig={gdcvEnergyBarChartConfig}
+/>
 
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, XAxis, YAxis } from "recharts"
-import {
-  ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig,
-} from "@/components/ui/chart"
-
-type ParkEnergyBarChartProps = {
-  data: { label: string; generated: number }[]
-  chartConfig: ChartConfig
-}
-
-function barFill(index: number, total: number): string {
-  return index === total - 1 ? "var(--chart-1)" : "var(--chart-1-muted)"
-}
-
-export function ParkEnergyBarChart({ data, chartConfig }: ParkEnergyBarChartProps) {
-  const n = data.length
-  return (
-    <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
-      <BarChart data={data} margin={{ left: 4, right: 8, top: 28, bottom: 4 }}>
-        <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/60" />
-        <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} className="text-muted-foreground" />
-        <YAxis tickLine={false} axisLine={false} tickMargin={8} className="text-muted-foreground" />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="generated" radius={[6, 6, 0, 0]} barSize={56}>
-          {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={barFill(index, n)} />
-          ))}
-          <LabelList
-            position="top"
-            dataKey="generated"
-            className="fill-foreground text-[10px] font-medium"
-            formatter={(value: unknown) =>
-              typeof value === "number"
-                ? `${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })} kWh`
-                : ""
-            }
-          />
-        </Bar>
-      </BarChart>
-    </ChartContainer>
-  )
-}
+// Cuotaparte visible (Switch ON)
+<ParkEnergyBarChart
+  variant="share"
+  data={getSocioParqueShareSeries("6m")}
+  chartConfig={parkEnergyShareChartConfig}
+/>
 ```
 
+Activación en vista: [Switch](#switch) «Mi parte» en `headerActions` de `CardWithResponsiveTabs` (`SocioPerformanceView`). Switch `disabled` en tab `1d`.
+
 ### Notas para el agente
-- `barFill` determina el color por posición — nunca hardcodear colores en las barras.
-- La última barra siempre es `--chart-1` (período actual).
-- Barras pasadas siempre `--chart-1-muted`.
-- `chartConfig` desde `/data/chart-config` — nunca inline.
-- Los datos `{ label, generated }` los provee `/data/gdd-performance-mock.ts` via `getParkEnergySeries(period)`.
+- `barFill` determina énfasis del período actual — nunca hardcodear hex en barras.
+- Modo `share` reutiliza los **tokens** de apilado (`--chart-stack-autoconsumo` / `--chart-stack-inyectada`), no el componente `MonetaryBarChart`.
+- `chartConfig` siempre desde `/data/chart-config` — nunca inline.
+- Serie total GDD: `/data/gdd-performance-mock.ts` → `getParkEnergySeries`.
+- Serie total socio parque: `getSocioParqueSeries`.
 
 ---
 

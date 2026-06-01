@@ -55,6 +55,18 @@ export const gdcvEnergyBarChartConfig = {
   },
 } satisfies ChartConfig
 
+/** Apilado cuotaparte — mismos tokens que Monetary (green base + amber tope). */
+export const parkEnergyShareChartConfig = {
+  resto: {
+    label: "Resto del parque",
+    color: "var(--chart-stack-autoconsumo)",
+  },
+  miParte: {
+    label: "Mi parte",
+    color: "var(--chart-stack-inyectada)",
+  },
+} satisfies ChartConfig
+
 export const dailyGenerationChartConfig = {
   kw: {
     label: "Generación",

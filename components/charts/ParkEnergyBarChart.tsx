@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  Tooltip,
   XAxis,
   YAxis,
 } from "recharts"
@@ -22,11 +23,31 @@ import { getChartBarDensity } from "@/lib/chart-bar-density"
 import { formatChartPeriodTooltipLabel } from "@/lib/format-chart-period-tooltip"
 import { cn } from "@/lib/utils"
 
-type ParkEnergyBarChartProps = {
-  data: { label: string; generated: number }[]
+export type ParkEnergyTotalRow = { label: string; generated: number }
+
+export type ParkEnergyShareRow = ParkEnergyTotalRow & {
+  miParte: number
+  resto: number
+}
+
+type ParkEnergyBarChartBaseProps = {
   chartConfig: ChartConfig
   className?: string
 }
+
+type ParkEnergyBarChartTotalProps = ParkEnergyBarChartBaseProps & {
+  variant?: "total"
+  data: ParkEnergyTotalRow[]
+}
+
+type ParkEnergyBarChartShareProps = ParkEnergyBarChartBaseProps & {
+  variant: "share"
+  data: ParkEnergyShareRow[]
+}
+
+export type ParkEnergyBarChartProps =
+  | ParkEnergyBarChartTotalProps
+  | ParkEnergyBarChartShareProps
 
 function barFill(index: number, total: number): string {
   if (index === total - 1) {
@@ -35,11 +56,132 @@ function barFill(index: number, total: number): string {
   return "var(--chart-1-muted)"
 }
 
-export function ParkEnergyBarChart({
+function formatKwh(value: number, maxFractionDigits = 0): string {
+  return `${value.toLocaleString("es-AR", { maximumFractionDigits: maxFractionDigits })} kWh`
+}
+
+function formatKwhCompact(value: number): string {
+  const hasDecimals = value % 1 !== 0
+  return formatKwh(value, hasDecimals ? 1 : 0)
+}
+
+function getShareStackColor(
+  chartConfig: ChartConfig,
+  key: "resto" | "miParte",
+  fallback: string
+): string {
+  const entry = chartConfig[key]
+  return entry && "color" in entry && entry.color ? String(entry.color) : fallback
+}
+
+const SHARE_COLOR_RESTO = "var(--chart-stack-autoconsumo)"
+const SHARE_COLOR_MI_PARTE = "var(--chart-stack-inyectada)"
+
+type ShareTooltipProps = {
+  active?: boolean
+  payload?: { dataKey?: string; value?: number; payload?: ParkEnergyShareRow }[]
+  label?: string | number
+  rows: ParkEnergyShareRow[]
+}
+
+function ShareTooltip({ active, payload, label, rows }: ShareTooltipProps) {
+  if (!active || !payload?.length) return null
+
+  const row = payload[0]?.payload
+  if (!row) return null
+
+  const index = rows.findIndex((d) => d.label === row.label)
+  const prevTotal = index > 0 ? (rows[index - 1]?.generated ?? 0) : 0
+  const delta = row.generated - prevTotal
+
+  return (
+    <div className="grid min-w-[10rem] gap-2 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+      <p className="font-medium text-foreground">
+        {formatChartPeriodTooltipLabel(String(label ?? row.label))}
+      </p>
+      <div className="grid gap-1.5">
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">Total parque</span>
+          <span className="font-mono font-medium tabular-nums text-foreground">
+            {formatKwhCompact(row.generated)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span
+              className="size-2 shrink-0 rounded-sm"
+              style={{ backgroundColor: SHARE_COLOR_MI_PARTE }}
+            />
+            Mi parte
+          </span>
+          <span className="font-mono font-medium tabular-nums text-foreground">
+            {formatKwhCompact(row.miParte)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span
+              className="size-2 shrink-0 rounded-sm"
+              style={{ backgroundColor: SHARE_COLOR_RESTO }}
+            />
+            Resto del parque
+          </span>
+          <span className="font-mono font-medium tabular-nums text-foreground">
+            {formatKwhCompact(row.resto)}
+          </span>
+        </div>
+      </div>
+      {index > 0 ? (
+        <p className="text-muted-foreground">
+          {`${delta >= 0 ? "+" : ""}${delta.toLocaleString("es-AR", {
+            maximumFractionDigits: 1,
+          })} kWh vs mes anterior`}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+type StackBarLabelProps = {
+  x?: string | number
+  y?: string | number
+  width?: string | number
+  index?: number
+}
+
+function renderShareTotalLabel(rows: ParkEnergyShareRow[]) {
+  return (props: StackBarLabelProps) => {
+    const index = props.index ?? -1
+    const row = rows[index]
+    if (
+      !row ||
+      props.x == null ||
+      props.y == null ||
+      props.width == null
+    ) {
+      return <text />
+    }
+
+    return (
+      <text
+        x={Number(props.x) + Number(props.width) / 2}
+        y={Number(props.y) - 6}
+        textAnchor="middle"
+        fill="var(--foreground)"
+        fontSize={10}
+        fontWeight={500}
+      >
+        {formatKwhCompact(row.generated)}
+      </text>
+    )
+  }
+}
+
+function ParkEnergyBarChartTotal({
   data,
   chartConfig,
   className,
-}: ParkEnergyBarChartProps) {
+}: ParkEnergyBarChartTotalProps) {
   const isMobile = useIsMobile()
   const n = data.length
   const density = getChartBarDensity(n, isMobile)
@@ -150,4 +292,104 @@ export function ParkEnergyBarChart({
       </BarChart>
     </ChartContainer>
   )
+}
+
+function ParkEnergyBarChartShare({
+  data,
+  chartConfig,
+  className,
+}: ParkEnergyBarChartShareProps) {
+  const isMobile = useIsMobile()
+  const n = data.length
+  const density = getChartBarDensity(n, isMobile)
+  return (
+    <ChartContainer
+      config={chartConfig}
+      className={cn(
+        "aspect-auto h-[300px] min-h-[300px] w-full [&_.recharts-responsive-container]:!h-full",
+        className
+      )}
+    >
+      <BarChart
+        data={data}
+        margin={{
+          left: 4,
+          right: 8,
+          top: density.showBarLabels ? 28 : 8,
+          bottom: density.xAxisAngle ? 8 : 4,
+        }}
+      >
+        <CartesianGrid
+          vertical={false}
+          strokeDasharray="3 3"
+          className="stroke-border/60"
+        />
+        <XAxis
+          dataKey="label"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          angle={density.xAxisAngle}
+          textAnchor={density.xAxisAngle ? "end" : "middle"}
+          height={density.xAxisHeight}
+          interval={density.xAxisInterval}
+          className="text-muted-foreground text-[10px] sm:text-xs"
+        />
+        <YAxis
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          className="text-muted-foreground"
+          tickFormatter={(v) => `${v}`}
+        />
+        {density.showTooltip ? (
+          <Tooltip
+            content={({ active, payload, label }) => (
+              <ShareTooltip
+                active={active}
+                payload={
+                  payload as unknown as ShareTooltipProps["payload"]
+                }
+                label={label}
+                rows={data}
+              />
+            )}
+            cursor={{ fill: "rgba(0,0,0,0.05)" }}
+          />
+        ) : null}
+        <Bar
+          dataKey="resto"
+          stackId="park"
+          fill={getShareStackColor(
+            chartConfig,
+            "resto",
+            SHARE_COLOR_RESTO
+          )}
+          radius={0}
+          barSize={density.barSize}
+        />
+        <Bar
+          dataKey="miParte"
+          stackId="park"
+          fill={getShareStackColor(
+            chartConfig,
+            "miParte",
+            SHARE_COLOR_MI_PARTE
+          )}
+          radius={n <= 16 ? [6, 6, 0, 0] : 0}
+          barSize={density.barSize}
+          label={
+            density.showBarLabels ? renderShareTotalLabel(data) : false
+          }
+        />
+      </BarChart>
+    </ChartContainer>
+  )
+}
+
+export function ParkEnergyBarChart(props: ParkEnergyBarChartProps) {
+  if (props.variant === "share") {
+    return <ParkEnergyBarChartShare {...props} />
+  }
+  return <ParkEnergyBarChartTotal {...props} />
 }

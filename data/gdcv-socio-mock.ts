@@ -567,6 +567,29 @@ export function getSocioParqueSeries(range: ChartRangeChip): SocioParqueRow[] {
   return sliceChartRangeSeries(range, SOCIO_PARQUE_MONTHLY, SOCIO_PARQUE_WEEKLY)
 }
 
+export type SocioParqueShareRow = SocioParqueRow & {
+  miParte: number
+  resto: number
+}
+
+/** Cuotaparte del socio sobre la serie del parque — `ParkEnergyBarChart` modo share. */
+export function mapSocioParqueShareRows(
+  rows: SocioParqueRow[]
+): SocioParqueShareRow[] {
+  const share = SOCIO_ENERGIA_SHARE
+  return rows.map(({ label, generated }) => {
+    const miParte = Math.round(generated * share * 100) / 100
+    const resto = Math.round((generated - miParte) * 100) / 100
+    return { label, generated, miParte, resto }
+  })
+}
+
+export function getSocioParqueShareSeries(
+  range: ChartRangeChip
+): SocioParqueShareRow[] {
+  return mapSocioParqueShareRows(getSocioParqueSeries(range))
+}
+
 export function getSocioParqueChartSubtitle(range: ChartRangeChip): string {
   return getChartRangeSubtitle(range, socioOperationsStartLabel)
 }

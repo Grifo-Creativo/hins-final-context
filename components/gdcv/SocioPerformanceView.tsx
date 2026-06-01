@@ -15,10 +15,17 @@ import { SOCIO_PARQUE_TOP_ROW_GRID } from "@/components/ui/performance-placehold
 import { FeatureItem } from "@/components/ui/feature-item"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { SheetContentDetail } from "@/components/ui/sheet-ops"
+import { Label } from "@/components/ui/label"
 import { SoftBadge } from "@/components/ui/soft-badge"
-import { gdcvEnergyBarChartConfig, generationSparklineConfig } from "@/data/chart-config"
+import { Switch } from "@/components/ui/switch"
+import {
+  gdcvEnergyBarChartConfig,
+  generationSparklineConfig,
+  parkEnergyShareChartConfig,
+} from "@/data/chart-config"
 import {
   getSocioParqueSeries,
+  getSocioParqueShareSeries,
   getSocioParqueChartSubtitle,
   getSocioParqueDailySeries,
   getSocioParqueDailyTotal,
@@ -53,9 +60,15 @@ export function SocioPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
   const [activeDay, setActiveDay] = useState<Date>(TODAY)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [showMiParte, setShowMiParte] = useState(false)
 
   const chartData = useMemo(
     () => (chartRange === "1d" ? [] : getSocioParqueSeries(chartRange)),
+    [chartRange]
+  )
+
+  const chartShareData = useMemo(
+    () => (chartRange === "1d" ? [] : getSocioParqueShareSeries(chartRange)),
     [chartRange]
   )
 
@@ -101,6 +114,31 @@ export function SocioPerformanceView() {
           defaultTab="6m"
           onTabChange={(v) => setChartRange(v as ChartRangeChip)}
           className="h-full"
+          headerActionsBeforeRangeTabs
+          headerActions={
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Label
+                htmlFor="socio-parque-mi-parte"
+                className="gap-1.5 text-sm font-medium text-muted-foreground"
+              >
+                {showMiParte ? (
+                  <span
+                    className="size-2 shrink-0 rounded-sm"
+                    style={{ backgroundColor: "var(--chart-stack-inyectada)" }}
+                    aria-hidden
+                  />
+                ) : null}
+                Mi parte
+              </Label>
+              <Switch
+                id="socio-parque-mi-parte"
+                checked={showMiParte}
+                onCheckedChange={setShowMiParte}
+                disabled={chartRange === "1d"}
+                aria-label="Mostrar mi parte de la energía generada del parque"
+              />
+            </div>
+          }
           mobileContentAfterTabs={
             <div className="flex flex-col gap-4">
               {socioParqueChartMetricRows.map((row, rowIndex) => (
@@ -136,11 +174,20 @@ export function SocioPerformanceView() {
               </div>
             ) : (
               <div className="min-h-[300px] w-full flex-1">
-                <ParkEnergyBarChart
-                  data={chartData}
-                  chartConfig={gdcvEnergyBarChartConfig}
-                  className="h-full min-h-[300px]"
-                />
+                {showMiParte ? (
+                  <ParkEnergyBarChart
+                    variant="share"
+                    data={chartShareData}
+                    chartConfig={parkEnergyShareChartConfig}
+                    className="h-full min-h-[300px]"
+                  />
+                ) : (
+                  <ParkEnergyBarChart
+                    data={chartData}
+                    chartConfig={gdcvEnergyBarChartConfig}
+                    className="h-full min-h-[300px]"
+                  />
+                )}
               </div>
             )}
 

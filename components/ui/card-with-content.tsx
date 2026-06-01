@@ -58,7 +58,7 @@ function CardWithContentHeaderControls({
   return (
     <div
       className={cn(
-        "flex flex-shrink-0 items-center gap-2 ml-auto w-auto",
+        "flex flex-shrink-0 items-center gap-2 sm:gap-4 ml-auto w-auto",
         className
       )}
     >

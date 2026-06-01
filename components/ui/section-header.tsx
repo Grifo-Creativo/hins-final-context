@@ -60,7 +60,9 @@ export function SectionHeader({
         </Heading>
       )}
       {action ? (
-        <div className="flex flex-shrink-0 ml-auto w-auto">{action}</div>
+        <div className="flex flex-shrink-0 items-center gap-2 sm:gap-4 ml-auto w-auto">
+          {action}
+        </div>
       ) : null}
     </div>
   )
