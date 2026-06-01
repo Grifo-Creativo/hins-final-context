@@ -39,6 +39,7 @@
 15. [StatusBadge](#statusbadge)
 16. [ModelBadge](#modelbadge)
 17. [CardWithContent](#cardwithcontent)
+17b. [CardWithResponsiveTabs](#cardwithresponsivetabs)
 18. [Table](#table)
 19. [GenerationSparkline](#generationsparkline)
 20. [GenerationSparkbars](#generationsparkbars)
@@ -2250,6 +2251,7 @@ que necesite header con título + subtítulo + acción opcional.
 ### Cuándo NO usar
 - KPIs → KpiPrimary o KpiSecondary
 - Tablas → Table es independiente
+- Charts con tabs de rango donde el mobile UX importa → usar `CardWithResponsiveTabs`
 
 ### Spec
 
@@ -2382,6 +2384,143 @@ export function CardWithContent({
   <MonetaryBarChart data={chartData} unit={chartUnit} ... />
 </CardWithContent>
 ```
+
+---
+
+## CardWithResponsiveTabs
+
+**Archivo:** `/components/ui/card-with-responsive-tabs.tsx`
+**Estado:** ✅ Aprobado
+**Extiende:** `CardWithContent` — misma estructura, layout de tabs responsivo
+
+### Cuándo usar
+- Charts que incluyen tabs de rango (1D / 1M / 3M / 6M / 1A / TODO) donde el mobile UX es prioritario
+- Cuando el header en mobile quedaría sobrecargado con título + tabs + acciones simultáneos
+- Cuando necesitás `mobileContentAfterTabs` (ej. FeatureItems después de los tabs en mobile)
+
+### Cuándo NO usar
+- Cards sin tabs → usar `CardWithContent`
+- Cards con tabs solo de unidad ($ / ⚡) sin rango → `CardWithContent` + `headerActions`
+- Tablas o KPIs → usar sus componentes específicos
+
+### Comportamiento responsivo
+
+| Elemento | Mobile (<640px) | Desktop (≥640px) |
+|---|---|---|
+| Tabs de rango | **Ocultos en header** → aparecen como **footer** bajo el chart | En header, a la derecha del título |
+| `headerActions` | Siempre visibles en header (derecha) | Siempre visibles en header (derecha) |
+| Subtitle | Oculto (`hidden`) | Visible (`md:block`) |
+| `mobileContentAfterTabs` | Visible debajo de los tabs footer | Oculto (`hidden sm:flex`) |
+
+### Anatomía
+
+```
+Desktop (≥640px):
+Card
+  └── flex-col
+      ├── Header [p-4 pb-0, flex-row]
+      │   ├── flex-1 → Title [+ Subtitle oculto en mobile]
+      │   └── flex-shrink-0 → [RangeTabs (sm:flex)] + [headerActions (siempre)]
+      └── Content [p-4 pt-0]
+          └── children
+
+Mobile (<640px):
+Card
+  └── flex-col
+      ├── Header [p-4 pb-0, flex-row]
+      │   ├── flex-1 → Title
+      │   └── flex-shrink-0 → [headerActions solo]
+      └── Content [p-4 pt-0]
+          ├── children
+          ├── RangeTabs footer [sm:hidden, pt-4]
+          └── mobileContentAfterTabs [sm:hidden, pt-4] (si se pasa)
+```
+
+### Spec visual
+
+| Elemento | Tailwind |
+|---|---|
+| Card wrapper | `bg-white py-0 shadow-xs ring-0 rounded-xl overflow-hidden` |
+| Layout interno | `flex flex-col gap-4` |
+| Header | `flex shrink-0 flex-row p-4 pb-0 items-center gap-2 sm:gap-4` |
+| Title block | `flex min-w-0 flex-1 flex-col gap-1` (title truncate) |
+| Subtitle | `hidden text-sm font-normal text-muted-foreground md:block` |
+| Controls (derecha) | `flex flex-shrink-0 items-center gap-2` |
+| RangeTabs header | `hidden sm:flex` — oculto en mobile |
+| RangeTabs footer | `flex sm:hidden p-4 pt-0` (noPadding) ó `flex sm:hidden pt-4` (con padding) |
+| mobileContentAfterTabs | `flex sm:hidden flex-col p-4 pt-0` (noPadding) ó `flex sm:hidden flex-col pt-4` |
+| Content area | `flex min-h-0 flex-1 flex-col p-4 pt-0` |
+
+### Props
+
+```tsx
+interface CardWithResponsiveTabsProps {
+  title: string
+  subtitle?: string
+  tabs: Tab[]                          // siempre requerido — define ambos (header + footer)
+  defaultTab?: string
+  activeTab?: string
+  onTabChange?: (value: string) => void
+  headerActions?: React.ReactNode      // controles extra (ej. toggle $/⚡) — siempre en header
+  children: React.ReactNode
+  className?: string
+  noPadding?: boolean                  // igual que CardWithContent
+  allowTooltipOverflow?: boolean       // igual que CardWithContent
+  mobileContentAfterTabs?: React.ReactNode  // solo visible en mobile, debajo del tab footer
+}
+```
+
+### Uso típico — chart de generación con rango
+
+```tsx
+<CardWithResponsiveTabs
+  title="Energía Generada del Parque"
+  subtitle="Períodos mensuales"
+  tabs={CHART_RANGE_TABS}
+  activeTab={chartRange}
+  onTabChange={setChartRange}
+  noPadding
+>
+  <div className="min-h-[300px] flex-1 w-full">
+    <ParkEnergyBarChart data={chartData} chartConfig={chartConfig} />
+  </div>
+</CardWithResponsiveTabs>
+```
+
+### Uso con headerActions y mobileContentAfterTabs (GDCV Socio Parque)
+
+```tsx
+<CardWithResponsiveTabs
+  title={title}
+  tabs={CHART_RANGE_TABS}
+  activeTab={chartRange}
+  onTabChange={setChartRange}
+  headerActions={
+    <TabsForBlocks variant="icon" tabs={UNIT_TABS} value={unit} onValueChange={setUnit} />
+  }
+  mobileContentAfterTabs={
+    <div className="flex sm:hidden flex-col gap-4">
+      {featureItems}
+    </div>
+  }
+  noPadding
+>
+  {/* Desktop: FeatureItems dentro de children (hidden sm:flex) */}
+  <div className="hidden sm:flex flex-col gap-4">
+    {featureItems}
+  </div>
+  <ParkEnergyBarChart ... />
+</CardWithResponsiveTabs>
+```
+
+### Notas para el agente
+
+- **No duplicar TabsForBlocks** — el componente lo renderiza dos veces internamente (header oculto + footer oculto). Solo pasar `tabs` una vez via prop.
+- `headerActions` siempre visible en header (mobile y desktop) — usar para toggles de unidad ($ / ⚡), no para rango.
+- **`noPadding`** aplica padding p-4 al footer de tabs; sin `noPadding`, el padding es pt-4.
+- El patrón `mobileContentAfterTabs` + children con `hidden sm:flex` resuelve reorden de elementos sin duplicar datos en el DOM.
+- `shadow-xs` — consistente con design-system (no `shadow-sm`).
+- Usado en: `GddParkPerformanceView`, `GdcvPerformanceView`, `SocioPerformanceView`, `SocioEnergyView`.
 
 ---
 
