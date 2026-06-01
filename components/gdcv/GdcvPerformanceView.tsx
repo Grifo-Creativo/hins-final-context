@@ -127,7 +127,7 @@ export function GdcvPerformanceView() {
             sparklineData={gdcvGenerationSparkline}
           />
 
-          <div className="grid grid-cols-2 gap-6 flex-1">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 flex-1">
             <KpiSecondary
               icon={DollarSignIcon}
               label={gdcvAhorroTotalAbril.label}
