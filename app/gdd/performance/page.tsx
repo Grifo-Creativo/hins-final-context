@@ -4,7 +4,7 @@ import { GddPerformanceView } from "@/components/gdd/GddPerformanceView"
 
 export default function GddPerformancePage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <GddPageHeading />
       <GddPerformanceView />
     </div>

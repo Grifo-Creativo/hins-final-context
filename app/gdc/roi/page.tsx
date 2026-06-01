@@ -7,7 +7,7 @@ import { gdcParkName } from "@/data/mantenimiento-mock"
 
 export default function GdcRoiPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       <header>
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <h1 className="min-w-0 max-w-full text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">

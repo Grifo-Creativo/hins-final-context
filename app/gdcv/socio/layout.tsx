@@ -8,7 +8,7 @@ export default function SocioLayout({ children }: { children: ReactNode }) {
   return (
     <SocioAuthGate>
       <PageTransition>
-        <div className="flex flex-col gap-6">{children}</div>
+        <div className="flex flex-col gap-4 sm:gap-6">{children}</div>
       </PageTransition>
     </SocioAuthGate>
   )
