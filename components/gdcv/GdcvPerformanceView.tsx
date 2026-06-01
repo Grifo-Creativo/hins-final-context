@@ -7,7 +7,7 @@ import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationCh
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { SocioDetailSheet } from "@/components/gdcv/SocioDetailSheet"
 import { SociosTable } from "@/components/gdcv/SociosTable"
-import { CardWithContent } from "@/components/ui/card-with-content"
+import { CardWithResponsiveTabs } from "@/components/ui/card-with-responsive-tabs"
 import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
@@ -82,7 +82,7 @@ export function GdcvPerformanceView() {
           metrics={gdcvParkDetails.metrics}
           className="h-full"
         />
-        <CardWithContent
+        <CardWithResponsiveTabs
           title="Energía Generada del Parque"
           tabs={CHART_RANGE_TABS}
           activeTab={chartRange}
@@ -111,7 +111,7 @@ export function GdcvPerformanceView() {
               />
             </div>
           )}
-        </CardWithContent>
+        </CardWithResponsiveTabs>
 
         {/* Right column — KPI primary + 2× secondary */}
         <div className="flex flex-col gap-4 sm:gap-6 h-full">

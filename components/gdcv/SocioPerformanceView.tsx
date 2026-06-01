@@ -10,6 +10,7 @@ import { ParticipacionDonutChart } from "@/components/charts/ParticipacionDonutC
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { CardWithResponsiveTabs } from "@/components/ui/card-with-responsive-tabs"
 import { SOCIO_PARQUE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { FeatureItem } from "@/components/ui/feature-item"
 import { IconBadge } from "@/components/ui/icon-badge"
@@ -92,7 +93,7 @@ export function SocioPerformanceView() {
   return (
     <>
       <div className={SOCIO_PARQUE_TOP_ROW_GRID}>
-        <CardWithContent
+        <CardWithResponsiveTabs
           title="Energía generada del parque"
           subtitle={chartRange === "1d" ? undefined : chartSubtitle}
           tabs={CHART_RANGE_TABS}
@@ -100,6 +101,25 @@ export function SocioPerformanceView() {
           defaultTab="6m"
           onTabChange={(v) => setChartRange(v as ChartRangeChip)}
           className="h-full"
+          mobileContentAfterTabs={
+            <div className="flex flex-col gap-4">
+              {socioParqueChartMetricRows.map((row, rowIndex) => (
+                <div
+                  key={rowIndex}
+                  className="grid shrink-0 grid-cols-2 gap-4"
+                >
+                  {row.map((metric) => (
+                    <FeatureItem
+                      key={metric.label}
+                      label={metric.label}
+                      value={metric.value}
+                      icon={SOCIO_PARQUE_FEATURE_ICONS[metric.label]}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          }
         >
           <div className="flex h-full min-h-0 flex-col gap-4">
             {chartRange === "1d" ? (
@@ -124,23 +144,26 @@ export function SocioPerformanceView() {
               </div>
             )}
 
-            {socioParqueChartMetricRows.map((row, rowIndex) => (
-              <div
-                key={rowIndex}
-                className="grid shrink-0 grid-cols-2 gap-4"
-              >
-                {row.map((metric) => (
-                  <FeatureItem
-                    key={metric.label}
-                    label={metric.label}
-                    value={metric.value}
-                    icon={SOCIO_PARQUE_FEATURE_ICONS[metric.label]}
-                  />
-                ))}
-              </div>
-            ))}
+            {/* FeatureItems — visible solo en desktop (≥640px) */}
+            <div className="hidden sm:flex sm:flex-col gap-4">
+              {socioParqueChartMetricRows.map((row, rowIndex) => (
+                <div
+                  key={rowIndex}
+                  className="grid shrink-0 grid-cols-2 gap-4"
+                >
+                  {row.map((metric) => (
+                    <FeatureItem
+                      key={metric.label}
+                      label={metric.label}
+                      value={metric.value}
+                      icon={SOCIO_PARQUE_FEATURE_ICONS[metric.label]}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </CardWithContent>
+        </CardWithResponsiveTabs>
 
         <div className="flex h-full min-h-0 flex-col gap-4">
           <Card className="shrink-0 overflow-hidden rounded-xl bg-white py-0 shadow-xs ring-0">

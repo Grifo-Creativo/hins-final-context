@@ -14,6 +14,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithContent } from "@/components/ui/card-with-content"
+import { CardWithResponsiveTabs } from "@/components/ui/card-with-responsive-tabs"
 import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { SOCIO_ENERGY_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { FeatureItem } from "@/components/ui/feature-item"
@@ -102,7 +103,7 @@ export function SocioEnergyView() {
         className="h-full"
       />
 
-      <CardWithContent
+      <CardWithResponsiveTabs
         title={getSocioV2ChartTitle(chartUnit)}
         tabs={chartRangeTabs}
         activeTab={ahorroRange}
@@ -144,7 +145,7 @@ export function SocioEnergyView() {
             />
           )}
         </div>
-      </CardWithContent>
+      </CardWithResponsiveTabs>
 
       <CardWithContent
         title={socioV2PanelKpis.periodLabel}

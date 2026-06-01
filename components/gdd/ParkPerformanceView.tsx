@@ -7,7 +7,7 @@ import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTabl
 import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationChartBlock"
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
-import { CardWithContent } from "@/components/ui/card-with-content"
+import { CardWithResponsiveTabs } from "@/components/ui/card-with-responsive-tabs"
 import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
@@ -72,7 +72,7 @@ export function ParkPerformanceView() {
           metrics={gddParkDetails.metrics}
           className="h-full"
         />
-        <CardWithContent
+        <CardWithResponsiveTabs
           title="Energía Generada del Parque"
           tabs={CHART_RANGE_TABS}
           activeTab={period}
@@ -101,7 +101,7 @@ export function ParkPerformanceView() {
               />
             </div>
           )}
-        </CardWithContent>
+        </CardWithResponsiveTabs>
 
         <div className="flex h-full flex-col gap-4 sm:gap-6">
           <KpiPrimary
