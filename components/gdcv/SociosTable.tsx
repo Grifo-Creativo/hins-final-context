@@ -177,19 +177,16 @@ const columns: ColumnDef<SocioRow>[] = [
     meta: { label: "Potencia Asociada" },
     header: ({ column }) => sortableHeader(column, "Potencia Asociada"),
     cell: ({ row }) => {
-      const parseKwp = (value: string): number => {
-        const m = value.match(/[\d]+(?:[.,][\d]+)?/)
-        return m ? parseFloat(m[0].replace(",", ".")) : 0
-      }
       const parseKwh = (value: string): number => {
         const m = value.match(/[\d]+(?:[.,][\d]+)?/)
         return m ? parseFloat(m[0].replace(",", ".")) : 0
       }
-      const potenciaKwp = parseKwp(row.original.potenciaAsociada)
+      // Total energía del parque GDCV en abril
+      const totalEnergiaParque = 124.2
       const energiaKwh = parseKwh(row.original.energiaGenerada)
-      const porcentajePotencia = potenciaKwp > 0 ? (energiaKwh / potenciaKwp * 100).toFixed(1) : "0.0"
+      const porcentajeEnergia = (energiaKwh / totalEnergiaParque * 100).toFixed(1)
       return (
-        <span className="text-sm tabular-nums">{row.original.potenciaAsociada} ({porcentajePotencia}%)</span>
+        <span className="text-sm tabular-nums">{row.original.potenciaAsociada} ({porcentajeEnergia}%)</span>
       )
     },
   },

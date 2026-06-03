@@ -43,7 +43,7 @@ const DETAIL_MAP: Record<
     medidor: "3551118",
     participacion: "25%",
     potenciaAsociada: "245 kWp",
-    porcentajePotencia: "13.5%",
+    porcentajePotencia: "26.6%",
     energiaGeneradaKwh: "33.1",
     energiaGeneradaMes: "Abril 2026",
     autoconsumoVirtual: "22.5 kWh",
@@ -65,14 +65,15 @@ function fallbackDetail(socio: Socio) {
   const kwh = parseFloat(socio.energiaGenerada.replace(/[^0-9.]/g, "")) || 0
   const auto = Math.round(kwh * 0.68 * 10) / 10
   const inj = Math.round((kwh - auto) * 10) / 10
-  const potenciaKwp = parseFloat(socio.potenciaAsociada.replace(/[^0-9.]/g, "")) || 0
-  const porcentajePotencia = potenciaKwp > 0 ? (kwh / potenciaKwp * 100).toFixed(1) : "0.0"
+  // Total energía del parque GDCV en abril (124.2 kWh)
+  const totalEnergiaParque = 124.2
+  const porcentajeEnergia = (kwh / totalEnergiaParque * 100).toFixed(1)
   return {
     descripcion: "Dispone de Autoconsumo Virtual del parque.",
     medidor: socio.medidor,
     participacion: socio.participacion,
     potenciaAsociada: socio.potenciaAsociada,
-    porcentajePotencia: porcentajePotencia + "%",
+    porcentajePotencia: porcentajeEnergia + "%",
     energiaGeneradaKwh: String(kwh),
     energiaGeneradaMes: "Abril 2026",
     autoconsumoVirtual: `${auto} kWh`,
