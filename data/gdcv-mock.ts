@@ -112,10 +112,21 @@ export const gdcvPromedioPorUsuario = {
 
 // ─── Socios ────────────────────────────────────────────────────────────────
 
+/** Detalle de un medidor individual — usado cuando un socio tiene +1 medidor. */
+export interface MedidorDetalle {
+  numero: string
+  participacion: string
+  potenciaAsociada: string
+  energiaGenerada: string
+  ahorroGenerado: string
+}
+
 export interface SocioRow {
   id: string
   nombre: string
   medidor: string
+  /** Presente solo cuando el socio tiene múltiples medidores con distinta participación. */
+  medidores?: MedidorDetalle[]
   participacion: string
   potenciaAsociada: string
   energiaGenerada: string
@@ -141,6 +152,22 @@ export const sociosMock: SocioRow[] = [
     potenciaAsociada: "147 kWp",
     energiaGenerada: "17.1 kWh",
     ahorroGenerado: formatCurrency(34_200, "ars", "full"),
+    medidores: [
+      {
+        numero: "354904",
+        participacion: "10%",
+        potenciaAsociada: "98 kWp",
+        energiaGenerada: "11.4 kWh",
+        ahorroGenerado: formatCurrency(22_800, "ars", "full"),
+      },
+      {
+        numero: "354906",
+        participacion: "5%",
+        potenciaAsociada: "49 kWp",
+        energiaGenerada: "5.7 kWh",
+        ahorroGenerado: formatCurrency(11_400, "ars", "full"),
+      },
+    ],
   },
   {
     id: "FC",
