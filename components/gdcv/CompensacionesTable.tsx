@@ -227,7 +227,7 @@ export function CompensacionesTable({ data }: CompensacionesTableProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-6 pb-0">
         <Heading level="h3">
-          Historial de Compensaciones
+          Historial de generación
         </Heading>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
