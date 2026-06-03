@@ -27,19 +27,21 @@ export function sheetContentClassName(
   return cn(SHEET_CONTENT_BASE, SHEET_CONTENT_PROFILE[profile], className)
 }
 
-/** Header con borde inferior (tabla, notificaciones). */
+/** Header con borde inferior (tabla, notificaciones) — responsive padding móvil/desktop. */
 export const SHEET_OPS_HEADER_BORDERED =
-  "shrink-0 space-y-0 border-b border-border p-6 text-left"
+  "shrink-0 space-y-0 border-b border-border p-4 sm:p-6 text-left"
 
-/** Header detalle (socio, mantenimiento) — sin borde bajo el título. */
+/** Header detalle (socio, mantenimiento) — responsive padding móvil/desktop, sin borde bajo título. */
 export const SHEET_OPS_HEADER_DETAIL =
-  "shrink-0 space-y-0 p-6 text-left"
+  "shrink-0 space-y-0 p-4 sm:p-6 text-left"
 
+/** Scroll content — responsive padding: mobile compacto (p-4 v-3), desktop generoso (p-6 v-4). */
 export const SHEET_OPS_SCROLL =
-  "min-h-0 flex-1 overflow-y-auto px-6 py-4"
+  "min-h-0 flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4"
 
+/** Footer — responsive padding móvil/desktop. */
 export const SHEET_OPS_FOOTER =
-  "shrink-0 border-t border-border bg-popover p-6"
+  "shrink-0 border-t border-border bg-popover p-4 sm:p-6"
 
 /** Header notificaciones — título + descripción, sin botón icon (cierra overlay / trigger). */
 export const SHEET_OPS_NOTIFICATIONS_HEADER =

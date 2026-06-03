@@ -399,6 +399,40 @@ chartComponent → renderizado puro
 - CartesianGrid con `strokeDasharray` y opacidad reducida
 - Ejes sin línea visible (`axisLine: false`, `tickLine: false`)
 
+### Ejes de tiempo — densidad de ticks (line / area charts)
+
+Para series temporales con rango variable (chips 1A / 5A / TODO, o filtros de período), **no delegar la densidad de labels a `interval` / `minTickGap` de Recharts**: en rangos largos colapsa a un solo label y en cortos satura.
+
+**Patrón obligatorio — ticks explícitos equiespaciados:**
+
+1. Calcular un array de `ticks` con **~6 en desktop, ~4 en mobile**, siempre incluyendo el primer y último punto:
+   ```ts
+   const ticks = useMemo(() => {
+     const n = data.length
+     if (n === 0) return []
+     const target = isMobile ? 4 : 6
+     if (n <= target) return data.map((d) => d.fecha)
+     const step = (n - 1) / (target - 1)
+     return Array.from(
+       new Set(Array.from({ length: target }, (_, i) => data[Math.round(i * step)].fecha))
+     )
+   }, [data, isMobile])
+   ```
+2. Pasar `ticks={ticks}` + `interval={0}` al `<XAxis>` (fuerza renderizar exactamente esos).
+3. **Granularidad del label adaptada al span**, no al chip seleccionado:
+   - Span corto (≤ ~36 puntos / meses) → mes + año (`"Mar 2024"`)
+   - Span largo (> ~36) → solo año (`"2024"`) — evita repetir el mismo año en varios ticks.
+
+**Resultado:** densidad constante en todos los rangos — nunca satura, nunca queda en un solo label. Referencia: `ROIProjectionChart`.
+
+### Anclaje temporal "Hoy" (real vs proyección)
+
+En charts que mezclan **dato real (hasta hoy)** + **proyección (hacia adelante)**, el nodo final de la serie real, el origen del cono de proyección y la línea vertical "Hoy" deben derivar **todos del mismo punto ancla** = último punto con dato real.
+
+- ❌ No usar una constante `fechaHoy` independiente para la línea vertical y dejar que el dot caiga en el último real — si difieren (aunque sea un período), el nodo queda fuera de la línea "Hoy".
+- ✅ Calcular el ancla como el último índice con valor real ≤ `fechaHoy`, y usar ese `fecha`/`value` para: (1) el dot final de la serie real, (2) el tip del cono de proyección, (3) la `ReferenceLine` vertical "Hoy".
+- **Backend-friendly:** la "presente" es por definición donde termina el dato real confirmado; el chart se mantiene fiel sin importar cómo llegue la data. Referencia: `ROIProjectionChart`.
+
 ### Paleta extendida para ROI / Finanzas
 
 Ciertos charts requieren semántica financiera que va más allá de la rampa verde:

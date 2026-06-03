@@ -123,51 +123,75 @@ const columns: ColumnDef<ConsumptionHistoryRow>[] = [
     ),
   },
   {
-    accessorKey: "energyPurchased",
+    accessorKey: "energyAcquired",
     enableSorting: true,
     sortingFn: (rowA, rowB) =>
-      parseKwhDisplay(rowA.original.energyPurchased) -
-      parseKwhDisplay(rowB.original.energyPurchased),
-    meta: { label: "Energía comprada" },
-    header: ({ column }) => sortableHeader(column, "Energía comprada"),
+      parseKwhDisplay(rowA.original.energyAcquired) -
+      parseKwhDisplay(rowB.original.energyAcquired),
+    meta: { label: "Energía adquirida" },
+    header: ({ column }) => sortableHeader(column, "Energía adquirida"),
     cell: ({ row }) => (
-      <span className="tabular-nums">{row.getValue("energyPurchased")}</span>
+      <span className="tabular-nums">{row.getValue("energyAcquired")}</span>
     ),
   },
   {
-    accessorKey: "coveragePercent",
+    accessorKey: "energyFromOtherSources",
     enableSorting: true,
     sortingFn: (rowA, rowB) =>
-      parsePercentDisplay(rowA.original.coveragePercent) -
-      parsePercentDisplay(rowB.original.coveragePercent),
-    meta: { label: "Cobertura (%)" },
-    header: ({ column }) => sortableHeader(column, "Cobertura (%)"),
+      parseKwhDisplay(rowA.original.energyFromOtherSources) -
+      parseKwhDisplay(rowB.original.energyFromOtherSources),
+    meta: { label: "Energía de otras fuentes" },
+    header: ({ column }) => sortableHeader(column, "Energía de otras fuentes"),
     cell: ({ row }) => (
-      <span className="tabular-nums">{row.getValue("coveragePercent")}</span>
+      <span className="tabular-nums">{row.getValue("energyFromOtherSources")}</span>
     ),
   },
   {
-    accessorKey: "totalConsumption",
+    accessorKey: "totalEnergy",
     enableSorting: true,
     sortingFn: (rowA, rowB) =>
-      parseKwhDisplay(rowA.original.totalConsumption) -
-      parseKwhDisplay(rowB.original.totalConsumption),
-    meta: { label: "Consumo Total" },
-    header: ({ column }) => sortableHeader(column, "Consumo Total"),
+      parseKwhDisplay(rowA.original.totalEnergy) -
+      parseKwhDisplay(rowB.original.totalEnergy),
+    meta: { label: "Energía total" },
+    header: ({ column }) => sortableHeader(column, "Energía total"),
     cell: ({ row }) => (
-      <span className="tabular-nums">{row.getValue("totalConsumption")}</span>
+      <span className="tabular-nums">{row.getValue("totalEnergy")}</span>
     ),
   },
   {
-    accessorKey: "coverageMoney",
+    accessorKey: "acquiredPercent",
     enableSorting: true,
     sortingFn: (rowA, rowB) =>
-      parseMoneyDisplay(rowA.original.coverageMoney) -
-      parseMoneyDisplay(rowB.original.coverageMoney),
-    meta: { label: "Cobertura ($)" },
-    header: ({ column }) => sortableHeader(column, "Cobertura ($)"),
+      parsePercentDisplay(rowA.original.acquiredPercent) -
+      parsePercentDisplay(rowB.original.acquiredPercent),
+    meta: { label: "Porcentaje adquirida" },
+    header: ({ column }) => sortableHeader(column, "Porcentaje adquirida"),
     cell: ({ row }) => (
-      <span className="tabular-nums">{row.getValue("coverageMoney")}</span>
+      <span className="tabular-nums">{row.getValue("acquiredPercent")}</span>
+    ),
+  },
+  {
+    accessorKey: "totalPercent",
+    enableSorting: true,
+    sortingFn: (rowA, rowB) =>
+      parsePercentDisplay(rowA.original.totalPercent) -
+      parsePercentDisplay(rowB.original.totalPercent),
+    meta: { label: "Porcentaje total" },
+    header: ({ column }) => sortableHeader(column, "Porcentaje total"),
+    cell: ({ row }) => (
+      <span className="tabular-nums">{row.getValue("totalPercent")}</span>
+    ),
+  },
+  {
+    accessorKey: "estimatedSavings",
+    enableSorting: true,
+    sortingFn: (rowA, rowB) =>
+      parseMoneyDisplay(rowA.original.estimatedSavings) -
+      parseMoneyDisplay(rowB.original.estimatedSavings),
+    meta: { label: "Ahorro estimado" },
+    header: ({ column }) => sortableHeader(column, "Ahorro estimado"),
+    cell: ({ row }) => (
+      <span className="tabular-nums">{row.getValue("estimatedSavings")}</span>
     ),
   },
   {
@@ -214,7 +238,7 @@ interface ConsumptionHistoryTableProps {
 
 export function ConsumptionHistoryTable({ data }: ConsumptionHistoryTableProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    totalConsumption: false,
+    totalEnergy: false,
   })
   const [sorting, setSorting] = useState<SortingState>([])
 

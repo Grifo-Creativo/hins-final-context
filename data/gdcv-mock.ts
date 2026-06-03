@@ -22,7 +22,7 @@ export const gdcvParkDetails = {
     { label: "Cap. Instalada", value: "980 kWp" },
     { label: "Potencia Acople", value: "815 kWp" },
     { label: "Equipo", value: "Canadian Solar HiKu7 655W" },
-    { label: "Ultimo Mantenimiento", value: "18 Feb. 2026" },
+    { label: "Inicio de operaciones", value: gdcvOperationsStartLabel },
   ],
 } as const
 
@@ -114,6 +114,7 @@ export interface SocioRow {
   nombre: string
   medidor: string
   participacion: string
+  potenciaAsociada: string
   energiaGenerada: string
   ahorroGenerado: string
   tipo?: "Virtual"
@@ -125,24 +126,27 @@ export const sociosMock: SocioRow[] = [
     nombre: "Alfredo Isaac SA",
     medidor: "3543871",
     participacion: "15%",
-    energiaGenerada: "18.6 kWh",
-    ahorroGenerado: formatCurrency(37_200, "ars", "full"),
+    potenciaAsociada: "147 kWp",
+    energiaGenerada: "15.9 kWh",
+    ahorroGenerado: formatCurrency(31_800, "ars", "full"),
   },
   {
     id: "AS",
     nombre: "Agro Sur Industrial",
     medidor: "354904",
     participacion: "15%",
-    energiaGenerada: "18.6 kWh",
-    ahorroGenerado: formatCurrency(37_200, "ars", "full"),
+    potenciaAsociada: "147 kWp",
+    energiaGenerada: "17.1 kWh",
+    ahorroGenerado: formatCurrency(34_200, "ars", "full"),
   },
   {
     id: "FC",
     nombre: "Ferretería Catalán",
     medidor: "3551118",
     participacion: "25%",
-    energiaGenerada: "31.0 kWh",
-    ahorroGenerado: formatCurrency(62_000, "ars", "full"),
+    potenciaAsociada: "245 kWp",
+    energiaGenerada: "33.1 kWh",
+    ahorroGenerado: formatCurrency(66_200, "ars", "full"),
     tipo: "Virtual",
   },
   {
@@ -150,24 +154,27 @@ export const sociosMock: SocioRow[] = [
     nombre: "Avícola del Sur",
     medidor: "355451",
     participacion: "20%",
-    energiaGenerada: "24.8 kWh",
-    ahorroGenerado: formatCurrency(49_600, "ars", "full"),
+    potenciaAsociada: "196 kWp",
+    energiaGenerada: "23.9 kWh",
+    ahorroGenerado: formatCurrency(47_800, "ars", "full"),
   },
   {
     id: "CV",
     nombre: "Campo Vita Alimentos",
     medidor: "355778",
     participacion: "20%",
-    energiaGenerada: "24.8 kWh",
-    ahorroGenerado: formatCurrency(49_600, "ars", "full"),
+    potenciaAsociada: "196 kWp",
+    energiaGenerada: "25.3 kWh",
+    ahorroGenerado: formatCurrency(50_600, "ars", "full"),
   },
   {
     id: "RF",
     nombre: "Rio Fértil SRL",
     medidor: "355262",
     participacion: "5%",
-    energiaGenerada: "6.2 kWh",
-    ahorroGenerado: formatCurrency(12_400, "ars", "full"),
+    potenciaAsociada: "49 kWp",
+    energiaGenerada: "4.9 kWh",
+    ahorroGenerado: formatCurrency(9_800, "ars", "full"),
   },
 ]
 
@@ -179,6 +186,8 @@ export interface SocioDetalle {
   descripcion: string
   medidor: string
   participacion: string
+  potenciaAsociada: string
+  porcentajePotencia: string
   energiaGeneradaKwh: string
   energiaGeneradaMes: string
   autoconsumoVirtual: string
@@ -201,14 +210,16 @@ export const socioDetalleMock: SocioDetalle = {
   descripcion: "Dispone de Autoconsumo y Crédito por Inyección a red.",
   medidor: "3551118",
   participacion: "25%",
-  energiaGeneradaKwh: "31.0",
+  potenciaAsociada: "245 kWp",
+  porcentajePotencia: "13.5%",
+  energiaGeneradaKwh: "33.1",
   energiaGeneradaMes: "Abril 2026",
-  autoconsumoVirtual: "21.0 kWh",
-  inyectada: "10.0 kWh",
-  autoconsumoKwh: 21.0,
-  inyectadaKwh: 10.0,
-  totalKwh: 31.0,
-  ahorroGenerado: formatCurrency(62_000, "ars", "full"),
+  autoconsumoVirtual: "22.5 kWh",
+  inyectada: "10.6 kWh",
+  autoconsumoKwh: 22.5,
+  inyectadaKwh: 10.6,
+  totalKwh: 33.1,
+  ahorroGenerado: formatCurrency(66_200, "ars", "full"),
   potenciaUtilizada: "15 kW",
   fechaDeAlta: "Marzo 2024",
   nombreResponsable: "Carlos Catalán",

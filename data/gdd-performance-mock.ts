@@ -15,7 +15,7 @@ export type ParkEnergyRow = {
 }
 
 /** Inicio de operaciones — Parque General Roca (GDD). */
-export const gddOperationsStartLabel = "Mayo 2025"
+export const gddOperationsStartLabel = "Mayo 2024"
 
 /**
  * Serie mensual canónica desde inicio de operaciones (May 25 → Abr 26).
@@ -60,7 +60,7 @@ export const gddParkDetails = {
     { label: "Cap. Instalada", value: "1.250 kWp" },
     { label: "Potencia Acople", value: "1.020 kWp" },
     { label: "Equipo", value: "Jinko Tiger Neo 72HL4" },
-    { label: "Ultimo Mantenimiento", value: "12 Mar. 2026" },
+    { label: "Inicio de operaciones", value: gddOperationsStartLabel },
   ],
 } as const
 
@@ -99,59 +99,73 @@ export const tariffCardMock = {
 export interface ConsumptionHistoryRow {
   period: string
   energyGenerated: string
-  energyPurchased: string
-  coveragePercent: string
-  totalConsumption: string
-  coverageMoney: string
+  energyAcquired: string
+  energyFromOtherSources: string
+  totalEnergy: string
+  acquiredPercent: string
+  totalPercent: string
+  estimatedSavings: string
 }
 
 export const consumptionHistoryMock: ConsumptionHistoryRow[] = [
   {
     period: "Abril 2026",
     energyGenerated: "830 kWh",
-    energyPurchased: "60 kWh",
-    coveragePercent: "93%",
-    totalConsumption: "890 kWh",
-    coverageMoney: formatCurrency(66_400, "ars", "full"),
+    energyAcquired: "60 kWh",
+    energyFromOtherSources: "12 kWh",
+    totalEnergy: "902 kWh",
+    acquiredPercent: "6,6%",
+    totalPercent: "93,4%",
+    estimatedSavings: formatCurrency(74_400, "ars", "full"),
   },
   {
     period: "Marzo 2026",
     energyGenerated: "610 kWh",
-    energyPurchased: "220 kWh",
-    coveragePercent: "73%",
-    totalConsumption: "830 kWh",
-    coverageMoney: formatCurrency(48_800, "ars", "full"),
+    energyAcquired: "220 kWh",
+    energyFromOtherSources: "15 kWh",
+    totalEnergy: "845 kWh",
+    acquiredPercent: "26,0%",
+    totalPercent: "74,0%",
+    estimatedSavings: formatCurrency(54_720, "ars", "full"),
   },
   {
     period: "Febrero 2026",
     energyGenerated: "690 kWh",
-    energyPurchased: "189 kWh",
-    coveragePercent: "78.5%",
-    totalConsumption: "879 kWh",
-    coverageMoney: formatCurrency(55_200, "ars", "full"),
+    energyAcquired: "189 kWh",
+    energyFromOtherSources: "18 kWh",
+    totalEnergy: "897 kWh",
+    acquiredPercent: "21,1%",
+    totalPercent: "78,9%",
+    estimatedSavings: formatCurrency(61_920, "ars", "full"),
   },
   {
     period: "Enero 2026",
     energyGenerated: "780 kWh",
-    energyPurchased: "20 kWh",
-    coveragePercent: "97.5%",
-    totalConsumption: "800 kWh",
-    coverageMoney: formatCurrency(62_400, "ars", "full"),
+    energyAcquired: "20 kWh",
+    energyFromOtherSources: "14 kWh",
+    totalEnergy: "814 kWh",
+    acquiredPercent: "2,5%",
+    totalPercent: "97,5%",
+    estimatedSavings: formatCurrency(70_080, "ars", "full"),
   },
   {
     period: "Diciembre 2025",
     energyGenerated: "870 kWh",
-    energyPurchased: "0 kWh",
-    coveragePercent: "100%",
-    totalConsumption: "870 kWh",
-    coverageMoney: formatCurrency(69_600, "ars", "full"),
+    energyAcquired: "0 kWh",
+    energyFromOtherSources: "20 kWh",
+    totalEnergy: "890 kWh",
+    acquiredPercent: "0,0%",
+    totalPercent: "100,0%",
+    estimatedSavings: formatCurrency(78_120, "ars", "full"),
   },
   {
     period: "Noviembre 2025",
     energyGenerated: "920 kWh",
-    energyPurchased: "4.2 kWh",
-    coveragePercent: "99.5%",
-    totalConsumption: "924 kWh",
-    coverageMoney: formatCurrency(73_600, "ars", "full"),
+    energyAcquired: "4.2 kWh",
+    energyFromOtherSources: "22 kWh",
+    totalEnergy: "946 kWh",
+    acquiredPercent: "0,4%",
+    totalPercent: "99,6%",
+    estimatedSavings: formatCurrency(82_720, "ars", "full"),
   },
 ]

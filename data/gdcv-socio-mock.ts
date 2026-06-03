@@ -16,6 +16,7 @@ import type { ChartRangeChip } from "@/types/chart-range"
 import type {
   GddRoiHistoricoRow,
   GddRoiProyectadoRow,
+  ROIDataPoint,
   RoiCurvePoint,
 } from "@/data/gdd-roi-mock"
 import type { StatListItem } from "@/components/ui/stat-list"
@@ -475,6 +476,94 @@ export const socioCurvaRecuperacion: RoiCurvePoint[] = [
 ]
 
 export const SOCIO_INVERSION_REFERENCIA = 5_700
+
+// ─── ROI Projection Chart ─────────────────────────────────────────────────────
+//
+// Datos reales: confirmados desde tabla Histórico (Nov 2025 → Abr 2026).
+//   Meses anteriores: ramp-up gradual desde Mar 2024 (inicio operaciones).
+//   El parque operó a menor capacidad en 2024 (tarifa inicial + ramp-up técnico).
+//
+// Proyecciones: patrón mensual base extraído de tablas de la vista del socio.
+//   Suma anual ≈ $1.430.000 → payback base ~Nov 2028 (4.9 años desde inicio).
+//   Favorable (+40%/mes): payback ~Jul 2028.
+//   Riesgo    (-30%/mes): payback ~Jun 2030.
+
+/**
+ * Ahorro mensual base del socio — extraído de tablas proyectado + histórico.
+ * Verano (Nov–Feb): alto. Invierno (May–Ago): mínimo. Suma anual ≈ $1.430.000.
+ */
+const SOCIO_MONTHLY_BASE: Readonly<Record<number, number>> = {
+  1: 168_000,  // Enero   — historico confirmado
+  2: 142_000,  // Febrero — historico confirmado
+  3: 118_000,  // Marzo   — historico confirmado
+  4: 95_000,   // Abril   — historico confirmado
+  5: 88_000,   // Mayo    — proyectado confirmado
+  6: 92_000,   // Junio   — proyectado confirmado
+  7: 98_000,   // Julio   — proyectado confirmado
+  8: 105_000,  // Agosto  — proyectado confirmado
+  9: 112_000,  // Septiembre — proyectado confirmado
+  10: 125_000, // Octubre    — interpolado
+  11: 132_000, // Noviembre — historico confirmado
+  12: 155_000, // Diciembre — historico confirmado
+}
+
+function buildSocioRoiProjectionData(): ROIDataPoint[] {
+  // Real data — ramp-up 2024 + confirmado contra tabla histórica /gdcv/socio
+  const realData: ROIDataPoint[] = [
+    { fecha: "2024-03", real: 0 },
+    { fecha: "2024-04", real: 30_000 },
+    { fecha: "2024-05", real: 65_000 },
+    { fecha: "2024-06", real: 103_000 },
+    { fecha: "2024-07", real: 145_000 },
+    { fecha: "2024-08", real: 190_000 },
+    { fecha: "2024-09", real: 245_000 },
+    { fecha: "2024-10", real: 310_000 },
+    { fecha: "2024-11", real: 390_000 },
+    { fecha: "2024-12", real: 485_000 },
+    { fecha: "2025-01", real: 590_000 },
+    { fecha: "2025-02", real: 685_000 },
+    { fecha: "2025-03", real: 765_000 },
+    { fecha: "2025-04", real: 830_000 },
+    { fecha: "2025-05", real: 888_000 },
+    { fecha: "2025-06", real: 948_000 },
+    { fecha: "2025-07", real: 1_013_000 },
+    { fecha: "2025-08", real: 1_085_000 },
+    { fecha: "2025-09", real: 1_175_000 },
+    { fecha: "2025-10", real: 1_320_000 },
+    { fecha: "2025-11", real: 1_452_000 }, // ← tabla histórica confirmado
+    { fecha: "2025-12", real: 1_607_000 }, // ← tabla histórica confirmado
+    { fecha: "2026-01", real: 1_775_000 }, // ← tabla histórica confirmado
+    { fecha: "2026-02", real: 1_917_000 }, // ← tabla histórica confirmado
+    { fecha: "2026-03", real: 2_035_000 }, // ← tabla histórica confirmado
+    { fecha: "2026-04", real: 2_130_000 }, // ← tabla histórica confirmado (Hoy)
+  ]
+
+  const projData: ROIDataPoint[] = []
+  let base      = 2_130_000
+  let favorable = 2_130_000
+  let riesgo    = 2_130_000
+
+  for (let year = 2026; year <= 2031; year++) {
+    for (let month = 1; month <= 12; month++) {
+      if (year === 2026 && month < 5) continue
+      const m = SOCIO_MONTHLY_BASE[month]
+      base      += m
+      favorable += Math.round(m * 1.4)
+      riesgo    += Math.round(m * 0.7)
+      projData.push({
+        fecha: `${year}-${String(month).padStart(2, "0")}`,
+        base,
+        favorable,
+        riesgo,
+      })
+    }
+  }
+
+  return [...realData, ...projData]
+}
+
+export const socioRoiProjectionData = buildSocioRoiProjectionData()
+export const SOCIO_ROI_FECHA_HOY = "2026-05"
 
 // ─── Historial de Compensaciones ─────────────────────────────────────────────
 

@@ -3,7 +3,7 @@
 
 import { useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { HandCoinsIcon } from "lucide-react"
+import { HandCoinsIcon, TrendingUpIcon } from "lucide-react"
 
 import {
   GddRoiRecuperoTable,
@@ -20,10 +20,13 @@ import { SectionHeader } from "@/components/ui/section-header"
 import { currencyTabsForBlocks } from "@/components/ui/currency-context-indicator"
 import { SheetContentTable } from "@/components/ui/sheet-ops"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { ROIProjectionChart } from "@/components/charts/ROIProjectionChart"
 import {
   socioRoiHistorico,
   socioRoiKpis,
+  socioRoiProjectionData,
   socioRoiProyectado,
+  SOCIO_ROI_FECHA_HOY,
 } from "@/data/gdcv-socio-mock"
 import { TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
 import { useIsMobile } from "@/hooks/use-is-mobile"
@@ -43,6 +46,7 @@ export function SocioRoiView() {
   const currency = (searchParams.get("currency") ?? "usd") as GddRoiCurrency
   const isMobile = useIsMobile()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [chartSheetOpen, setChartSheetOpen] = useState(false)
   const [tablaTab, setTablaTab] = useState<GddRoiTableVariant>("proyectado")
 
   const fmt = (valueUsd: number, desktopMode: "full" | "axis" = "full") =>
@@ -122,7 +126,7 @@ export function SocioRoiView() {
 
           <Card className="flex h-full min-h-0 w-full flex-col bg-white p-6 shadow-xs ring-0 rounded-xl">
             <div className="flex min-h-0 flex-1 flex-col gap-4 lg:gap-6">
-              <div className="grid grid-cols-2 gap-4 lg:gap-x-6 lg:gap-y-6">
+              <div className="grid grid-cols-3 lg:grid-cols-2 gap-4 lg:gap-x-6 lg:gap-y-6">
                 <KpiSecondaryMetric
                   label="TIR"
                   value={socioRoiKpis.tir}
@@ -134,28 +138,40 @@ export function SocioRoiView() {
                   label="Plazo"
                   value={socioRoiKpis.plazo}
                   size="standard"
-                  className="min-w-0 items-start text-left max-lg:items-center max-lg:text-center"
+                  className="min-w-0 items-center text-center lg:items-start lg:text-left"
                 />
                 <KpiSecondaryMetric
                   label="Mi Inversión"
                   value={totalInvertidoDisplay}
                   size="standard"
-                  className="col-span-2 min-w-0 items-start text-left lg:col-span-1"
+                  className="min-w-0 items-end text-right lg:items-start lg:text-left"
                 />
               </div>
-              <Button
-                type="button"
-                className="mt-auto w-full shadow-xs"
-                onClick={() => setSheetOpen(true)}
-              >
-                <HandCoinsIcon aria-hidden />
-                Ver Tabla de Recupero
-              </Button>
+              <div className="mt-auto grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full shadow-xs"
+                  onClick={() => setSheetOpen(true)}
+                >
+                  <HandCoinsIcon aria-hidden />
+                  ROI Tabla
+                </Button>
+                <Button
+                  type="button"
+                  className="w-full shadow-xs"
+                  onClick={() => setChartSheetOpen(true)}
+                >
+                  <TrendingUpIcon aria-hidden />
+                  ROI Gráfico
+                </Button>
+              </div>
             </div>
           </Card>
         </div>
       </section>
 
+      {/* Sheet 1: Tabla */}
       <SheetContentTable
         open={sheetOpen}
         onOpenChange={setSheetOpen}
@@ -172,6 +188,23 @@ export function SocioRoiView() {
           proyectadoData={socioRoiProyectado}
           historicoData={socioRoiHistorico}
           tipoCambio={TIPO_CAMBIO_ARS}
+        />
+      </SheetContentTable>
+
+      {/* Sheet 2: Gráfico */}
+      <SheetContentTable
+        open={chartSheetOpen}
+        onOpenChange={setChartSheetOpen}
+        title="Gráfico Recupero de Inversión"
+        showFooter={false}
+      >
+        <ROIProjectionChart
+          data={socioRoiProjectionData}
+          inversionMeta={socioRoiKpis.totalInvertido}
+          fechaHoy={SOCIO_ROI_FECHA_HOY}
+          showRangeChips={true}
+          showScenarioBands={true}
+          className="min-h-[420px] w-full"
         />
       </SheetContentTable>
     </>

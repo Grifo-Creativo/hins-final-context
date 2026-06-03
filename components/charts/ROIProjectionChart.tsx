@@ -129,7 +129,7 @@ interface ROITooltipProps {
 }
 
 const SERIES_LABELS: Record<string, string> = {
-  real:      "Real Acumulado",
+  real:      "Acumulado",
   base:      "Base",
   favorable: "Optimista",
   riesgo:    "Conservador",
@@ -300,38 +300,57 @@ export function ROIProjectionChart({
     return [...filtered].sort((a, b) => a.fecha.localeCompare(b.fecha))
   }, [data, rangoAnios])
 
-  /** Último valor real antes o en HOY — para anclar las proyecciones */
-  const lastRealValue = useMemo(
-    () =>
-      filteredData
-        .filter((d) => d.fecha <= fechaHoy && d.real !== undefined)
-        .pop()?.real ?? null,
-    [filteredData, fechaHoy]
-  )
+  /**
+   * Ancla temporal "Hoy" = último punto con dato real (≤ `fechaHoy`).
+   *
+   * El nodo final de la serie real, el origen del cono de proyección y la línea
+   * vertical "Hoy" se derivan TODOS de este mismo punto, por lo que coinciden
+   * visualmente siempre — sin importar cómo llegue la data del backend. La
+   * "presente" es, por definición, donde termina el dato real confirmado.
+   */
+  const anchorIdx = useMemo(() => {
+    for (let i = filteredData.length - 1; i >= 0; i--) {
+      if (filteredData[i].fecha <= fechaHoy && filteredData[i].real !== undefined) {
+        return i
+      }
+    }
+    return -1
+  }, [filteredData, fechaHoy])
 
-  /** Serie de chart: proyecciones solo desde HOY (cono anclado en la vertical "Hoy"). */
+  const anchorFecha = anchorIdx >= 0 ? filteredData[anchorIdx].fecha : fechaHoy
+  const anchorValue = anchorIdx >= 0 ? filteredData[anchorIdx].real ?? null : null
+
+  /** Serie de chart: el cono de proyección nace exactamente en el nodo real (ancla). */
   const chartData = useMemo(
     () =>
-      filteredData.map((d, idx) => {
-        const onOrAfterHoy = d.fecha >= fechaHoy
-        let base = onOrAfterHoy ? d.base : undefined
-        let favorable = onOrAfterHoy ? d.favorable : undefined
-        let riesgo = onOrAfterHoy ? d.riesgo : undefined
+      filteredData.map((d) => {
+        const isAnchor = d.fecha === anchorFecha
+        const afterAnchor = d.fecha > anchorFecha
 
-        // En el primer punto >= HOY, anclar todas las proyecciones al último valor real
-        const isFirstAfterHoy = idx > 0 && filteredData[idx - 1].fecha < fechaHoy && d.fecha >= fechaHoy
-        if (isFirstAfterHoy && lastRealValue !== null) {
-          base = lastRealValue
-          favorable = lastRealValue
-          riesgo = lastRealValue
-        }
+        // En el ancla, las 3 proyecciones arrancan del valor real (tip del cono);
+        // de ahí en más siguen su propia trayectoria.
+        const base = afterAnchor
+          ? d.base
+          : isAnchor
+            ? anchorValue ?? undefined
+            : undefined
+        const favorable = afterAnchor
+          ? d.favorable
+          : isAnchor
+            ? anchorValue ?? undefined
+            : undefined
+        const riesgo = afterAnchor
+          ? d.riesgo
+          : isAnchor
+            ? anchorValue ?? undefined
+            : undefined
 
         const r = riesgo
         const b = base
         const f = favorable
         const showBand =
           showScenarioBands &&
-          onOrAfterHoy &&
+          (isAnchor || afterAnchor) &&
           r != null &&
           b != null &&
           f != null &&
@@ -350,36 +369,30 @@ export function ROIProjectionChart({
           bandGreenStack2: showBand ? Math.max(0, f - b) : 0,
         }
       }),
-    [filteredData, fechaHoy, showScenarioBands]
+    [filteredData, anchorFecha, anchorValue, showScenarioBands]
   )
 
-  // ── Last real index (for CustomDot) ──────────────────────────────────────
-  const lastRealIdx = useMemo(
-    () =>
-      filteredData.reduce(
-        (last, p, i) => (p.real !== undefined ? i : last),
-        -1
-      ),
-    [filteredData]
-  )
-
-  // ── Year-change tick set (show year only at first occurrence) ─────────────
-  const yearFirstFecha = useMemo(() => {
-    const set = new Set<string>()
-    filteredData.forEach((d, i) => {
-      const year = d.fecha.split("-")[0]
-      const prevYear = i > 0 ? filteredData[i - 1].fecha.split("-")[0] : null
-      if (year !== prevYear) set.add(d.fecha)
-    })
-    return set
-  }, [filteredData])
-
-  const xAxisTickFormatter = (value: string) => {
-    if (rangoAnios === 1 || rangoAnios === 3 || rangoAnios === 5) {
-      return formatFecha(value)
+  // ── Ticks uniformes del eje X ─────────────────────────────────────────────
+  // En vez de delegar la densidad a `interval`/`minTickGap` (que en rangos
+  // largos colapsaba a un solo label y en cortos saturaba), generamos ~N ticks
+  // equiespaciados, siempre incluyendo inicio y fin.
+  const xAxisTicks = useMemo(() => {
+    const n = filteredData.length
+    if (n === 0) return []
+    const target = isMobile ? 4 : 6
+    if (n <= target) return filteredData.map((d) => d.fecha)
+    const step = (n - 1) / (target - 1)
+    const ticks: string[] = []
+    for (let i = 0; i < target; i++) {
+      ticks.push(filteredData[Math.round(i * step)].fecha)
     }
-    return yearFirstFecha.has(value) ? value.split("-")[0] : ""
-  }
+    return Array.from(new Set(ticks))
+  }, [filteredData, isMobile])
+
+  // Granularidad del label adaptada al span: rangos cortos (≤36m) → mes + año;
+  // rangos largos → solo año (evita repetir el mismo año en varios ticks).
+  const xAxisTickFormatter = (value: string) =>
+    filteredData.length <= 36 ? formatFecha(value) : value.split("-")[0]
 
   // ── Visible payback markers (basado en rango, no en fecha exacta) ─────────
   const minFecha = filteredData[0]?.fecha ?? ""
@@ -403,8 +416,8 @@ export function ROIProjectionChart({
     [filteredData]
   )
 
-  // HOY es visible si está dentro del rango de datos (no requiere fecha exacta)
-  const hoyVisible = fechaHoy >= minFecha && fechaHoy <= maxFecha
+  // HOY es visible si el ancla está dentro del rango de datos
+  const hoyVisible = anchorFecha >= minFecha && anchorFecha <= maxFecha
 
   const endYearLabel =
     chartData[chartData.length - 1]?.fecha.split("-")[0] ?? "2034"
@@ -433,15 +446,15 @@ export function ROIProjectionChart({
         <div
           className={
             isMobile
-              ? "flex flex-col justify-start gap-2"
+              ? "flex flex-wrap justify-start gap-2"
               : "flex flex-wrap justify-start gap-4"
           }
         >
-          <LegendItem label="Real Acumulado" color={chartColors.real} />
+          <LegendItem label="Acumulado" color={chartColors.real} />
           <LegendItem label="Optimista" color={chartColors.favorable} dashed />
           <LegendItem label="Base" color={chartColors.base} dashed />
           <LegendItem label="Conservador" color={chartColors.riesgo} dashed />
-          <LegendItem label="Inversión inicial" color={chartColors.metaLine} />
+          <LegendItem label="Inv. inicial" color={chartColors.metaLine} />
         </div>
         {showRangeChips ? (
           <TabsForBlocks
@@ -477,8 +490,8 @@ export function ROIProjectionChart({
               axisLine={false}
               tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
               tickFormatter={xAxisTickFormatter}
-              interval="preserveStartEnd"
-              minTickGap={isMobile ? 8 : 4}
+              ticks={xAxisTicks}
+              interval={0}
             />
 
             <YAxis
@@ -594,7 +607,7 @@ export function ROIProjectionChart({
                   cx={dotProps.cx}
                   cy={dotProps.cy}
                   index={dotProps.index}
-                  lastRealIdx={lastRealIdx}
+                  lastRealIdx={anchorIdx}
                   color={chartColors.real}
                 />
               )}
@@ -603,7 +616,7 @@ export function ROIProjectionChart({
             {/* Referencias verticales — encima de las series para legibilidad */}
             {hoyVisible && (
               <ReferenceLine
-                x={fechaHoy}
+                x={anchorFecha}
                 stroke={chartColors.hoyLine}
                 strokeWidth={1.5}
                 label={{

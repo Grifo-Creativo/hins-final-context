@@ -5,13 +5,15 @@ import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import { GddRoiRecuperoTable, type GddRoiCurrency } from "@/components/gdd/GddRoiRecuperoTable"
+import { ROIProjectionChart } from "@/components/charts/ROIProjectionChart"
 import { Card } from "@/components/ui/card"
+import { CardWithContent } from "@/components/ui/card-with-content"
 import { KpiProgressBar } from "@/components/ui/kpi-progress-bar"
 import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
 import { KpiWithAsset } from "@/components/ui/kpi-with-asset"
 import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
 
-import { gddRoiKpis, TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
+import { gddRoiKpis, TIPO_CAMBIO_ARS, gddRoiProjectionData, GDD_ROI_FECHA_HOY } from "@/data/gdd-roi-mock"
 import { useIsMobile } from "@/hooks/use-is-mobile"
 import {
   formatCurrency,
@@ -95,6 +97,20 @@ export function GddRoiView() {
         onVariantChange={setTablaTab}
         currency={currency}
       />
+
+      <CardWithContent
+        title="Curva de Recuperación"
+        className="flex min-h-0 flex-col"
+      >
+        <ROIProjectionChart
+          data={gddRoiProjectionData}
+          inversionMeta={gddRoiKpis.totalInvertido}
+          fechaHoy={GDD_ROI_FECHA_HOY}
+          showRangeChips={true}
+          showScenarioBands={true}
+          className="h-full min-h-[420px] w-full"
+        />
+      </CardWithContent>
     </div>
   )
 }

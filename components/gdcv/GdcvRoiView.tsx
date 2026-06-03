@@ -14,10 +14,14 @@ import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
 import { KpiWithAsset } from "@/components/ui/kpi-with-asset"
 import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
 
+import { ROIProjectionChart } from "@/components/charts/ROIProjectionChart"
+import { CardWithContent } from "@/components/ui/card-with-content"
 import {
   gdcvRoiHistorico,
   gdcvRoiKpis,
+  gdcvRoiProjectionData,
   gdcvRoiProyectado,
+  GDCV_ROI_FECHA_HOY,
 } from "@/data/gdcv-agc-mock"
 import { TIPO_CAMBIO_ARS } from "@/data/gdd-roi-mock"
 import { useIsMobile } from "@/hooks/use-is-mobile"
@@ -106,6 +110,20 @@ export function GdcvRoiView() {
         historicoData={gdcvRoiHistorico}
         tipoCambio={TIPO_CAMBIO_ARS}
       />
+
+      <CardWithContent
+        title="Curva de Recuperación"
+        className="flex min-h-0 flex-col"
+      >
+        <ROIProjectionChart
+          data={gdcvRoiProjectionData}
+          inversionMeta={gdcvRoiKpis.totalInvertido}
+          fechaHoy={GDCV_ROI_FECHA_HOY}
+          showRangeChips={true}
+          showScenarioBands={true}
+          className="h-full min-h-[420px] w-full"
+        />
+      </CardWithContent>
     </div>
   )
 }
