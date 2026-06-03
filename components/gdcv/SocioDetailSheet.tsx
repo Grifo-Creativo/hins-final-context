@@ -8,6 +8,7 @@ import { IconBadge } from "@/components/ui/icon-badge"
 import { SheetContentDetail } from "@/components/ui/sheet-ops"
 import { StatList, type StatListItem } from "@/components/ui/stat-list"
 import type { SocioRow } from "@/data/gdcv-mock"
+import { GDCV_TOTAL_POTENCIA } from "@/data/gdcv-mock"
 import { formatCurrency } from "@/lib/format-currency"
 import { ParkingMeter, PlugZap } from "lucide-react"
 
@@ -66,9 +67,7 @@ function fallbackDetail(socio: Socio) {
   const auto = Math.round(kwh * 0.68 * 10) / 10
   const inj = Math.round((kwh - auto) * 10) / 10
   const potenciaKwp = parseFloat(socio.potenciaAsociada.replace(/[^0-9.]/g, "")) || 0
-  // Total potencia instalada del parque GDCV
-  const totalPotenciaParque = 980
-  const porcentajePotencia = (potenciaKwp / totalPotenciaParque * 100).toFixed(1)
+  const porcentajePotencia = (potenciaKwp / GDCV_TOTAL_POTENCIA * 100).toFixed(1)
   return {
     descripcion: "Dispone de Autoconsumo Virtual del parque.",
     medidor: socio.medidor,

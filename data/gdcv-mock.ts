@@ -11,6 +11,9 @@ import type { ChartRangeChip } from "@/types/chart-range"
 
 export const gdcvParkName = "Parque Río Cuarto"
 
+/** Capacidad total instalada del parque GDCV (kWp). Fuente única de verdad para cálculos de porcentaje. */
+export const GDCV_TOTAL_POTENCIA = 980
+
 /** Inicio de operaciones — Parque Río Cuarto (GDCV). */
 export const gdcvOperationsStartLabel = "Marzo 2024"
 
@@ -211,7 +214,7 @@ export const socioDetalleMock: SocioDetalle = {
   medidor: "3551118",
   participacion: "25%",
   potenciaAsociada: "245 kWp",
-  porcentajePotencia: "13.5%",
+  porcentajePotencia: "25%",
   energiaGeneradaKwh: "33.1",
   energiaGeneradaMes: "Abril 2026",
   autoconsumoVirtual: "22.5 kWh",

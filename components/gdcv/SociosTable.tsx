@@ -34,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { SocioRow } from "@/data/gdcv-mock"
+import { GDCV_TOTAL_POTENCIA } from "@/data/gdcv-mock"
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
 import {
@@ -181,10 +182,8 @@ const columns: ColumnDef<SocioRow>[] = [
         const m = value.match(/[\d]+(?:[.,][\d]+)?/)
         return m ? parseFloat(m[0].replace(",", ".")) : 0
       }
-      // Total potencia instalada del parque GDCV
-      const totalPotenciaParque = 980
       const potenciaKwp = parseKwp(row.original.potenciaAsociada)
-      const porcentajePotencia = (potenciaKwp / totalPotenciaParque * 100).toFixed(1)
+      const porcentajePotencia = (potenciaKwp / GDCV_TOTAL_POTENCIA * 100).toFixed(1)
       return (
         <span className="text-sm tabular-nums">{row.original.potenciaAsociada} ({porcentajePotencia}%)</span>
       )

@@ -82,6 +82,9 @@ function useIsMobile(breakpoint = 640): boolean {
 }
 
 // ─── Custom Dot — only on last real data point ────────────────────────────────
+// Renders a circle marker at the anchor point (last real data). If lastRealIdx = -1
+// (no real data found), the dot does not render — this is an edge case that should
+// not occur in production (backend must provide at least one real data point ≤ today).
 
 interface CustomRealDotProps {
   cx?: number
@@ -307,6 +310,10 @@ export function ROIProjectionChart({
    * vertical "Hoy" se derivan TODOS de este mismo punto, por lo que coinciden
    * visualmente siempre — sin importar cómo llegue la data del backend. La
    * "presente" es, por definición, donde termina el dato real confirmado.
+   *
+   * Edge case: si no hay datos reales ≤ fechaHoy (p.ej. data incompleta o
+   * fechaHoy > último real), anchorIdx = -1 y el dot desaparece. En producción,
+   * el backend debe garantizar que existe al menos un punto real anterior a hoy.
    */
   const anchorIdx = useMemo(() => {
     for (let i = filteredData.length - 1; i >= 0; i--) {
@@ -376,6 +383,8 @@ export function ROIProjectionChart({
   // En vez de delegar la densidad a `interval`/`minTickGap` (que en rangos
   // largos colapsaba a un solo label y en cortos saturaba), generamos ~N ticks
   // equiespaciados, siempre incluyendo inicio y fin.
+  // `Array.from(new Set(ticks))` deduplica fechas cuando Math.round(i * step)
+  // produce índices duplicados en rangos muy cortos — evita labels repetidos.
   const xAxisTicks = useMemo(() => {
     const n = filteredData.length
     if (n === 0) return []
