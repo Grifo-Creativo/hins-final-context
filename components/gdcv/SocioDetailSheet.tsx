@@ -21,6 +21,8 @@ const DETAIL_MAP: Record<
     descripcion: string
     medidor: string
     participacion: string
+    potenciaAsociada: string
+    porcentajePotencia: string
     energiaGeneradaKwh: string
     energiaGeneradaMes: string
     autoconsumoVirtual: string
@@ -40,6 +42,8 @@ const DETAIL_MAP: Record<
     descripcion: "Dispone de Autoconsumo y Crédito por Inyección a red.",
     medidor: "3551118",
     participacion: "25%",
+    potenciaAsociada: "245 kWp",
+    porcentajePotencia: "12.7%",
     energiaGeneradaKwh: "31.0",
     energiaGeneradaMes: "Abril 2026",
     autoconsumoVirtual: "21.0 kWh",
@@ -61,10 +65,14 @@ function fallbackDetail(socio: Socio) {
   const kwh = parseFloat(socio.energiaGenerada.replace(/[^0-9.]/g, "")) || 0
   const auto = Math.round(kwh * 0.68 * 10) / 10
   const inj = Math.round((kwh - auto) * 10) / 10
+  const potenciaKwp = parseFloat(socio.potenciaAsociada.replace(/[^0-9.]/g, "")) || 0
+  const porcentajePotencia = potenciaKwp > 0 ? (kwh / potenciaKwp * 100).toFixed(1) : "0.0"
   return {
     descripcion: "Dispone de Autoconsumo Virtual del parque.",
     medidor: socio.medidor,
     participacion: socio.participacion,
+    potenciaAsociada: socio.potenciaAsociada,
+    porcentajePotencia: porcentajePotencia + "%",
     energiaGeneradaKwh: String(kwh),
     energiaGeneradaMes: "Abril 2026",
     autoconsumoVirtual: `${auto} kWh`,
@@ -83,7 +91,8 @@ function fallbackDetail(socio: Socio) {
 
 function buildInfoItems(detail: ReturnType<typeof fallbackDetail>): StatListItem[] {
   return [
-    { name: "Potencia utilizada", value: detail.potenciaUtilizada },
+    { name: "Potencia Asociada", value: detail.potenciaAsociada },
+    { name: "Porcentaje P. Asociada", value: detail.porcentajePotencia },
     { name: "Fecha de alta", value: detail.fechaDeAlta },
     { name: "Nombre del responsable", value: detail.nombreResponsable },
     { name: "Teléfono de contacto", value: detail.telefonoContacto },

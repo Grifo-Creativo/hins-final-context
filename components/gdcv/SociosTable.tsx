@@ -164,6 +164,36 @@ const columns: ColumnDef<SocioRow>[] = [
     ),
   },
   {
+    accessorKey: "potenciaAsociada",
+    enableSorting: true,
+    sortingFn: (rowA, rowB) => {
+      const parseKwp = (value: string): number => {
+        const m = value.match(/[\d]+(?:[.,][\d]+)?/)
+        return m ? parseFloat(m[0].replace(",", ".")) : 0
+      }
+      return parseKwp(rowA.original.potenciaAsociada) -
+             parseKwp(rowB.original.potenciaAsociada)
+    },
+    meta: { label: "Potencia Asociada" },
+    header: ({ column }) => sortableHeader(column, "Potencia Asociada"),
+    cell: ({ row }) => {
+      const parseKwp = (value: string): number => {
+        const m = value.match(/[\d]+(?:[.,][\d]+)?/)
+        return m ? parseFloat(m[0].replace(",", ".")) : 0
+      }
+      const parseKwh = (value: string): number => {
+        const m = value.match(/[\d]+(?:[.,][\d]+)?/)
+        return m ? parseFloat(m[0].replace(",", ".")) : 0
+      }
+      const potenciaKwp = parseKwp(row.original.potenciaAsociada)
+      const energiaKwh = parseKwh(row.original.energiaGenerada)
+      const porcentajePotencia = potenciaKwp > 0 ? (energiaKwh / potenciaKwp * 100).toFixed(1) : "0.0"
+      return (
+        <span className="text-sm tabular-nums">{row.original.potenciaAsociada} ({porcentajePotencia}%)</span>
+      )
+    },
+  },
+  {
     accessorKey: "energiaGenerada",
     enableSorting: true,
     sortingFn: (rowA, rowB) =>
