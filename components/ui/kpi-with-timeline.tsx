@@ -42,7 +42,7 @@ export function KpiWithTimeline({
           <SoftBadge className="flex-shrink-0">{metricBadge}</SoftBadge>
         ) : undefined
       }
-      bottomLabel={remaining ? "Faltan" : undefined}
+      bottomLabel={remaining ? "Plazo Pendiente" : undefined}
       bottomValue={remaining ?? undefined}
       asset={<KpiPaybackTimeline timelineData={timelineData} />}
     />
