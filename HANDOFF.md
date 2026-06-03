@@ -1,10 +1,10 @@
-# 📋 HINS Handoff — Guía Completa para el Ingeniero
+# 📋 HINS Handoff — Guía Completa para Ingeniero
 
 > **Dirección:** Este documento es tu punto de entrada al proyecto. Léelo de arriba a abajo. Al final encontrarás referencias a documentos detallados.
 
 ---
 
-## 1. Qué es HINS (30 seg)
+## 1. Qué es HINS
 
 **HINS** = Plataforma web B2B de **monitoreo visual** para parques fotovoltaicos.
 - No ejecuta acciones sobre la red — solo muestra datos
@@ -43,10 +43,10 @@ hins-final-context/
 ├── app/                              ← Rutas (Next.js App Router)
 │   ├── globals.css                   ← Tokens CSS (fuente de verdad)
 │   ├── main/                         ← HINS Admin cartera
-│   ├── gdd/*                         ← GDD owner (performance, roi, maintenance)
-│   ├── gdcv/*                        ← GDCV (AGC + Socio)
-│   ├── gdc/*                         ← GDC AGC
-│   └── dev/components                ← Component playground (dev only)
+│   ├── gdd/*                         ← GDD Dueño (secciones: Performance, ROI, Mantenimiento)
+│   ├── gdcv/*                        ← GDCV (Administrador Comunitario + Socio)
+│   ├── gdc/*                         ← GDC AGC (Administrador Comunitario)
+│   └── dev/components                ← Pagina de Preview de los Componentes documentados
 │
 ├── components/
 │   ├── ui/                           ← Base components (shadcn + custom HINS)
@@ -167,17 +167,17 @@ hins-final-context/
 
 ```
 /main                           → HINS Admin (cartera)
-  └─ NewProjectDialog          ← TODO: Crear proyecto (API)
+  └─ NewProjectDialog          ←  Crear Nuevo proyecto (API)
 
 /gdd/*                          → GDD Owner (dueño único)
   ├─ /gdd/performance           ✅ Energy charts
   ├─ /gdd/roi                   ✅ ROI tables + projection
-  └─ /gdd/mantenimiento         ✅ Maintenance log
+  └─ /gdd/mantenimiento         ✅ Pagina de Mantenimiento (log)
 
 /gdcv/*                         → GDCV AGC (comunitario virtual)
-  ├─ /gdcv/performance          ✅ Community energy
-  ├─ /gdcv/roi                  ✅ Community ROI
-  ├─ /gdcv/mantenimiento        ✅ Community maintenance
+  ├─ /gdcv/performance          ✅ Vista de Performance del Parque
+  ├─ /gdcv/roi                  ✅ Vista de ROI
+  ├─ /gdcv/mantenimiento        ✅ Pagina de Mantenimiento
   └─ /gdcv/socios               ✅ Socio table
 
 /gdcv/socio/*                   → GDCV Socio (acceso OTP)
@@ -186,9 +186,9 @@ hins-final-context/
   └─ /gdcv/socio/[id]/details        ✅ Personal details
 
 /gdc/*                          → GDC AGC (comunitario)
-  ├─ /gdc/performance           ✅ Community energy
-  ├─ /gdc/roi                   ✅ Community ROI
-  └─ /gdc/mantenimiento         ✅ Community maintenance
+  ├─ /gdc/performance           ✅ Vista de Performance del Parque
+  ├─ /gdc/roi                   ✅ Vista de ROI
+  └─ /gdc/mantenimiento         ✅ Pagina de Mantenimiento
 
 /dev/components                 ← Component playground (dev only)
 ```
