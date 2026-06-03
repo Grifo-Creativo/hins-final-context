@@ -281,7 +281,7 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 5 } },
+    initialState: { pagination: { pageSize: 10 } },
   })
 
   const { pageIndex, pageSize } = table.getState().pagination
