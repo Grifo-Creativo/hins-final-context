@@ -49,17 +49,9 @@ import {
 } from "lucide-react"
 
 import { type ConsumptionHistoryRow } from "@/data/gdd-performance-mock"
+import { parseKwhDisplay, parsePercentDisplay } from "@/lib/format-energy"
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
-
-function parseKwhDisplay(value: string): number {
-  const m = value.match(/[\d]+(?:[.,][\d]+)?/)
-  return m ? parseFloat(m[0].replace(",", ".")) : 0
-}
-
-function parsePercentDisplay(value: string): number {
-  return parseFloat(value.replace("%", "").replace(",", ".")) || 0
-}
 
 function parseMoneyDisplay(value: string): number {
   const digits = value.replace(/[^\d]/g, "")

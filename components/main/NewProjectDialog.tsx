@@ -27,7 +27,7 @@ interface NewProjectDialogProps {
 export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) {
   const [formData, setFormData] = useState<NewProjectFormData>({
     nombre: "",
-    tipo: undefined as any,
+    tipo: undefined as ProjectType | undefined,
   })
 
   const handleReset = () => {
@@ -55,7 +55,12 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
       return
     }
 
-    // TODO: Aquí iría la lógica para crear el proyecto
+    // TODO: Wire to backend API
+    // Expected request: POST /api/projects
+    // Payload: { nombre, tipo, medidor? }
+    // Expected response: { id, nombre, tipo, medidor?, estado }
+    // On success: invalidate projects cache, close dialog, navigate to /main
+    // On error: show toast notification
     console.log("Crear proyecto:", formData)
 
     // Cerrar dialog

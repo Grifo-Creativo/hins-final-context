@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table"
 import type { SocioRow } from "@/data/gdcv-mock"
 import { GDCV_TOTAL_POTENCIA } from "@/data/gdcv-mock"
+import { parseKwhDisplay, parsePercentDisplay } from "@/lib/format-energy"
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
 import {
@@ -63,15 +64,7 @@ function getInitials(name: string): string {
 }
 
 // ─── Parsing helpers ──────────────────────────────────────────────────────────
-
-function parseKwhDisplay(value: string): number {
-  const m = value.match(/[\d]+(?:[.,][\d]+)?/)
-  return m ? parseFloat(m[0].replace(",", ".")) : 0
-}
-
-function parsePercentDisplay(value: string): number {
-  return parseFloat(value.replace("%", "").replace(",", ".")) || 0
-}
+// parseKwhDisplay and parsePercentDisplay imported from @/lib/format-energy
 
 function parseMoneyDisplay(value: string): number {
   const digits = value.replace(/[^\d]/g, "")
