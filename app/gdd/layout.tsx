@@ -1,9 +1,9 @@
 // app/gdd/layout.tsx
 import type { ReactNode } from "react"
 
+import { DashboardMain } from "@/components/layout/DashboardMain"
 import { GddHeader } from "@/components/layout/GddHeader"
 import { GddLayoutShell } from "@/components/layout/GddLayoutShell"
-import { PageTransition } from "@/components/ui/page-transition"
 
 export default function GddLayout({
   children,
@@ -13,9 +13,7 @@ export default function GddLayout({
   return (
     <GddLayoutShell>
       <GddHeader />
-      <main className="flex-1 px-4 sm:px-6 py-4 sm:py-6 bg-background-subtle">
-        <PageTransition>{children}</PageTransition>
-      </main>
+      <DashboardMain>{children}</DashboardMain>
     </GddLayoutShell>
   )
 }

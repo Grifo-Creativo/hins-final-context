@@ -4,10 +4,10 @@
 import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 
+import { DashboardMain } from "@/components/layout/DashboardMain"
 import { GdcvHeader } from "@/components/layout/GdcvHeader"
 import { GdcvLayoutShell } from "@/components/layout/GdcvLayoutShell"
 import { GdcvLayoutShellNoSidebar } from "@/components/layout/GdcvLayoutShellNoSidebar"
-import { PageTransition } from "@/components/ui/page-transition"
 
 export default function GdcvLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
@@ -17,9 +17,7 @@ export default function GdcvLayout({ children }: { children: ReactNode }) {
   return (
     <Shell>
       <GdcvHeader />
-      <main className="flex-1 px-4 sm:px-6 py-4 sm:py-6 bg-background-subtle">
-        <PageTransition>{children}</PageTransition>
-      </main>
+      <DashboardMain>{children}</DashboardMain>
     </Shell>
   )
 }
