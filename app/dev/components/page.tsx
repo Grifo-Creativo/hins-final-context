@@ -67,6 +67,7 @@ import {
   gddParkDetails,
   generationSparklinePoints,
 } from "@/data/gdd-performance-mock"
+import { gddParkEquipmentDetail } from "@/data/park-equipment-mock"
 import Link from "next/link"
 import {
   DownloadIcon,
@@ -477,7 +478,7 @@ export default function DevComponentsPage() {
             file="components/ui/kpi-secondary-metric.tsx"
           >
             <div className="max-w-[10rem] rounded-lg border border-border bg-white p-4">
-              <KpiSecondaryMetric label="Cap. Instalada" value="1.250 kWp" />
+              <KpiSecondaryMetric label="Capacidad Instalada" value="1.250 kWp" />
             </div>
           </Showcase>
 
@@ -542,6 +543,7 @@ export default function DevComponentsPage() {
                 imageSrc={gddParkDetails.imageSrc}
                 imageAlt={gddParkDetails.imageAlt}
                 metrics={gddParkDetails.metrics}
+                equipmentDetail={gddParkEquipmentDetail}
               />
             </div>
           </Showcase>

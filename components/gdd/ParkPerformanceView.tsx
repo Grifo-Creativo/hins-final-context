@@ -12,6 +12,7 @@ import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
+import { gddParkEquipmentDetail } from "@/data/park-equipment-mock"
 import { parkEnergyBarChartConfig } from "@/data/chart-config"
 import {
   consumptionHistoryMock,
@@ -70,6 +71,7 @@ export function ParkPerformanceView() {
           imageSrc={gddParkDetails.imageSrc}
           imageAlt={gddParkDetails.imageAlt}
           metrics={gddParkDetails.metrics}
+          equipmentDetail={gddParkEquipmentDetail}
           className="h-full"
         />
         <CardWithResponsiveTabs

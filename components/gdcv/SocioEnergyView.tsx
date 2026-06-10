@@ -20,6 +20,7 @@ import { SOCIO_ENERGY_TOP_ROW_GRID } from "@/components/ui/performance-placehold
 import { FeatureItem } from "@/components/ui/feature-item"
 import { StatList } from "@/components/ui/stat-list"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
+import { socioParkEquipmentDetail } from "@/data/park-equipment-mock"
 import {
   parkEnergyBarChartConfig,
   socioAhorroStackChartConfig,
@@ -100,6 +101,7 @@ export function SocioEnergyView() {
         imageSrc={socioParkDetails.imageSrc}
         imageAlt={socioParkDetails.imageAlt}
         metrics={socioParkDetails.metrics}
+        equipmentDetail={socioParkEquipmentDetail}
         className="h-full"
       />
 

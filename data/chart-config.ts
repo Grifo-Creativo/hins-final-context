@@ -3,13 +3,17 @@ import type { ChartConfig } from "@/components/ui/chart"
 import { participacionChartData } from "@/data/gdcv-socio-mock"
 
 export const socioAhorroStackChartConfig = {
+  inyectada: {
+    label: "Energía Inyectada",
+    color: "var(--chart-stack-inyectada)",
+  },
   autoconsumo: {
     label: "Autoconsumo Virtual",
     color: "var(--chart-stack-autoconsumo)",
   },
-  inyectada: {
-    label: "Energía Inyectada",
-    color: "var(--chart-stack-inyectada)",
+  impuestos: {
+    label: "Ahorro de Impuestos",
+    color: "var(--chart-stack-impuestos)",
   },
 } satisfies ChartConfig
 

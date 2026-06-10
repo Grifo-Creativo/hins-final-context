@@ -12,6 +12,8 @@ const modelStyles: Record<ParkModel, string> = {
 
 interface ModelBadgeProps {
   model: ParkModel
+  /** Texto custom (ej. nombre del socio). Si se omite, muestra el modelo. */
+  label?: string
   className?: string
 }
 
@@ -23,18 +25,20 @@ interface ModelBadgeProps {
  * <ModelBadge model="GDD" />
  * <ModelBadge model="GDCV" />
  * <ModelBadge model="GDC" />
+ * <ModelBadge model="GDD" label="Agro Sur Industrial" />
  * ```
  *
- * El texto siempre es el nombre del modelo — no acepta `children`.
+ * Por defecto el texto es el nombre del modelo. `label` permite reutilizar
+ * el estilo del modelo con otro copy (vista Socio: `model="GDD"` + nombre empresa).
  * Para estados semánticos live/vigente usar `StatusBadge`.
  */
-export function ModelBadge({ model, className }: ModelBadgeProps) {
+export function ModelBadge({ model, label, className }: ModelBadgeProps) {
   return (
     <Badge
       variant="secondary"
       className={cn("shrink-0 font-medium", modelStyles[model], className)}
     >
-      {model}
+      {label ?? model}
     </Badge>
   )
 }

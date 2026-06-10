@@ -6,12 +6,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
   DASHBOARD_DOWNLOAD_OPTIONS,
   type DashboardDownloadsVariant,
 } from "@/data/dashboard-downloads-mock"
+import {
+  DASHBOARD_DOWNLOAD_ALL_LABEL,
+  downloadAllDashboardExports,
+  downloadDashboardExport,
+} from "@/lib/dashboard-downloads"
 import { DownloadIcon } from "lucide-react"
 
 interface DashboardDownloadsMenuProps {
@@ -40,12 +46,20 @@ export function DashboardDownloadsMenu({ variant }: DashboardDownloadsMenuProps)
           <DropdownMenuItem
             key={option.id}
             onSelect={() => {
-              // TODO: wire export por dataset cuando exista backend / generación de archivos
+              downloadDashboardExport(option, variant)
             }}
           >
             {option.label}
           </DropdownMenuItem>
         ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => {
+            void downloadAllDashboardExports(options, variant)
+          }}
+        >
+          {DASHBOARD_DOWNLOAD_ALL_LABEL}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

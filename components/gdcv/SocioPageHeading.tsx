@@ -3,8 +3,9 @@
 
 import { usePathname, useRouter } from "next/navigation"
 
+import { ModelBadge } from "@/components/ui/model-badge"
 import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
-import { socioParkName } from "@/data/gdcv-socio-mock"
+import { socioNombre, socioParkName } from "@/data/gdcv-socio-mock"
 
 const navTabs = [
   { value: "/gdcv/socio", label: "Mi Espacio" },
@@ -22,9 +23,12 @@ export function SocioPageHeading() {
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="min-w-0 max-w-full text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-        {socioParkName}
-      </h1>
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        <h1 className="min-w-0 max-w-full text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+          {socioParkName}
+        </h1>
+        <ModelBadge model="GDD" label={socioNombre} />
+      </div>
       <TabsForBlocks
         className="w-full min-w-0 sm:w-auto"
         tabs={navTabs}

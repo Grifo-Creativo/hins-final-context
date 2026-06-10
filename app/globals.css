@@ -80,6 +80,7 @@
   --chart-1-muted: rgba(34, 197, 94, 0.4);
   --chart-stack-autoconsumo: var(--chart-1);
   --chart-stack-inyectada: rgb(251 191 36 / 0.9);
+  --chart-stack-impuestos: #86EFAC;
   --chart-2: #0d9488;
   --chart-3: #16a34a;
   --chart-4: #34d399;
@@ -132,6 +133,7 @@
   --chart-1-muted: rgba(34, 197, 94, 0.4);
   --chart-stack-autoconsumo: var(--chart-1);
   --chart-stack-inyectada: rgb(251 191 36 / 0.9);
+  --chart-stack-impuestos: #86EFAC;
   --chart-2: #0d9488;
   --chart-3: #16a34a;
   --chart-4: #34d399;

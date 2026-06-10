@@ -83,7 +83,7 @@ Dentro de `ParkDetailsCard`:
 
 - **Flex columna** (`flex h-full min-h-0 flex-col`): imagen arriba + bloque métricas abajo.
 - **Imagen:** `block h-auto w-full` + dimensiones intrínsecas del PNG → ancho 100%, altura proporcional.
-- **Métricas:** `grid grid-cols-2 gap-4` + `KpiSecondaryMetric`.
+- **Métricas:** `PARK_DETAILS_METRICS_GRID` (`1.15fr / 0.85fr`) + `KpiSecondaryMetric`.
 
 No hay posicionamiento absoluto para columnas ni hacks de ancho dentro del organismo.
 

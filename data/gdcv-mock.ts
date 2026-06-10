@@ -25,9 +25,9 @@ export const gdcvParkDetails = {
   imageSrc: "/images/png-assets/asset_gdcv.png",
   imageAlt: "Parque GDCV",
   metrics: [
-    { label: "Cap. Instalada", value: "980 kWp" },
+    { label: "Capacidad Instalada", value: "980 kWp" },
     { label: "Potencia Acople", value: "815 kWp" },
-    { label: "Equipo", value: "Canadian Solar HiKu7 655W" },
+    { label: "Equipamiento", value: "Canadian Solar HiKu7 655W" },
     {
       label: GDCV_OPERATIONS_START_METRIC_LABEL,
       value: gdcvOperationsStartLabel,

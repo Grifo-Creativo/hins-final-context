@@ -12,6 +12,7 @@ import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
+import { gdcvParkEquipmentDetail } from "@/data/park-equipment-mock"
 import { gdcvEnergyBarChartConfig } from "@/data/chart-config"
 import {
   gdcvAhorroTotalAbril,
@@ -107,6 +108,7 @@ export function GdcvPerformanceView() {
           imageSrc={gdcvParkDetails.imageSrc}
           imageAlt={gdcvParkDetails.imageAlt}
           metrics={gdcvParkDetails.metrics}
+          equipmentDetail={gdcvParkEquipmentDetail}
           className="h-full"
         />
         <CardWithResponsiveTabs

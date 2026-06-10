@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils"
 
 type MonetaryBarChartProps = {
-  data: { label: string; autoconsumo: number; inyectada: number }[]
+  data: { label: string; autoconsumo: number; inyectada: number; impuestos: number }[]
   chartConfig: ChartConfig
   unit?: "dinero" | "energia"
   /** Ahorro socio / facturación en ARS por defecto. */
@@ -51,6 +51,7 @@ type MonetaryBarRow = {
   label: string
   autoconsumo: number
   inyectada: number
+  impuestos: number
   total: number
 }
 
@@ -108,7 +109,7 @@ type CustomTooltipProps = {
 
 function getStackColor(
   chartConfig: ChartConfig,
-  key: "autoconsumo" | "inyectada",
+  key: "autoconsumo" | "inyectada" | "impuestos",
   fallback: string
 ): string {
   const entry = chartConfig[key]
@@ -128,18 +129,24 @@ function CustomTooltip({
   const autoconsumo =
     payload.find((p) => p.dataKey === "autoconsumo")?.value ?? 0
   const inyectada = payload.find((p) => p.dataKey === "inyectada")?.value ?? 0
-  const total = autoconsumo + inyectada
+  const impuestos = payload.find((p) => p.dataKey === "impuestos")?.value ?? 0
+  const total = autoconsumo + inyectada + impuestos
   const totalLabel =
     unit === "energia" ? `Total kWh ${label}` : `Total Ahorro ${label}`
+  const autoconsumoColor = getStackColor(
+    chartConfig,
+    "autoconsumo",
+    "var(--chart-stack-autoconsumo)"
+  )
   const inyectadaColor = getStackColor(
     chartConfig,
     "inyectada",
     "var(--chart-stack-inyectada)"
   )
-  const autoconsumoColor = getStackColor(
+  const impuestosColor = getStackColor(
     chartConfig,
-    "autoconsumo",
-    "var(--chart-stack-autoconsumo)"
+    "impuestos",
+    "var(--chart-stack-impuestos)"
   )
 
   const formatPart = (value: number) =>
@@ -159,7 +166,7 @@ function CustomTooltip({
           {formatPart(inyectada)}
         </span>
       </div>
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-2 flex items-center gap-2">
         <div
           className="h-3 w-3 rounded-sm"
           style={{ backgroundColor: autoconsumoColor }}
@@ -167,6 +174,16 @@ function CustomTooltip({
         <span className="text-foreground">Autoconsumo virtual</span>
         <span className="ml-auto font-semibold text-foreground">
           {formatPart(autoconsumo)}
+        </span>
+      </div>
+      <div className="mb-3 flex items-center gap-2">
+        <div
+          className="h-3 w-3 rounded-sm"
+          style={{ backgroundColor: impuestosColor }}
+        />
+        <span className="text-foreground">Ahorro de Impuestos</span>
+        <span className="ml-auto font-semibold text-foreground">
+          {formatPart(impuestos)}
         </span>
       </div>
       <div className="border-t border-border pt-2">
@@ -193,7 +210,7 @@ export function MonetaryBarChart({
     () =>
       data.map((row) => ({
         ...row,
-        total: row.autoconsumo + row.inyectada,
+        total: row.autoconsumo + row.inyectada + row.impuestos,
       })),
     [data]
   )
@@ -256,6 +273,17 @@ export function MonetaryBarChart({
             cursor={{ fill: "rgba(0,0,0,0.05)" }}
           />
         ) : null}
+        <Bar
+          dataKey="impuestos"
+          stackId="a"
+          fill={getStackColor(
+            chartConfig,
+            "impuestos",
+            "var(--chart-stack-impuestos)"
+          )}
+          radius={0}
+          barSize={density.barSize}
+        />
         <Bar
           dataKey="autoconsumo"
           stackId="a"

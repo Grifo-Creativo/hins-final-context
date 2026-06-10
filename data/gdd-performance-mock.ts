@@ -14,6 +14,9 @@ export type ParkEnergyRow = {
   generated: number
 }
 
+/** Label canónico — ParkDetailsCard (GDD). */
+export const GDD_OPERATIONS_START_METRIC_LABEL = "Fecha de Inicio"
+
 /** Inicio de operaciones — Parque General Roca (GDD). */
 export const gddOperationsStartLabel = "Mayo 2024"
 
@@ -57,10 +60,10 @@ export const gddParkDetails = {
   imageSrc: "/images/png-assets/asset_gdd.png",
   imageAlt: "Ilustración del parque fotovoltaico Parque General Roca",
   metrics: [
-    { label: "Cap. Instalada", value: "1.250 kWp" },
+    { label: "Capacidad Instalada", value: "1.250 kWp" },
     { label: "Potencia Acople", value: "1.020 kWp" },
-    { label: "Equipo", value: "Jinko Tiger Neo 72HL4" },
-    { label: "Inicio de operaciones", value: gddOperationsStartLabel },
+    { label: "Equipamiento", value: "Jinko Tiger Neo 72HL4" },
+    { label: GDD_OPERATIONS_START_METRIC_LABEL, value: gddOperationsStartLabel },
   ],
 } as const
 

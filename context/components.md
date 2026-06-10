@@ -1847,7 +1847,7 @@ interface KpiSecondaryMetricProps {
 ### Uso
 
 ```tsx
-<KpiSecondaryMetric label="Cap. Instalada" value="1.250 kWp" />
+<KpiSecondaryMetric label="Capacidad Instalada" value="1.250 kWp" />
 <KpiSecondaryMetric label="Inversión Recuperada" value="u$s 6.000.000" size="standard" />
 ```
 
@@ -1885,7 +1885,7 @@ CardWithContent(title="", noPadding, h-full)
     ├── div.relative.w-full.shrink-0.leading-none
     │   └── Image (width/height intrínsecos, block h-auto w-full)
     └── div.p-4.flex-1
-        └── grid grid-cols-2 gap-4
+        └── grid grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-4
             └── KpiSecondaryMetric × 4
 ```
 
@@ -1901,6 +1901,7 @@ type ParkDetailsCardProps = {
   className?: string
   imageWidth?: number   // default 478 (PNG GDD)
   imageHeight?: number  // default 347 (PNG GDD)
+  equipmentDetail?: ParkEquipmentDetail
 }
 ```
 
@@ -1915,19 +1916,19 @@ type ParkDetailsCardProps = {
 
 | Label | Value ejemplo |
 |---|---|
-| Cap. Instalada | 1.250 kWp |
+| Capacidad Instalada | 1.250 kWp |
 | Potencia Acople | 1.020 kWp |
-| Equipo | Jinko Tiger Neo 72HL4 |
-| Ultimo Mantenimiento | 12 Mar. 2026 |
+| Equipamiento | Jinko Tiger Neo 72HL4 |
+| Fecha de Inicio | Mayo 2024 |
 
 ### Mock GDCV (`gdcvParkDetails`)
 
 | Label | Value ejemplo |
 |---|---|
-| Cap. Instalada | 980 kWp |
+| Capacidad Instalada | 980 kWp |
 | Potencia Acople | 815 kWp |
-| Equipo | Canadian Solar HiKu7 655W |
-| Ultimo Mantenimiento | 18 Feb. 2026 |
+| Equipamiento | Canadian Solar HiKu7 655W |
+| Fecha de Inicio | Marzo 2024 |
 
 `imageAlt`: **Parque GDCV**
 
@@ -1940,16 +1941,16 @@ Orden = grid 2×2 (fila 1 → fila 2):
 | Celda | Label | Value ejemplo |
 |---|---|---|
 | 1 | Mi Potencia Instalada | 380 kWp |
-| 2 | Mi participación | 15% (`socioPorcentaje`) |
-| 3 | Equipo | Solar HiKu7 655W |
-| 4 | Potencia de Acople | 310 kWp |
+| 2 | Mi Participación | 15% (`socioPorcentaje`) |
+| 3 | Equipamiento | Solar HiKu7 655W |
+| 4 | Emisiones Evitadas | 388 kg CO₂ |
 
 ### Mock Socio parque (`socioParqueChartMetricRows` — `/gdcv/socio/parque`)
 
 | Fila | Labels | Fuente mock |
 |---|---|---|
 | 1 | Potencia total instalada · Potencia total de acople | `gdcvParkDetails` (980 / 815 kWp) |
-| 2 | Inversión inicial · Inicio de operaciones | `socioRoiMetrics` · `socioRoiSecondaryMetrics` |
+| 2 | Inversión inicial · Fecha de Inicio | `socioRoiMetrics` · `socioRoiSecondaryMetrics` |
 
 Íconos: Zap · Zap · CircleDollarSign · Calendar. Ver FeatureItem → Íconos.
 

@@ -64,6 +64,12 @@ export const socioOperationsStartLabel = "Marzo 2024"
 export const socioPotenciaInstalada = "380 kWp"
 export const socioPotenciaAcople = "310 kWp"
 
+/**
+ * Emisiones evitadas del socio — factor ~0,468 kg CO₂/kWh (paridad `socioDetalleMock.ahorroEmisiones`).
+ * Abril 2026: 830 kWh × factor ≈ 388 kg.
+ */
+export const socioEmisionesEvitadas = "388 kg CO₂"
+
 /** Totales del parque (AGC) — `SocioPerformanceView` fila 1 bajo chart. */
 export const socioParquePotenciaTotalInstalada = gdcvParkDetails.metrics[0].value
 export const socioParquePotenciaTotalAcople = gdcvParkDetails.metrics[1].value
@@ -75,16 +81,16 @@ export const socioParkEquipoLabel = "Solar HiKu7 655W"
 
 /**
  * Detalle del parque — Mi Espacio (`/gdcv/socio`, columna 1).
- * Grid 2×2: participación + mi instalada | equipo + mi acople. Sin último mantenimiento.
+ * Grid 2×2: instalada + participación | equipamiento + emisiones. Sin último mantenimiento.
  */
 export const socioParkDetails = {
   imageSrc: "/images/png-assets/asset_gdcv.png",
   imageAlt: "Parque Río Cuarto",
   metrics: [
     { label: "Mi Potencia Instalada", value: socioPotenciaInstalada },
-    { label: "Mi participación", value: `${socioPorcentaje}%` },
-    { label: "Equipo", value: socioParkEquipoLabel },
-    { label: "Potencia de Acople", value: socioPotenciaAcople },
+    { label: "Mi Participación", value: `${socioPorcentaje}%` },
+    { label: "Equipamiento", value: socioParkEquipoLabel },
+    { label: "Emisiones Evitadas", value: socioEmisionesEvitadas },
   ],
 } as const
 
@@ -112,13 +118,15 @@ const SOCIO_PARQUE_TAIL: Record<string, number> = {
 
 function buildSocioAhorroMonthly(): SocioAhorroRow[] {
   return GDCV_ENERGY_MONTHLY_CANONICAL.map((row) => {
-    const total = SOCIO_AHORRO_TAIL[row.label] ?? Math.round(row.generated * AHORRO_PER_KWH)
-    const autoconsumo = Math.round(total * 0.68)
-    const inyectada = total - autoconsumo
+    const energyTotal = SOCIO_AHORRO_TAIL[row.label] ?? Math.round(row.generated * AHORRO_PER_KWH)
+    const autoconsumo = Math.round(energyTotal * 0.68)
+    const inyectada = energyTotal - autoconsumo
+    const impuestos = Math.round(energyTotal * IMPUESTOS_RATE)
     return {
       label: row.label,
       autoconsumo,
       inyectada,
+      impuestos,
     }
   })
 }
@@ -134,15 +142,18 @@ function buildSocioParqueMonthly(): SocioParqueRow[] {
 
 // ─── Mi Ahorro Chart ────────────────────────────────────────────────────────
 
-export type SocioAhorroRow = { label: string; autoconsumo: number; inyectada: number }
+/** Tasa mock de ahorro fiscal sobre el ahorro energético total (placeholder — reemplazar con dato real). */
+const IMPUESTOS_RATE = 0.10
+
+export type SocioAhorroRow = { label: string; autoconsumo: number; inyectada: number; impuestos: number }
 
 const SOCIO_AHORRO_MONTHLY = buildSocioAhorroMonthly()
 
 const SOCIO_AHORRO_WEEKLY: readonly SocioAhorroRow[] = [
-  { label: "1–7 Abr", autoconsumo: 12240, inyectada: 5760 },
-  { label: "8–14 Abr", autoconsumo: 13600, inyectada: 6400 },
-  { label: "15–21 Abr", autoconsumo: 11968, inyectada: 5632 },
-  { label: "22–30 Abr", autoconsumo: 12784, inyectada: 6016 },
+  { label: "1–7 Abr", autoconsumo: 12240, inyectada: 5760, impuestos: 1800 },
+  { label: "8–14 Abr", autoconsumo: 13600, inyectada: 6400, impuestos: 2000 },
+  { label: "15–21 Abr", autoconsumo: 11968, inyectada: 5632, impuestos: 1760 },
+  { label: "22–30 Abr", autoconsumo: 12784, inyectada: 6016, impuestos: 1880 },
 ]
 
 export function getSocioAhorroSeries(range: ChartRangeChip): SocioAhorroRow[] {
@@ -294,7 +305,7 @@ export const socioStatListV2Energia: StatListItem[] = [
 
 /** Sparklines del panel derecho V2 (últimos 6 meses). */
 export const socioV2AhorroSparkline = SOCIO_AHORRO_MONTHLY.slice(-6).map(
-  (row) => ({ value: row.autoconsumo + row.inyectada })
+  (row) => ({ value: row.autoconsumo + row.inyectada + row.impuestos })
 )
 
 export const socioV2EnergiaSparkline = [...socioEnergiaSparkline]
