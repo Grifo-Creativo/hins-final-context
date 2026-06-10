@@ -3,26 +3,17 @@
 
 ---
 
-## Orden de lectura obligatorio
+## Inicio obligatorio
 
-Antes de generar cualquier código o tomar cualquier decisión de diseño,
-leer los archivos en este orden:
+Leer **siempre primero** `/context/kick-off.md` — contiene todas las reglas operativas, orden de lectura y reglas no negociables.
 
-1. `/context/kick-off.md` — arranque rápido: qué es el sistema, método de build, reglas críticas
-2. `/context/product-context.md` — qué es el producto, quiénes son los usuarios, reglas de negocio
-3. `/context/design-system.md` — tokens, principios y referencias de componentes
-4. `/context/components.md` — specs de implementación exacta (tiene la última palabra)
-5. `/context/ux-guidelines.md` — jerarquía, patrones, anti-patterns
-6. `/engineering/tech-stack.md` — stack, arquitectura, convenciones
-7. `/flows/[pantalla].md` — el flujo específico que se está implementando
-8. `/flows/performance/about-performance-layout.md` — si se toca la fila superior Performance, `ParkDetailsCard` o constantes `*_TOP_ROW_GRID`
-9. `/lib/format-currency.ts` y `context/components.md` → **FormatCurrency** — si se formatean montos, toggles DOLAR/ARS, tooltips o labels de charts monetarios
+**No duplicar reglas aquí.** Este archivo es solo el router de contexto.
 
 ---
 
-## Regla de precedencia de archivos
+## Precedencia de documentos
 
-Cuando hay conflicto entre documentos, el orden de autoridad es:
+Cuando hay conflicto entre documentos:
 
 1. `/context/components.md` → implementación exacta — **última palabra siempre**
 2. `/context/design-system.md` → tokens y principios visuales
@@ -31,46 +22,17 @@ Cuando hay conflicto entre documentos, el orden de autoridad es:
 
 ---
 
-## Reglas generales
+## Lecturas condicionales (después de kick-off)
 
-- No inventar un sistema visual nuevo. Todo está definido en `design-system.md` y `components.md`.
-- No tomar decisiones de diseño no documentadas. Si algo no está en los archivos, preguntar.
-- Siempre indicar la ruta completa del archivo al generar código.
-- Respetar el aislamiento de roles: cada usuario ve solo su información.
-- El sistema es de visibilidad, no operativo. No generar flujos de acción sobre la red.
+| Condición | Archivo |
+|-----------|---------|
+| Fila superior Performance, `ParkDetailsCard`, `*_TOP_ROW_GRID` | `/flows/performance/about-performance-layout.md` |
+| Montos, toggles DOLAR/ARS, labels monetarios | `/lib/format-currency.ts` + `/context/components.md` → FormatCurrency |
+| ROI GDD — datos de maqueta Parque General Roca | `/flows/GDD/roi-spec.md` |
+| Integración backend / reemplazo de mocks | `/BACKEND_INTEGRATION.md` |
 
-## Reglas de color
-
-- `--primary` (Zinc 900) → solo en botones primarios, CTAs, focus ring.
-- `--chart-1` a `--chart-5` → exclusivo para visualizaciones de datos.
-- Estados semánticos (success/warning/error/info) → solo cuando hay un estado real que comunicar.
-- Nunca hardcodear valores hex en componentes. Siempre referenciar tokens CSS.
-- El fondo del shell principal (Main content) usa `bg-background-subtle` (token `--background-subtle`).
-  Las cards usan `bg-white` (`--background`). Nunca invertir esto.
-
-## Reglas de componentes
-
-- Antes de crear cualquier componente, verificar si existe spec en `components.md`.
-- Si existe spec en `components.md` → usar ese spec exacto, sin interpretación.
-- Si no existe spec → mapear a shadcn/ui nativo antes de crear uno custom.
-- **Spacing responsivo (mobile):** Elementos wrapper de primer nivel usan `gap-4 sm:gap-6` y `p-4 sm:p-6` para optimizar mobile. Ver `design-system.md` → "Spacing Responsivo en Mobile — Wrappers de Primer Nivel".
-- Charts: separación obligatoria `chartData / chartConfig / chartComponent`.
-- Navegación: siempre `next/link`, nunca `<a href>` para rutas internas.
-- Íconos: solo `lucide-react`, no mezclar librerías.
-
-## Reglas de output
-
-- Todo archivo generado debe incluir su ruta completa como comentario en la primera línea.
-- Ejemplo: `// app/dashboard/page.tsx`
-- Props siempre tipadas en TypeScript. No usar `any`.
-- Un componente por archivo.
-
-## Reglas técnicas
-
-- Assets (logos, imágenes): guardar en `/public/images`, referenciar como `/images/[archivo]`
-- Usar Next.js Image component para optimización automática.
+---
 
 ## Criterio de éxito
 
-Un developer debe poder agregar una nueva vista al producto sin tomar
-ninguna decisión de diseño. Todo debe estar resuelto por el sistema.
+Un developer debe poder agregar una nueva vista al producto sin tomar ninguna decisión de diseño. Todo debe estar resuelto por el sistema documentado en `context/`.

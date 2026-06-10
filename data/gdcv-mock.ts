@@ -14,8 +14,11 @@ export const gdcvParkName = "Parque Río Cuarto"
 /** Capacidad total instalada del parque GDCV (kWp). Fuente única de verdad para cálculos de porcentaje. */
 export const GDCV_TOTAL_POTENCIA = 980
 
-/** Inicio de operaciones — Parque Río Cuarto (GDCV). */
+/** Valor — fecha de inicio de operaciones, Parque Río Cuarto (GDCV). */
 export const gdcvOperationsStartLabel = "Marzo 2024"
+
+/** Label canónico — ParkDetailsCard, KPIs y FeatureItem del parque GDCV. */
+export const GDCV_OPERATIONS_START_METRIC_LABEL = "Fecha de Inicio"
 
 /** Datos de la card de detalle del parque (GDCV Performance — columna 1/3). */
 export const gdcvParkDetails = {
@@ -25,7 +28,10 @@ export const gdcvParkDetails = {
     { label: "Cap. Instalada", value: "980 kWp" },
     { label: "Potencia Acople", value: "815 kWp" },
     { label: "Equipo", value: "Canadian Solar HiKu7 655W" },
-    { label: "Inicio de operaciones", value: gdcvOperationsStartLabel },
+    {
+      label: GDCV_OPERATIONS_START_METRIC_LABEL,
+      value: gdcvOperationsStartLabel,
+    },
   ],
 } as const
 
@@ -276,7 +282,10 @@ export const gdcvRoiMetrics = {
 
 export const gdcvSecondaryMetrics = {
   tir: { label: "TIR (actualizada)", value: "18.5%" },
-  inicioOperaciones: { label: "Inicio de operaciones", value: "Marzo 2024" },
+  inicioOperaciones: {
+    label: GDCV_OPERATIONS_START_METRIC_LABEL,
+    value: gdcvOperationsStartLabel,
+  },
   kpi4: { label: "KPI [4]", value: "Valor de KPI [4]" },
 }
 

@@ -209,39 +209,7 @@ Ver `context/product-context.md` para detalles completos.
 
 ## 8. Convenciones de Código
 
-### TypeScript
-- ✅ Strict mode siempre
-- ✅ Props tipadas, sin `any`
-- ✅ Enums para valores fijos (ej: ProjectType, Currency)
-
-### Componentes
-- ✅ Un componente por archivo (PascalCase)
-- ✅ Props interface clara
-- ✅ Valores default explícitos
-- ✅ Sin CSS inline (solo Tailwind)
-- ✅ Colores siempre desde tokens CSS (`var(--color-*)`), nunca hex directo
-
-### Navegación Interna
-- ✅ `next/link` siempre (no `<a href>`)
-- ✅ No hardcodear rutas (si cambian, update en un lugar)
-
-### Datos & Formatos
-- ✅ Energía: usar `lib/format-energy.ts` (parseKwhDisplay, parseKwpDisplay)
-- ✅ Moneda: usar `lib/format-currency.ts` (ARS/USD)
-- ✅ Casing SI: `kWh`, `kWp`, `kW` (nunca `Kwh`)
-- ✅ Fechas: ISO format `YYYY-MM` para datos energéticos
-
-### Charts
-- ✅ Separación: `chartData` / `chartConfig` / `<Component>`
-- ✅ Colors desde `data/chart-config.ts` (nunca hardcode)
-- ✅ Ticks uniformes en ejes X (ver `ROIProjectionChart.tsx` como ref)
-
-### Tablas
-- ✅ TanStack Table (no custom tables)
-- ✅ Consolidar parsing functions en `lib/format-energy.ts`
-- ✅ Sorting/filtering lógica en columnas (`Column.sortingFn`)
-
-Ver `engineering/tech-stack.md` § Convenciones de Código para detalles.
+Ver `engineering/tech-stack.md` §3 Convenciones de Código y `context/kick-off.md` §4 Reglas no negociables (UI, tokens, TypeScript).
 
 ---
 
@@ -315,13 +283,12 @@ GDCV Socio:     /gdcv/socio/acceso?socio=AS + OTP: 4904 (medidor: 354904)
 | **BACKEND_INTEGRATION.md** | Mapa: mocks → APIs | Root |
 | **README.md** | Quick start + project status | Root |
 
-**Orden de lectura recomendado:**
+**Orden de lectura recomendado (ingeniero backend):**
 1. Este archivo (HANDOFF.md) ← estás acá
-2. `context/kick-off.md` (60 seg)
-3. `context/product-context.md` (modelos)
-4. `BACKEND_INTEGRATION.md` (mocks mapping)
-5. `engineering/tech-stack.md` (convenciones)
-6. `context/design-system.md` + `context/components.md` (si tocas UI)
+2. `BACKEND_INTEGRATION.md` (mocks → APIs)
+3. `engineering/tech-stack.md` (convenciones de código)
+
+**Agentes / UI:** usar `context/kick-off.md` como punto de entrada único.
 
 ---
 

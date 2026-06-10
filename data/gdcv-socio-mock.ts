@@ -3,7 +3,11 @@ import {
   getChartRangeSubtitle,
   sliceChartRangeSeries,
 } from "@/lib/chart-range-resolve"
-import { gdcvParkDetails, GDCV_ENERGY_MONTHLY_CANONICAL } from "@/data/gdcv-mock"
+import {
+  gdcvParkDetails,
+  GDCV_ENERGY_MONTHLY_CANONICAL,
+  GDCV_OPERATIONS_START_METRIC_LABEL,
+} from "@/data/gdcv-mock"
 import {
   getDailyGenerationData24,
   getDailyPeak,
@@ -332,7 +336,10 @@ export const socioRoiMetrics = {
 
 export const socioRoiSecondaryMetrics = {
   tir: { label: "TIR (actualizada)", value: "18.5%" },
-  inicioOperaciones: { label: "Inicio de operaciones", value: socioOperationsStartLabel },
+  inicioOperaciones: {
+    label: GDCV_OPERATIONS_START_METRIC_LABEL,
+    value: socioOperationsStartLabel,
+  },
 }
 
 /** KPIs numéricos + timeline — `SocioRoiView` (misma forma que `gddRoiKpis` / `gdcvRoiKpis`). */

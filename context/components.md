@@ -69,18 +69,20 @@
 ### Drill-down y Sheets
 40. [Sheet — drill-down y anchos](#sheet--drill-down-y-anchos) — tres perfiles (detail / notifications / table)
 41. [SheetOps — composición](#sheetops--composición-drill-down) — recetas listas: SheetContentTable, SheetContentDetail
+42. [SociosTable](#sociostable) — tabla socios AGC + sheet intermedio N medidores
+43. [SocioDetailSheet](#sociodetailsheet) — detalle socio AGC + drill-down por medidor
 
 ### Feedback y Alertas
-42. [HinsTooltip](#hinstooltip) — tooltip custom con delay y contenido rico
-43. [HinsAlert](#hinsalert) — alerta contextual (warning/info/success/error), sin ícono ni dismiss
+44. [HinsTooltip](#hinstooltip) — tooltip custom con delay y contenido rico
+45. [HinsAlert](#hinsalert) — alerta contextual (warning/info/success/error), sin ícono ni dismiss
 
 ### Vistas y Páginas
-44. [PageHeader](#pageheader) — header de página con H1 + breadcrumb + acciones
-45. [SocioAccessView](#socioaccessview) — pantalla OTP de acceso socio (`/gdcv/socio/acceso`)
+46. [PageHeader](#pageheader) — header de página con H1 + breadcrumb + acciones
+47. [SocioAccessView](#socioaccessview) — pantalla OTP de acceso socio (`/gdcv/socio/acceso`)
 
 ### Helpers y Utilidades
-46. [FormatCurrency](#formatcurrency) — ARS/USD, modos full/compact/axis, locale `es-AR`
-47. [FormatEnergy](#formatenergy--unidades-energéticas) — kWh/kWp/kW, casing SI, locale `es-AR`
+48. [FormatCurrency](#formatcurrency) — ARS/USD, modos full/compact/axis, locale `es-AR`
+49. [FormatEnergy](#formatenergy--unidades-energéticas) — kWh/kWp/kW, casing SI, locale `es-AR`
 
 ---
 
@@ -4449,7 +4451,7 @@ Tabla TanStack de recupero de inversión con dos variantes (**Proyectado** / **H
 - Datos mock en USD numérico (`data/gdd-roi-mock.ts`, `data/gdcv-agc-mock.ts`); nunca strings `"$38.000.000"` en mocks ROI.
 - Reutilizar este componente en GDD y GDCV; no duplicar tabla.
 - Socio (`SocioRoiView`): `layout="embedded"`, `showColumnVisibility={false}`; título vía `SheetContentTable`. La moneda es un tab **clickeable** dentro de la toolbar (`onCurrencyChange={handleCurrencyChange}`), junto a Proyectado \| Histórico — convierte los valores y sincroniza `?currency=` (única fuente de verdad, igual que `/gdcv/roi`). **No** usar `CurrencyContextIndicator` solo-lectura en `headerAction` para este caso.
-- Flows: `flows/GDD/data-roi.md`, `flows/GDD/flow.md`, `flows/GDCV-agc/GDCV_flow.md`, `flows/GDCV-socio/GDCV_socio_flow.md`.
+- Flows: `flows/GDD/roi-spec.md`, `flows/GDD/flow.md`, `flows/GDCV-agc/GDCV_flow.md`, `flows/GDCV-socio/GDCV_socio_flow.md`.
 
 ---
 
@@ -4587,7 +4589,7 @@ Ver también [SheetOps — composición drill-down](#sheetops--composición-dril
 
 | Export | Rol |
 |---|---|
-| `SheetOpsHeader` | Título + `action?` + `SheetClose` (`bordered` \| `detail`) |
+| `SheetOpsHeader` | Título + `action?` + `onBack?` + `SheetClose` (`bordered` \| `detail`) |
 | `SheetOpsNotificationsHeader` | Título + `SheetDescription` (sin icon cerrar) |
 | `SheetOpsScroll` | Scroll con padding OPS (`px-6 py-4`) |
 | `SheetOpsFooter` | «Cerrar» `outline` `w-full` `shadow-xs` |
@@ -4605,6 +4607,31 @@ Ver también [SheetOps — composición drill-down](#sheetops--composición-dril
 | `SheetContentTable` | `contentClassName` | — | Override de ancho `sm+` (misma forma `data-[side=*]:sm:max-w-*`) |
 | `SheetContentDetail` | `scrollVariant` | `"padded"` | `"flush"` cuando el hijo lleva `p-6 pt-0` (CardWire, charts en sheet) |
 | `SheetContentDetail` | `showFooter` | `true` | `false` en placeholders sin acción de cierre inferior |
+| `SheetContentDetail` | `onBack` | — | Callback opcional — icon button `<` (`ChevronLeft`) a la **izquierda** del [x]. Solo cuando hay sheet superior (drill-down en dos niveles). Ver § SociosTable / § SocioDetailSheet |
+
+### `onBack` — volver a sheet superior
+
+| Elemento | Spec |
+|---|---|
+| Cuándo | Drill-down en **dos niveles** (ej. lista medidores → detalle socio por medidor) |
+| Cuándo NO | Apertura directa desde fila de tabla (un medidor, mantenimiento, ROI) |
+| Botón | `Button` `variant="outline"` `size="icon"` `size-8` `shadow-xs` |
+| Ícono | `ChevronLeft` `size-4` — `lucide-react` |
+| `aria-label` | `"Volver"` |
+| Posición | Grupo `[onBack?] [SheetClose]` alineado a la derecha del header, `gap-2` |
+| Comportamiento | Cierra sheet actual y restaura sheet superior — **no** navegar con `router.back()` |
+
+```tsx
+<SheetContentDetail
+  open={open}
+  onOpenChange={onOpenChange}
+  title={socio.nombre}
+  scrollVariant="flush"
+  onBack={selectedMedidor ? handleBackToMedidores : undefined}
+>
+  {/* … */}
+</SheetContentDetail>
+```
 
 ### Ejemplo — detalle (`SocioDetailSheet`)
 
@@ -4637,6 +4664,149 @@ Ver también [SheetOps — composición drill-down](#sheetops--composición-dril
 
 ---
 
+## SociosTable
+
+**Archivo:** `/components/gdcv/SociosTable.tsx`  
+**Vista:** `/components/gdcv/GdcvPerformanceView.tsx` — ruta `/gdcv/performance`  
+**Estado:** ✅ Prototipo GDCV AGC  
+**UX:** `ux-guidelines.md` §3 — drill-down en dos niveles  
+**Dependencias:** TanStack Table, `SheetContentDetail`, `PeriodSelector`, mock `sociosMock`
+
+### Cuándo usar
+
+- Tabla **Socios del Parque** en vista Performance AGC (`GDCV_admin_01`).
+- Listado de socios con medidor, participación, energía y ahorro del período.
+
+### Cuándo NO usar
+
+- Flow Socio (`/gdcv/socio/*`) — el socio no ve esta tabla.
+- Como sustituto de `SocioDetailSheet` — el detalle va en sheet aparte.
+
+### Columnas — tabla principal
+
+| id | Header | Notas |
+|---|---|---|
+| `socio` | Socio | Avatar + nombre; badge Virtual si aplica; sticky mobile |
+| `medidor` | Medidor | Ver reglas multi-medidor abajo |
+| `participacion` | Participación (%) | Sin `%` duplicado en celda si ya viene en dato |
+| `potenciaAsociada` | Potencia Asociada | kWp, `tabular-nums` |
+| `energiaGenerada` | Energía Generada | kWh |
+| `ahorroGenerado` | Ahorro Generado | `formatCurrency` |
+| `actions` | — | Menú `⋮` (Descargar, Copiar, Compartir) |
+
+### Regla — celda Medidor (multi vs single)
+
+| Caso | Celda | Click en fila |
+|---|---|---|
+| **1 medidor** | N° de medidor (`tabular-nums`, muted) | Abre `SocioDetailSheet` |
+| **+1 medidor** | `{n} Medidores >` — `inline-flex gap-1`; número en `tabular-nums` | Abre sheet intermedio (no detalle) |
+
+Mock multi-medidor: **Agro Sur Industrial** (`id: "AS"`) — medidores `354904`, `354906`.
+
+### Sheet intermedio — `{nombre} > Medidores`
+
+**Componente:** `SheetContentDetail` (`scrollVariant="flush"`, `showFooter={false}` implícito vía tabla).  
+**Título:** `{Nombre socio} > Medidores` — no usar guión largo (`—`).
+
+**Columnas (solo esta vista):**
+
+| Orden | Header | Celda |
+|---|---|---|
+| 1 | Medidor | **Text link** — `button` `underline underline-offset-2` `font-medium` `text-foreground` |
+| 2 | Potencia | `tabular-nums` |
+| 3 | Energía | `tabular-nums` |
+| 4 | Participación | `tabular-nums` |
+
+**Footer:** fila `Total` con sumas del socio en Potencia, Energía, Participación. Sin columna Ahorro.
+
+**Click en N° medidor:** `onMedidorClick(socio, medidor)` → cierra intermedio → abre `SocioDetailSheet` con `selectedMedidor`.
+
+### Props públicas
+
+| Prop | Tipo | Requerido | Uso |
+|---|---|---|---|
+| `data` | `SocioRow[]` | ✅ | Filas del período |
+| `onRowClick` | `(socio) => void` | ✅ | Fila con 1 medidor → detalle |
+| `onMedidorClick` | `(socio, medidor) => void` | ❌ | Text link en sheet intermedio |
+| `medidoresSheetSocio` | `SocioRow \| null` | ❌ | Control del sheet intermedio (para `onBack`) |
+| `onMedidoresSheetOpenChange` | `(socio \| null) => void` | ❌ | Par controlado de `medidoresSheetSocio` |
+
+Si `onMedidoresSheetOpenChange` está definido, el estado del sheet intermedio es **controlado** por la vista padre (`GdcvPerformanceView`).
+
+### Notas para el agente
+
+- No hacer clickeable toda la fila del sheet intermedio — solo el N° de medidor.
+- Compartir socio demo: menú `⋮` → Compartir solo fila `AS` → `/gdcv/socio/acceso?socio=AS`.
+- Documentación de flujo: `flows/GDCV-agc/GDCV_flow.md` — `GDCV_admin_01b`, `GDCV_admin_02`.
+
+---
+
+## SocioDetailSheet
+
+**Archivo:** `/components/gdcv/SocioDetailSheet.tsx`  
+**Vista:** `/components/gdcv/GdcvPerformanceView.tsx`  
+**Estado:** ✅ Prototipo GDCV AGC  
+**UX:** `ux-guidelines.md` §3  
+**Dependencias:** `SheetContentDetail`, `CardWire`, `FeatureItem`, `StatList`, `Alert`
+
+### Cuándo usar
+
+- Detalle de un socio en vista Performance AGC (`GDCV_admin_02`).
+- Trigger: fila con un medidor, o N° de medidor en sheet intermedio.
+
+### Props públicas
+
+| Prop | Tipo | Requerido | Uso |
+|---|---|---|---|
+| `socio` | `SocioRow \| null` | ✅ | Entidad; `null` → no render |
+| `open` | `boolean` | ✅ | Estado del sheet |
+| `onOpenChange` | `(open) => void` | ✅ | Cierre por [x] o footer |
+| `selectedMedidor` | `MedidorDetalle \| null` | ❌ | Datos del medidor puntual (desde sheet intermedio) |
+| `onBack` | `() => void` | ❌ | Volver al sheet `{nombre} > Medidores` — solo si `selectedMedidor` activo |
+
+### Resolución de datos
+
+| Origen | Fuente de detalle |
+|---|---|
+| Sin `selectedMedidor` | `DETAIL_MAP[socio.id]` o `fallbackDetail(socio)` |
+| Con `selectedMedidor` | `detailFromMedidor(socio, selectedMedidor)` — participación, potencia, energía y ahorro del **medidor**, no del agregado del socio |
+
+### Header del sheet
+
+| Elemento | Valor |
+|---|---|
+| Título | `socio.nombre` |
+| `onBack` | Presente solo si `onBack` prop definida (vista padre: cuando `selectedMedidor !== null`) |
+| Cerrar | [x] outline — cierra sin reabrir intermedio |
+
+### Contenido (orden)
+
+1. `Alert` warning si `socio.tipo === "Virtual"`.
+2. Grid 2 cols: `FeatureItem` vertical — Nº de Medidor | Participación (%).
+3. `CardWire`: Energía generada (mes), Autoconsumo / Inyectada + barra %, Ahorro Generado.
+4. `StatList` «Más información del socio» — sin «Porcentaje P. Asociada».
+
+### Ejemplo — con volver desde medidor
+
+```tsx
+<SocioDetailSheet
+  socio={selectedSocio}
+  selectedMedidor={selectedMedidor}
+  open={sheetOpen}
+  onOpenChange={handleDetailOpenChange}
+  onBack={selectedMedidor ? handleBackToMedidores : undefined}
+/>
+```
+
+`handleBackToMedidores`: `setSheetOpen(false)`, `setSelectedMedidor(null)`, `setMedidoresSheetSocio(selectedSocio)`.
+
+### Notas para el agente
+
+- No mostrar `onBack` en aperturas directas desde tabla (1 medidor).
+- Reutilizar tokens de energía (`--energy-autoconsumo`, `--energy-inyectada`) en barra de distribución.
+- Flow: `flows/GDCV-agc/GDCV_flow.md` — `GDCV_admin_02`.
+
+---
 
 ## PageHeader
 

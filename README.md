@@ -8,14 +8,10 @@ Stack: Next.js App Router, shadcn/ui, TanStack Table, Recharts.
 
 ---
 
-## Documentación del producto (orden de lectura)
+## Documentación
 
-1. [`context/product-context.md`](context/product-context.md) — usuarios, RBAC, reglas de negocio  
-2. [`context/design-system.md`](context/design-system.md) — tokens y principios visuales  
-3. [`context/components.md`](context/components.md) — specs de implementación (**última palabra**)  
-4. [`context/ux-guidelines.md`](context/ux-guidelines.md) — patrones UX (⚠️ ver tech debt)  
-5. [`engineering/tech-stack.md`](engineering/tech-stack.md) — stack y convenciones  
-6. [`flows/`](flows/) — flujo por actor/pantalla  
+**Agentes / Cursor:** empezar en [`context/kick-off.md`](context/kick-off.md) — orden de lectura, reglas y precedencia.  
+**Humanos / onboarding:** este README (estado del proyecto) + [`HANDOFF.md`](HANDOFF.md) (ingeniero) + [`BACKEND_INTEGRATION.md`](BACKEND_INTEGRATION.md) (APIs).
 
 ---
 

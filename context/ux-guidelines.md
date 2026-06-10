@@ -72,6 +72,31 @@ No duplicar título: en sheets de tabla el título va en `SheetTitle`, no en un 
 
 **Implementación:** `lib/sheet-layout.ts`, `components/ui/sheet-ops.tsx` (`SheetContentTable`, `SheetContentDetail`, `SheetOpsNotificationsHeader`, …). Spec: `components.md` § Sheet + § SheetOps. Demo: `/app/dev/components`.
 
+### Drill-down en dos niveles (multi-medidor)
+
+Cuando una entidad de tabla agrupa **varios ítems homogéneos** (ej. un socio con N medidores), usar **dos sheets secuenciales** en lugar de abrir el detalle final directo:
+
+| Nivel | Trigger | Sheet | Título |
+|-------|---------|-------|--------|
+| 1 | Click en fila (socio con +1 medidor) | Intermedio — lista de medidores | `{Nombre socio} > Medidores` |
+| 2 | Click en N° de medidor (text link) | Detalle — `SocioDetailSheet` | Nombre del socio |
+
+**Reglas UX:**
+
+- Fila con **un solo medidor** → nivel 1 se omite; la fila abre `SocioDetailSheet` directo (mismo patrón que mantenimiento u otras tablas).
+- Celda **Medidor** en tabla principal (multi): `{n} Medidores >` — número y texto separados (`inline-flex gap-1`); el `>` indica drill-down.
+- Celda **N° de medidor** en sheet intermedio: **text link** (`underline`, `font-medium`) — no fila clickeable entera.
+- Al abrir detalle desde medidor, **cerrar** el sheet intermedio (un solo sheet visible).
+- **Volver:** en `SocioDetailSheet`, si el usuario llegó desde el intermedio, mostrar icon button `<` (`ChevronLeft`, outline, junto al [x]) — **no** en aperturas directas desde tabla.
+- Tap en `<` → cierra detalle y **reabre** el sheet intermedio del mismo socio.
+- Tap en [x] → cierra detalle **sin** reabrir intermedio.
+
+**Columnas del sheet intermedio (solo esta vista):** Medidor | Potencia | Energía | Participación — footer con fila Total en el mismo orden. Sin columna Ahorro.
+
+**Estado:** el sheet intermedio puede controlarse desde la vista padre (`medidoresSheetSocio` + `onMedidoresSheetOpenChange`) para soportar el botón volver.
+
+**Implementación:** `SociosTable`, `SocioDetailSheet`, `GdcvPerformanceView`; props `onBack` en `SheetContentDetail` / `SheetOpsHeader`. Spec: `components.md` § SociosTable, § SocioDetailSheet, § SheetOps.
+
 ---
 
 ## 4. Navegación

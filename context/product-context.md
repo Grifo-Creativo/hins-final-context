@@ -275,7 +275,7 @@ HINS (Admin Global — superadministrador)
 - Ver el crédito total generado para el período y el promedio por socio.
 - Ver la performance del parque (real vs. esperado).
 - Identificar los socios del parque, su participación y tipo (con/sin cargo de potencia).
-- Acceder al detalle individual de cualquier socio.
+- Acceder al detalle individual de cualquier socio — y, si el socio tiene **varios medidores**, al desglose por N° de medidor (drill-down en dos niveles; ver `flows/GDCV-agc/GDCV_flow.md` `GDCV_admin_01b`).
 - Ver el ROI del parque completo.
 - Consultar el historial de mantenimiento del parque (tareas y costos por período).
 
@@ -392,7 +392,7 @@ flows/
 | GDD | Dueño del Parque GDD | GDD_01, GDD_02 | ✅ Construido |
 | main | HINS Admin Global | Main_00 | ⏳ Pendiente |
 | GDC | AGC + Socios GDC | — | ⏳ Pendiente |
-| GDCV-agc | AGC GDCV | admin_01, admin_03, **mantenimiento** | ✅ Performance + ROI + Mantenimiento |
+| GDCV-agc | AGC GDCV | admin_01, admin_01b, admin_02, admin_03, **mantenimiento** | ✅ Performance + ROI + Mantenimiento |
 | GDCV-socio | Socio GDCV | socio_00, socio_01, socio_02 | ✅ Construido — **sin** Mantenimiento |
 
 ---

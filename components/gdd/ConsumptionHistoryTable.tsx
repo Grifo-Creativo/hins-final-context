@@ -180,8 +180,8 @@ const columns: ColumnDef<ConsumptionHistoryRow>[] = [
     sortingFn: (rowA, rowB) =>
       parseMoneyDisplay(rowA.original.estimatedSavings) -
       parseMoneyDisplay(rowB.original.estimatedSavings),
-    meta: { label: "Ahorro estimado" },
-    header: ({ column }) => sortableHeader(column, "Ahorro estimado"),
+    meta: { label: "Ahorro generado" },
+    header: ({ column }) => sortableHeader(column, "Ahorro generado"),
     cell: ({ row }) => (
       <span className="tabular-nums">{row.getValue("estimatedSavings")}</span>
     ),

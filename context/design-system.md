@@ -337,48 +337,12 @@ por ese archivo. Las entradas aquí son referencias, no specs de implementación
 | `PeriodSelector` | `/components/ui/period-selector.tsx` | → `components.md` |
 | `Table` | `/components/ui/data-table.tsx` | ⏳ Refactor pendiente |
 | `Sheet` | `/components/ui/sheet.tsx` | Drill-down: `ux-guidelines.md` §3 · OPS: `lib/sheet-layout.ts`, `sheet-ops.tsx` · spec: `components.md` § Sheet |
-| `Button` | shadcn/ui nativo | ver reglas abajo |
+| `Button` | `/components/ui/button.tsx` | → `components.md` § Button |
 | `Badge` | shadcn/ui nativo | usar variante nativa |
 | `Alert` | shadcn/ui nativo | usar semantic states §1 |
 | `HinsAlert` | shadcn/ui Alert nativo | → `components.md` |
 
-### Card — resumen
-- Superficie neutral. `p-0`. El padding lo define el contenido.
-- Un solo tipo. Sin variantes de estilo.
-- **Spec completo:** `components.md`
-
-### KPIs — resumen
-- `KpiPrimary` → dato héroe, **1 por vista**, tipografía 4xl, sparkline edge-to-edge
-- `KpiPrimaryCompact` → variante compacta con sparkline, **N por vista** en grid (misma Card + `shadow-xs`)
-- `KpiSecondary` → datos de soporte sin sparkline (o layout alternativo), N por vista
-- Todos viven dentro de `Card`
-- **Spec completo:** `components.md`
-
-### TabsForBlocks — resumen
-- Único componente de tabs/chips permitido en el producto
-- Fondo contenedor: `bg-stone-200/75` (#E7E5E4 @ 75%)
-- Tab activo: `bg-white shadow-xs`
-- **Spec completo:** `components.md`
-
-### SoftBadge — resumen
-- Shape: `rounded-full`
-- Background: `bg-background-subtle` (token `--background-subtle`)
-- Text: `--foreground`
-- Ícono izquierdo: opcional
-- **Spec completo:** `components.md`
-
-### Botones
-
-**Primary:**
-- Fondo: `--primary` (Zinc 900) / Texto: `--primary-foreground` / Shadow: `shadow-xs`
-- Hover: Zinc 800 (`#27272A`) / Disabled: `opacity-50`
-- NUNCA usar colores de chart en botones
-
-**Secondary:**
-- Fondo: `--background` / Borde: `border border-input` / Shadow: `shadow-xs`
-- Hover: `--accent`
-
-**Regla:** Todos los botones de acción llevan `shadow-xs` — elevación sutil intencional.
+> **Implementación:** cada componente de la tabla tiene spec completa en `context/components.md`. Este índice no duplica reglas de implementación.
 
 ---
 

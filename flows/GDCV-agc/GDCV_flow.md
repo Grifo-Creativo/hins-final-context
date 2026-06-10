@@ -47,24 +47,57 @@ Referencia visual: GDCV__admin_01.png
   - Botón "+ Nuevo Socio"
   - Selector período: "Abril 2026" dropdown
 - Tabla con columnas:
-  - Socio | Medidor | Participación (%) | Energía Generada | Ahorro Generado | acciones (⋮)
+  - Socio | Medidor | Participación (%) | Potencia Asociada | Energía Generada | Ahorro Generado | acciones (⋮)
+- Celda **Medidor**:
+  - Socio con **1 medidor** → N° de medidor
+  - Socio con **+1 medidor** → `{n} Medidores >` (ej. `2 Medidores >`) — indica drill-down
+- Click en fila:
+  - **1 medidor** → abre `GDCV_admin_02` (detalle directo)
+  - **+1 medidor** → abre `GDCV_admin_01b` (sheet intermedio)
 - Badges:
   - Socio "Ferretería Catalán" tiene badge "Virtual" (naranja)
-- Row actions (⋮): acciones placeholder
+- Row actions (⋮): acciones placeholder; **Compartir** en fila demo `AS` (Agro Sur Industrial)
 - Paginación: "Showing 1 to 5 of 25 entries"
-- Mock data: 6 socios visibles
+- Mock data: 6 socios visibles; multi-medidor: Agro Sur Industrial (`354904`, `354906`)
+
+---
+
+### GDCV_admin_01b — Sheet: Medidores del socio (overlay intermedio)
+Trigger: click en fila de socio con **+1 medidor** (ej. Agro Sur Industrial)  
+Implementación: `SociosTable` + `SheetContentDetail`
+
+**Header del sheet:**
+- Título: `{Nombre socio} > Medidores` (ej. `Agro Sur Industrial > Medidores`)
+- Botón cerrar (X) arriba derecha — sin botón volver (es el primer nivel del drill-down)
+
+**Contenido — tabla:**
+- Columnas (orden fijo): **Medidor | Potencia | Energía | Participación**
+- Celda Medidor: **text link** (N° de medidor subrayado)
+- Footer: fila **Total** con agregados del socio en Potencia, Energía, Participación
+- Sin columna Ahorro en esta vista
+
+**Interacciones:**
+- Click en N° de medidor → cierra este sheet → abre `GDCV_admin_02` con datos de **ese medidor**
+- [X] → cierra sin abrir detalle
 
 ---
 
 ### GDCV_admin_02 — Sheet: Detalle de Socio (overlay)
-Trigger: click en row de tabla "Socios del Parque"
+Trigger:
+- Click en fila de socio con **1 medidor**, o
+- Click en N° de medidor dentro de `GDCV_admin_01b`
 Referencia visual: GDCV__admin_02.png
 
 **Header del sheet:**
 - Nombre del socio: "Ferretería Catalán"
-- Badge: "Socio Virtual" — naranja
-- Botón cerrar (X) arriba derecha
+- Badge: "Socio Virtual" — naranja (en contenido, `Alert` warning)
+- Botones header (derecha):
+  - **Volver** (`<`, `ChevronLeft`) — **solo** si se abrió desde `GDCV_admin_01b`; reabre sheet medidores del mismo socio
+  - **Cerrar** (X) — cierra detalle sin reabrir intermedio
 - Copy corta: "Dispone de Autoconsumo y Crédito por Inyección a red."
+
+**Datos cuando viene de medidor puntual (`GDCV_admin_01b`):**
+- N° de Medidor, Participación, Energía y Ahorro del **medidor seleccionado** — no del agregado del socio
 
 **Contenido:**
 - Row 1: "N° de Medidor" | 3551118 | gap | "Participación (%)" | 25%
@@ -134,6 +167,10 @@ Mar 2024       May 2026         Mar 2030
 
 - Tab "Performance del Parque" → `/gdcv/performance`
 - Tab "Retorno de Inversión" → `/gdcv/roi` (esta vista)
+- Fila socio **1 medidor** → `GDCV_admin_02` directo
+- Fila socio **+1 medidor** → `GDCV_admin_01b` → text link medidor → `GDCV_admin_02` (scoped al medidor)
+- `<` en `GDCV_admin_02` (solo desde 01b) → vuelve a `GDCV_admin_01b`
+- [X] en `GDCV_admin_02` → cierra detalle (no restaura 01b)
 - Tooltip en nodo "Hoy" del timeline → `"May 2026 · 2.2 Años"` (vía `formatPaybackTooltipText`)
 - Botón export: acción placeholder
 

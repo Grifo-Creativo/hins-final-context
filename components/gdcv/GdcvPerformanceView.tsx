@@ -22,6 +22,7 @@ import {
   getGdcvEnergyChartSubtitle,
   getGdcvEnergySeries,
   sociosMock,
+  type MedidorDetalle,
   type SocioRow,
 } from "@/data/gdcv-mock"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
@@ -40,7 +41,12 @@ export function GdcvPerformanceView() {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
   const [activeDay, setActiveDay] = useState<Date>(MOCK_TODAY)
   const [selectedSocio, setSelectedSocio] = useState<SocioRow | null>(null)
+  const [selectedMedidor, setSelectedMedidor] = useState<MedidorDetalle | null>(
+    null
+  )
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [medidoresSheetSocio, setMedidoresSheetSocio] =
+    useState<SocioRow | null>(null)
 
   const chartData = useMemo(
     () => (chartRange === "1d" ? [] : getGdcvEnergySeries(chartRange)),
@@ -69,7 +75,28 @@ export function GdcvPerformanceView() {
 
   function handleRowClick(socio: SocioRow) {
     setSelectedSocio(socio)
+    setSelectedMedidor(null)
     setSheetOpen(true)
+  }
+
+  function handleMedidorClick(socio: SocioRow, medidor: MedidorDetalle) {
+    setSelectedSocio(socio)
+    setSelectedMedidor(medidor)
+    setSheetOpen(true)
+  }
+
+  function handleDetailOpenChange(open: boolean) {
+    setSheetOpen(open)
+    if (!open) {
+      setSelectedMedidor(null)
+    }
+  }
+
+  function handleBackToMedidores() {
+    if (!selectedSocio) return
+    setSheetOpen(false)
+    setSelectedMedidor(null)
+    setMedidoresSheetSocio(selectedSocio)
   }
 
   return (
@@ -145,13 +172,21 @@ export function GdcvPerformanceView() {
       </div>
 
       {/* Socios del Parque table */}
-      <SociosTable data={sociosMock} onRowClick={handleRowClick} />
+      <SociosTable
+        data={sociosMock}
+        onRowClick={handleRowClick}
+        onMedidorClick={handleMedidorClick}
+        medidoresSheetSocio={medidoresSheetSocio}
+        onMedidoresSheetOpenChange={setMedidoresSheetSocio}
+      />
 
       {/* Socio detail sheet */}
       <SocioDetailSheet
         socio={selectedSocio}
+        selectedMedidor={selectedMedidor}
         open={sheetOpen}
-        onOpenChange={setSheetOpen}
+        onOpenChange={handleDetailOpenChange}
+        onBack={selectedMedidor ? handleBackToMedidores : undefined}
       />
     </div>
   )

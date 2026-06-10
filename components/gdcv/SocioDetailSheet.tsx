@@ -7,8 +7,7 @@ import { FeatureItem } from "@/components/ui/feature-item"
 import { IconBadge } from "@/components/ui/icon-badge"
 import { SheetContentDetail } from "@/components/ui/sheet-ops"
 import { StatList, type StatListItem } from "@/components/ui/stat-list"
-import type { SocioRow } from "@/data/gdcv-mock"
-import { GDCV_TOTAL_POTENCIA } from "@/data/gdcv-mock"
+import type { MedidorDetalle, SocioRow } from "@/data/gdcv-mock"
 import { formatCurrency } from "@/lib/format-currency"
 import { ParkingMeter, PlugZap } from "lucide-react"
 
@@ -61,19 +60,45 @@ const DETAIL_MAP: Record<
   },
 }
 
-/** Fallback detail derived from the table row for socios without static data. */
-function fallbackDetail(socio: Socio) {
-  const kwh = parseFloat(socio.energiaGenerada.replace(/[^0-9.]/g, "")) || 0
+type SocioDetailData = {
+  descripcion: string
+  medidor: string
+  participacion: string
+  potenciaAsociada: string
+  porcentajePotencia: string
+  energiaGeneradaKwh: string
+  energiaGeneradaMes: string
+  autoconsumoVirtual: string
+  inyectada: string
+  autoconsumoKwh: number
+  inyectadaKwh: number
+  totalKwh: number
+  ahorroGenerado: string
+  potenciaUtilizada: string
+  fechaDeAlta: string
+  nombreResponsable: string
+  telefonoContacto: string
+  ahorroEmisiones: string
+}
+
+function buildEnergyDetail(
+  energiaGenerada: string,
+  medidor: string,
+  participacion: string,
+  potenciaAsociada: string,
+  ahorroGenerado: string,
+  descripcion: string
+): SocioDetailData {
+  const kwh = parseFloat(energiaGenerada.replace(/[^0-9.]/g, "")) || 0
   const auto = Math.round(kwh * 0.68 * 10) / 10
   const inj = Math.round((kwh - auto) * 10) / 10
-  const potenciaKwp = parseFloat(socio.potenciaAsociada.replace(/[^0-9.]/g, "")) || 0
-  const porcentajePotencia = (potenciaKwp / GDCV_TOTAL_POTENCIA * 100).toFixed(1)
+
   return {
-    descripcion: "Dispone de Autoconsumo Virtual del parque.",
-    medidor: socio.medidor,
-    participacion: socio.participacion,
-    potenciaAsociada: socio.potenciaAsociada,
-    porcentajePotencia: porcentajePotencia + "%",
+    descripcion,
+    medidor,
+    participacion,
+    potenciaAsociada,
+    porcentajePotencia: participacion,
     energiaGeneradaKwh: String(kwh),
     energiaGeneradaMes: "Abril 2026",
     autoconsumoVirtual: `${auto} kWh`,
@@ -81,7 +106,7 @@ function fallbackDetail(socio: Socio) {
     autoconsumoKwh: auto,
     inyectadaKwh: inj,
     totalKwh: kwh,
-    ahorroGenerado: socio.ahorroGenerado,
+    ahorroGenerado,
     potenciaUtilizada: "NN kWh",
     fechaDeAlta: "NN",
     nombreResponsable: "NN",
@@ -90,10 +115,34 @@ function fallbackDetail(socio: Socio) {
   }
 }
 
-function buildInfoItems(detail: ReturnType<typeof fallbackDetail>): StatListItem[] {
+/** Fallback detail derived from the table row for socios without static data. */
+function fallbackDetail(socio: Socio): SocioDetailData {
+  return buildEnergyDetail(
+    socio.energiaGenerada,
+    socio.medidor,
+    socio.participacion,
+    socio.potenciaAsociada,
+    socio.ahorroGenerado,
+    "Dispone de Autoconsumo Virtual del parque."
+  )
+}
+
+function detailFromMedidor(socio: Socio, medidor: MedidorDetalle): SocioDetailData {
+  return buildEnergyDetail(
+    medidor.energiaGenerada,
+    medidor.numero,
+    medidor.participacion,
+    medidor.potenciaAsociada,
+    medidor.ahorroGenerado,
+    socio.tipo === "Virtual"
+      ? "Dispone de Autoconsumo y Crédito por Inyección a red."
+      : "Dispone de Autoconsumo Virtual del parque."
+  )
+}
+
+function buildInfoItems(detail: SocioDetailData): StatListItem[] {
   return [
     { name: "Potencia Asociada", value: detail.potenciaAsociada },
-    { name: "Porcentaje P. Asociada", value: detail.porcentajePotencia },
     { name: "Fecha de alta", value: detail.fechaDeAlta },
     { name: "Nombre del responsable", value: detail.nombreResponsable },
     { name: "Teléfono de contacto", value: detail.telefonoContacto },
@@ -103,18 +152,26 @@ function buildInfoItems(detail: ReturnType<typeof fallbackDetail>): StatListItem
 
 interface SocioDetailSheetProps {
   socio: Socio | null
+  /** Medidor puntual (sheet intermedio de socios con +1 medidor). */
+  selectedMedidor?: MedidorDetalle | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Volver al sheet intermedio de medidores (solo si se abrió desde ahí). */
+  onBack?: () => void
 }
 
 export function SocioDetailSheet({
   socio,
+  selectedMedidor = null,
   open,
   onOpenChange,
+  onBack,
 }: SocioDetailSheetProps) {
   if (!socio) return null
 
-  const detail = DETAIL_MAP[socio.id] ?? fallbackDetail(socio)
+  const detail = selectedMedidor
+    ? detailFromMedidor(socio, selectedMedidor)
+    : (DETAIL_MAP[socio.id] ?? fallbackDetail(socio))
   const autoconsumoPercent = Math.round((detail.autoconsumoKwh / detail.totalKwh) * 100)
   const inyectadaPercent = 100 - autoconsumoPercent
   const infoItems = buildInfoItems(detail)
@@ -125,6 +182,7 @@ export function SocioDetailSheet({
       onOpenChange={onOpenChange}
       title={socio.nombre}
       scrollVariant="flush"
+      onBack={onBack}
     >
       <div className="flex flex-col gap-4 sm:gap-6 p-6 pt-0">
               {/* 2. Alert — no tocar */}

@@ -36,7 +36,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { MedidorDetalle, SocioRow } from "@/data/gdcv-mock"
-import { GDCV_TOTAL_POTENCIA } from "@/data/gdcv-mock"
 import { parseKwhDisplay, parsePercentDisplay } from "@/lib/format-energy"
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
@@ -63,6 +62,10 @@ function getInitials(name: string): string {
     .map((w) => w[0])
     .join("")
     .toUpperCase()
+}
+
+function socioHasMultipleMedidores(row: SocioRow): boolean {
+  return (row.medidores?.length ?? 0) > 1
 }
 
 // ─── Parsing helpers ──────────────────────────────────────────────────────────
@@ -141,24 +144,14 @@ const columns: ColumnDef<SocioRow>[] = [
     enableSorting: true,
     meta: { label: "Medidor" },
     header: ({ column }) => sortableHeader(column, "Medidor"),
-    cell: ({ row, table: t }) => {
+    cell: ({ row }) => {
       const medidores = row.original.medidores
-      if (medidores && medidores.length > 1) {
+      if (socioHasMultipleMedidores(row.original) && medidores) {
         return (
-          <button
-            type="button"
-            className="flex items-center gap-1.5 text-sm tabular-nums text-foreground font-medium hover:underline underline-offset-2 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation()
-              ;(t.options.meta as { onOpenMedidores?: (row: SocioRow) => void })
-                ?.onOpenMedidores?.(row.original)
-            }}
-          >
-            {medidores.length} medidores
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden className="text-muted-foreground">
-              <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          <span className="inline-flex items-center gap-1 text-sm font-medium text-foreground">
+            <span className="tabular-nums">{medidores.length}</span>
+            <span>Medidores &gt;</span>
+          </span>
         )
       }
       return (
@@ -193,17 +186,9 @@ const columns: ColumnDef<SocioRow>[] = [
     },
     meta: { label: "Potencia Asociada" },
     header: ({ column }) => sortableHeader(column, "Potencia Asociada"),
-    cell: ({ row }) => {
-      const parseKwp = (value: string): number => {
-        const m = value.match(/[\d]+(?:[.,][\d]+)?/)
-        return m ? parseFloat(m[0].replace(",", ".")) : 0
-      }
-      const potenciaKwp = parseKwp(row.original.potenciaAsociada)
-      const porcentajePotencia = (potenciaKwp / GDCV_TOTAL_POTENCIA * 100).toFixed(1)
-      return (
-        <span className="text-sm tabular-nums">{row.original.potenciaAsociada} ({porcentajePotencia}%)</span>
-      )
-    },
+    cell: ({ row }) => (
+      <span className="text-sm tabular-nums">{row.original.potenciaAsociada}</span>
+    ),
   },
   {
     accessorKey: "energiaGenerada",
@@ -281,12 +266,37 @@ const columns: ColumnDef<SocioRow>[] = [
 interface SociosTableProps {
   data: SocioRow[]
   onRowClick: (socio: SocioRow) => void
+  /** Medidor puntual dentro del sheet intermedio → SocioDetailSheet. */
+  onMedidorClick?: (socio: SocioRow, medidor: MedidorDetalle) => void
+  /** Control opcional del sheet intermedio (para volver desde SocioDetailSheet). */
+  medidoresSheetSocio?: SocioRow | null
+  onMedidoresSheetOpenChange?: (socio: SocioRow | null) => void
 }
 
-export function SociosTable({ data, onRowClick }: SociosTableProps) {
+export function SociosTable({
+  data,
+  onRowClick,
+  onMedidorClick,
+  medidoresSheetSocio,
+  onMedidoresSheetOpenChange,
+}: SociosTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [medidoresSheet, setMedidoresSheet] = useState<SocioRow | null>(null)
+  const [internalMedidoresSheet, setInternalMedidoresSheet] =
+    useState<SocioRow | null>(null)
+
+  const isMedidoresSheetControlled = onMedidoresSheetOpenChange !== undefined
+  const medidoresSheet = isMedidoresSheetControlled
+    ? (medidoresSheetSocio ?? null)
+    : internalMedidoresSheet
+
+  function updateMedidoresSheet(socio: SocioRow | null) {
+    if (isMedidoresSheetControlled) {
+      onMedidoresSheetOpenChange?.(socio)
+    } else {
+      setInternalMedidoresSheet(socio)
+    }
+  }
 
   const table = useReactTable({
     data,
@@ -298,9 +308,6 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize: 10 } },
-    meta: {
-      onOpenMedidores: (row: SocioRow) => setMedidoresSheet(row),
-    },
   })
 
   const { pageIndex, pageSize } = table.getState().pagination
@@ -389,7 +396,13 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
                 <TableRow
                   key={row.id}
                   className="group h-14 cursor-pointer"
-                  onClick={() => onRowClick(row.original)}
+                  onClick={() => {
+                    if (socioHasMultipleMedidores(row.original)) {
+                      updateMedidoresSheet(row.original)
+                      return
+                    }
+                    onRowClick(row.original)
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
@@ -449,8 +462,8 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
       {/* Sheet: detalle de medidores (solo socios con +1 medidor) */}
       <SheetContentDetail
         open={!!medidoresSheet}
-        onOpenChange={(open) => { if (!open) setMedidoresSheet(null) }}
-        title={medidoresSheet ? `Medidores — ${medidoresSheet.nombre}` : "Medidores"}
+        onOpenChange={(open) => { if (!open) updateMedidoresSheet(null) }}
+        title={medidoresSheet ? `${medidoresSheet.nombre} > Medidores` : "Medidores"}
         scrollVariant="flush"
       >
         {medidoresSheet?.medidores && (
@@ -459,30 +472,38 @@ export function SociosTable({ data, onRowClick }: SociosTableProps) {
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="text-sm font-medium text-muted-foreground">Medidor</TableHead>
-                  <TableHead className="text-sm font-medium text-muted-foreground">Participación</TableHead>
                   <TableHead className="text-sm font-medium text-muted-foreground">Potencia</TableHead>
                   <TableHead className="text-sm font-medium text-muted-foreground">Energía</TableHead>
-                  <TableHead className="text-sm font-medium text-muted-foreground text-right">Ahorro</TableHead>
+                  <TableHead className="text-sm font-medium text-muted-foreground">Participación</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {medidoresSheet.medidores.map((m: MedidorDetalle) => (
                   <TableRow key={m.numero} className="h-12">
-                    <TableCell className="text-sm tabular-nums text-muted-foreground">{m.numero}</TableCell>
-                    <TableCell className="text-sm tabular-nums">{m.participacion}</TableCell>
+                    <TableCell>
+                      <button
+                        type="button"
+                        className="text-sm font-medium tabular-nums text-foreground underline underline-offset-2 transition-colors hover:text-foreground"
+                        onClick={() => {
+                          onMedidorClick?.(medidoresSheet, m)
+                          updateMedidoresSheet(null)
+                        }}
+                      >
+                        {m.numero}
+                      </button>
+                    </TableCell>
                     <TableCell className="text-sm tabular-nums">{m.potenciaAsociada}</TableCell>
                     <TableCell className="text-sm tabular-nums">{m.energiaGenerada}</TableCell>
-                    <TableCell className="text-sm tabular-nums text-right">{m.ahorroGenerado}</TableCell>
+                    <TableCell className="text-sm tabular-nums">{m.participacion}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
               <TableFooter>
                 <TableRow className="h-12 font-medium bg-muted/40">
                   <TableCell className="text-sm">Total</TableCell>
-                  <TableCell className="text-sm tabular-nums">{medidoresSheet.participacion}</TableCell>
                   <TableCell className="text-sm tabular-nums">{medidoresSheet.potenciaAsociada}</TableCell>
                   <TableCell className="text-sm tabular-nums">{medidoresSheet.energiaGenerada}</TableCell>
-                  <TableCell className="text-sm tabular-nums text-right">{medidoresSheet.ahorroGenerado}</TableCell>
+                  <TableCell className="text-sm tabular-nums">{medidoresSheet.participacion}</TableCell>
                 </TableRow>
               </TableFooter>
             </Table>

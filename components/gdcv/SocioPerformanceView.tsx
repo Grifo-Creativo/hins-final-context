@@ -23,6 +23,7 @@ import {
   generationSparklineConfig,
   parkEnergyShareChartConfig,
 } from "@/data/chart-config"
+import { GDCV_OPERATIONS_START_METRIC_LABEL } from "@/data/gdcv-mock"
 import {
   getSocioParqueSeries,
   getSocioParqueShareSeries,
@@ -53,7 +54,7 @@ const SOCIO_PARQUE_FEATURE_ICONS: Record<string, LucideIcon> = {
   "Potencia total instalada": ZapIcon,
   "Potencia total de acople": ZapIcon,
   "Inversión inicial": CircleDollarSignIcon,
-  "Inicio de operaciones": CalendarIcon,
+  [GDCV_OPERATIONS_START_METRIC_LABEL]: CalendarIcon,
 }
 
 export function SocioPerformanceView() {

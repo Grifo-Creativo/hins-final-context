@@ -17,9 +17,8 @@ import { KpiSecondaryMetric } from "@/components/ui/kpi-secondary-metric"
 import { KpiWithAsset } from "@/components/ui/kpi-with-asset"
 import { KpiWithTimeline } from "@/components/ui/kpi-with-timeline"
 import { SectionHeader } from "@/components/ui/section-header"
-import { currencyTabsForBlocks } from "@/components/ui/currency-context-indicator"
+import { RoiCurrencyTabs } from "@/components/ui/roi-currency-tabs"
 import { SheetContentTable } from "@/components/ui/sheet-ops"
-import { TabsForBlocks } from "@/components/ui/tabs-for-blocks"
 import { ROIProjectionChart } from "@/components/charts/ROIProjectionChart"
 import {
   socioRoiHistorico,
@@ -86,15 +85,7 @@ export function SocioRoiView() {
         <SectionHeader
           level="h2"
           title="Retorno de Inversión (ROI)"
-          action={
-            <TabsForBlocks
-              width="fit"
-              className="shrink-0"
-              tabs={currencyTabsForBlocks}
-              value={currency}
-              onValueChange={handleCurrencyChange}
-            />
-          }
+          action={<RoiCurrencyTabs value={currency} onValueChange={handleCurrencyChange} />}
         />
 
         <div className={SOCIO_ROI_KPI_GRID}>

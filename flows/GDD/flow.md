@@ -47,6 +47,7 @@ Referencia visual: GDD_01.png
 ### GDD_02 — Vista: Retorno de Inversión
 Ruta: `/gdd/roi`
 Referencia visual: **GDD_ROI_Proyectado.png** (vista Proyectado - esta es la vista by default) + **GDD_ROI_historico.png** (vista Histórico)
+**Datos y reglas de negocio:** `flows/GDD/roi-spec.md` · Mock: `data/gdd-roi-mock.ts`
 
 **Header:** Nombre parque ("Parque General Roca") + badge GDD + TabsForBlocks navegación (Performance / Retorno de Inversión) + **Currency Toggle (DOLAR | ARS)** + botón export.
 

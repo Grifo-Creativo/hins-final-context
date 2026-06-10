@@ -8,6 +8,10 @@ export const LEGAL_TERMS_LINK_LABEL = "Términos y condiciones del servicio"
 
 export const LEGAL_TERMS_DIALOG_TITLE = "Términos y condiciones del servicio"
 
+export const LEGAL_TERMS_ACCEPTANCE_CHECKBOX_LABEL = "Acepto los Términos."
+
+export const LEGAL_TERMS_ACCEPTANCE_BUTTON_LABEL = "Aceptar y continuar"
+
 /** [CONTENIDO TEMPORAL] — no es texto jurídico definitivo. */
 export const LEGAL_TERMS_PLACEHOLDER_SECTIONS = [
   {

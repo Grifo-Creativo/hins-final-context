@@ -2,7 +2,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { XIcon } from "lucide-react"
+import { ChevronLeftIcon, XIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -31,6 +31,8 @@ interface SheetOpsHeaderProps {
   className?: string
   /** Slot antes del botón cerrar (ej. `CurrencyContextIndicator`). */
   action?: ReactNode
+  /** Volver a sheet superior — icon button a la izquierda del [x]. */
+  onBack?: () => void
 }
 
 /** Título + cerrar (outline icon) — patrón OPS de drill-down. */
@@ -39,6 +41,7 @@ export function SheetOpsHeader({
   variant = "bordered",
   className,
   action,
+  onBack,
 }: SheetOpsHeaderProps) {
   return (
     <SheetHeader
@@ -54,17 +57,31 @@ export function SheetOpsHeader({
           <SheetTitle className="min-w-0 flex-1 pr-2 text-2xl font-semibold leading-tight text-foreground">
             {title}
           </SheetTitle>
-          <SheetClose asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-8 shrink-0 shadow-xs"
-              aria-label="Cerrar"
-            >
-              <XIcon className="size-4" aria-hidden />
-            </Button>
-          </SheetClose>
+          <div className="flex shrink-0 items-center gap-2">
+            {onBack ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8 shadow-xs"
+                aria-label="Volver"
+                onClick={onBack}
+              >
+                <ChevronLeftIcon className="size-4" aria-hidden />
+              </Button>
+            ) : null}
+            <SheetClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-8 shadow-xs"
+                aria-label="Cerrar"
+              >
+                <XIcon className="size-4" aria-hidden />
+              </Button>
+            </SheetClose>
+          </div>
         </div>
         {action ? (
           <div className="flex justify-end">{action}</div>
@@ -189,6 +206,8 @@ interface SheetContentDetailProps {
   showFooter?: boolean
   side?: "left" | "right"
   scrollClassName?: string
+  /** Volver a sheet superior — solo cuando hay drill-down (ej. medidor → socio). */
+  onBack?: () => void
 }
 
 /**
@@ -203,6 +222,7 @@ export function SheetContentDetail({
   showFooter = true,
   side = "right",
   scrollClassName,
+  onBack,
 }: SheetContentDetailProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -212,7 +232,7 @@ export function SheetContentDetail({
         className={sheetContentClassName("detail")}
       >
         <div className="flex min-h-0 flex-1 flex-col">
-          <SheetOpsHeader title={title} variant="detail" />
+          <SheetOpsHeader title={title} variant="detail" onBack={onBack} />
           {scrollVariant === "flush" ? (
             <div className={cn(SHEET_OPS_SCROLL_FLUSH, scrollClassName)}>
               {children}
