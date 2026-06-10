@@ -28,7 +28,7 @@ Antes de generar cualquier código, leer en este orden:
 | 1 | `context/kick-off.md` | Este archivo — reglas críticas y routing |
 | 2 | `context/product-context.md` | Modelos de negocio, RBAC, reglas de dominio |
 | 3 | `context/design-system.md` | Tokens de color, tipografía, spacing, shadows |
-| 4 | `context/components.md` | Spec exacta de cada componente ← **última palabra** |
+| 4 | `context/components.md` | Spec del componente — **leer solo la sección del § Índice** (no el archivo entero) ← **última palabra** |
 | 5 | `context/ux-guidelines.md` | Patrones UX, anti-patterns, Sheet drill-down |
 | 6 | `engineering/tech-stack.md` | Stack, carpetas, convenciones de código |
 | 7 | `flows/[flujo]/flow.md` | Wireframe y estructura de la vista a construir |
@@ -37,6 +37,8 @@ Antes de generar cualquier código, leer en este orden:
 | 10 | `flows/GDD/roi-spec.md` | *Condicional:* datos y reglas ROI GDD (Parque General Roca) |
 
 **Precedencia (conflictos):** `components.md` > `design-system.md` > `ux-guidelines.md` > `flows/`
+
+**Cómo leer `components.md`:** usar el **§ Índice** al inicio del archivo, identificar el componente del `flow.md` o de la tarea, y leer **únicamente** ese bloque (`## NombreComponente`). No cargar el archivo completo salvo que debas crear un componente nuevo sin spec previa.
 
 ---
 
@@ -55,7 +57,7 @@ design-system.md               → tokens para colores, spacing, shadows
 /app/[ruta]/page.tsx           → integración en ruta
 ```
 
-**Regla:** Verificar siempre si el componente existe en `components.md` antes de crear uno nuevo. El código documentado ahí se usa sin modificar salvo instrucción explícita.
+**Regla:** Verificar siempre si el componente existe en `components.md` (§ Índice → sección puntual) antes de crear uno nuevo. El código documentado ahí se usa sin modificar salvo instrucción explícita.
 
 ---
 
