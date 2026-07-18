@@ -12,7 +12,6 @@ import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
-import { gdcvParkEquipmentDetail } from "@/data/park-equipment-mock"
 import { gdcvEnergyBarChartConfig } from "@/data/chart-config"
 import {
   gdcvAhorroTotalAbril,
@@ -36,9 +35,18 @@ import {
   toDateKey,
 } from "@/data/gdcv-daily-mock"
 import { formatChartDayLong, formatDailyPeakLabel } from "@/lib/chart-day-format"
+import { parqueToDetailsMetrics } from "@/lib/park-details-metrics"
+import type { Parque } from "@/lib/api/types"
 import { DollarSignIcon, ZapIcon } from "lucide-react"
 
-export function GdcvPerformanceView() {
+interface GdcvPerformanceViewProps {
+  /** Parque real — las métricas de ParkDetailsCard se derivan de acá. El resto de este
+   * componente (energía horaria/diaria, sparklines, KPIs derivados, tabla de socios)
+   * sigue en datos mock por excepción documentada — ver data-model.md. */
+  parque: Parque
+}
+
+export function GdcvPerformanceView({ parque }: GdcvPerformanceViewProps) {
   const [chartRange, setChartRange] = useState<ChartRangeChip>("6m")
   const [activeDay, setActiveDay] = useState<Date>(MOCK_TODAY)
   const [selectedSocio, setSelectedSocio] = useState<SocioRow | null>(null)
@@ -107,8 +115,7 @@ export function GdcvPerformanceView() {
         <ParkDetailsCard
           imageSrc={gdcvParkDetails.imageSrc}
           imageAlt={gdcvParkDetails.imageAlt}
-          metrics={gdcvParkDetails.metrics}
-          equipmentDetail={gdcvParkEquipmentDetail}
+          metrics={parqueToDetailsMetrics(parque)}
           className="h-full"
         />
         <CardWithResponsiveTabs
