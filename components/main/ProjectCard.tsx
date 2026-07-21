@@ -28,8 +28,8 @@ function AccessCta({ label }: { label: string }) {
 
 export function ProjectCard({ proyecto }: ProjectCardProps) {
   const href = hrefForModelo(proyecto.modelo, proyecto.id)
-  const coverImageUrl = getProjectCoverImage(proyecto.id)
-  const remoteImage = coverImageUrl?.startsWith("https://hins.com.ar") ?? false
+  const coverImageUrl = getProjectCoverImage(proyecto)
+  const remoteImage = coverImageUrl?.startsWith("http") ?? false
 
   const inner = (
     <Card className="group/card flex h-full flex-col overflow-hidden p-0 shadow-xs ring-0 transition-shadow cursor-pointer hover:shadow-md">

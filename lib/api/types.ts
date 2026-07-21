@@ -61,6 +61,7 @@ export interface Proyecto {
   ubicacion: string
   fechaAlta: string
   activo: boolean
+  imageUrl?: string
 }
 
 export interface CreateParqueDto {

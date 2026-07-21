@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { CreateSocioDialog } from "@/components/gdcv/CreateSocioDialog"
 import { Heading } from "@/components/ui/heading"
 import {
   DropdownMenu,
@@ -264,7 +265,12 @@ const columns: ColumnDef<SocioRow>[] = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface SociosTableProps {
+  /** Parque activo — el alta vía "Nuevo Socio" se registra contra este parque. */
+  parqueId: string
   data: SocioRow[]
+  /** `true` cuando la consulta de socios al backend falló — distinto de `data: []` (sin socios registrados). */
+  loadFailed?: boolean
+  onRetry?: () => void
   onRowClick: (socio: SocioRow) => void
   /** Medidor puntual dentro del sheet intermedio → SocioDetailSheet. */
   onMedidorClick?: (socio: SocioRow, medidor: MedidorDetalle) => void
@@ -274,7 +280,10 @@ interface SociosTableProps {
 }
 
 export function SociosTable({
+  parqueId,
   data,
+  loadFailed = false,
+  onRetry,
   onRowClick,
   onMedidorClick,
   medidoresSheetSocio,
@@ -284,6 +293,7 @@ export function SociosTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [internalMedidoresSheet, setInternalMedidoresSheet] =
     useState<SocioRow | null>(null)
+  const [createSocioOpen, setCreateSocioOpen] = useState(false)
 
   const isMedidoresSheetControlled = onMedidoresSheetOpenChange !== undefined
   const medidoresSheet = isMedidoresSheetControlled
@@ -360,6 +370,7 @@ export function SociosTable({
             size="icon"
             className="md:w-auto md:px-2.5 md:gap-2 shadow-xs"
             title="Nuevo Socio"
+            onClick={() => setCreateSocioOpen(true)}
           >
             <PlusIcon className="size-4" aria-hidden />
             <span className="hidden md:inline">Nuevo Socio</span>
@@ -391,7 +402,22 @@ export function SociosTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length > 0 ? (
+            {loadFailed ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <p className="text-sm text-muted-foreground">
+                      No se pudo cargar el listado de socios.
+                    </p>
+                    {onRetry ? (
+                      <Button variant="outline" size="sm" onClick={onRetry}>
+                        Reintentar
+                      </Button>
+                    ) : null}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -423,7 +449,7 @@ export function SociosTable({
                   colSpan={columns.length}
                   className="h-24 text-center text-sm text-muted-foreground"
                 >
-                  Sin resultados.
+                  Sin socios registrados para este parque.
                 </TableCell>
               </TableRow>
             )}
@@ -510,6 +536,12 @@ export function SociosTable({
           </div>
         )}
       </SheetContentDetail>
+
+      <CreateSocioDialog
+        parqueId={parqueId}
+        open={createSocioOpen}
+        onOpenChange={setCreateSocioOpen}
+      />
     </>
   )
 }
