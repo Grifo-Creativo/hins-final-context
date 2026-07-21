@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest"
 vi.mock("@/lib/api/client", () => ({ apiFetch: vi.fn() }))
 
 import { apiFetch } from "@/lib/api/client"
-import { listEnergia, listEnergiaDiaria, registrarEnergia } from "@/lib/api/energia"
+import { listEnergia, listEnergiaDiaria, getEnergiaDelDia, registrarEnergia } from "@/lib/api/energia"
 import { listRoi, registrarRoi } from "@/lib/api/roi"
 import { listMantenimiento, registrarMantenimiento } from "@/lib/api/mantenimiento"
 
@@ -37,6 +37,28 @@ describe("lib/api/energia", () => {
     vi.mocked(apiFetch).mockResolvedValue(registros)
     const result = await listEnergiaDiaria("p1", "2026-07")
     expect(apiFetch).toHaveBeenCalledWith("/parques/p1/energia?periodo=2026-07")
+    expect(result).toEqual(registros)
+  })
+
+  it("getEnergiaDelDia returns [] on null", async () => {
+    vi.mocked(apiFetch).mockResolvedValue(null)
+    expect(await getEnergiaDelDia("p1", "2026-07-20")).toEqual([])
+  })
+
+  it("getEnergiaDelDia calls the endpoint with periodo as query param and parses the daily-snapshot shape", async () => {
+    const registros = [
+      {
+        capturadoEn: "2026-07-20T14:41:56.703Z",
+        energiaDiaKwh: 93.61,
+        ingresoDia: 6843.04,
+        energiaTotalKwh: 901509.7,
+        energiaInyectadaDiaKwh: 0,
+        energiaConsumidaDiaKwh: 0,
+      },
+    ]
+    vi.mocked(apiFetch).mockResolvedValue(registros)
+    const result = await getEnergiaDelDia("p1", "2026-07-20")
+    expect(apiFetch).toHaveBeenCalledWith("/parques/p1/energia?periodo=2026-07-20")
     expect(result).toEqual(registros)
   })
 

@@ -5,8 +5,11 @@ import {
   getGenerationHistoryRows,
   getMonthlyGenerationTotal,
   getMonthlySparklinePoints,
+  getRegistroMasRecienteDelDia,
+  getRegistrosDelDiaOrdenados,
+  getRegistroDelMesActual,
 } from "@/lib/park-energy-series"
-import type { RegistroEnergiaDiario, RegistroEnergiaMensual } from "@/lib/api/types"
+import type { RegistroEnergiaDia, RegistroEnergiaDiario, RegistroEnergiaMensual } from "@/lib/api/types"
 
 describe("lib/park-energy-series", () => {
   it("returns [] for an empty registros list", () => {
@@ -196,5 +199,114 @@ describe("lib/park-energy-series getMonthlySparklinePoints", () => {
       { fecha: "2026-07-01", energiaDiaKwh: 999, ingresoDia: 1 },
     ]
     expect(getMonthlySparklinePoints(registros)).toEqual([{ value: 999 }])
+  })
+})
+
+describe("lib/park-energy-series getRegistroMasRecienteDelDia", () => {
+  it("returns null for an empty registros list", () => {
+    expect(getRegistroMasRecienteDelDia([])).toBeNull()
+  })
+
+  it("returns the single registro when there is only one", () => {
+    const registro: RegistroEnergiaDia = {
+      capturadoEn: "2026-07-20T14:41:56.703Z",
+      energiaDiaKwh: 93.61,
+      ingresoDia: 6843.04,
+      energiaTotalKwh: 901509.7,
+      energiaInyectadaDiaKwh: 0,
+      energiaConsumidaDiaKwh: 0,
+    }
+    expect(getRegistroMasRecienteDelDia([registro])).toEqual(registro)
+  })
+
+  it("returns the registro with the most recent capturadoEn when there are several", () => {
+    const older: RegistroEnergiaDia = {
+      capturadoEn: "2026-07-20T08:00:00.000Z",
+      energiaDiaKwh: 10,
+      ingresoDia: 1,
+      energiaTotalKwh: 100,
+      energiaInyectadaDiaKwh: 0,
+      energiaConsumidaDiaKwh: 0,
+    }
+    const newer: RegistroEnergiaDia = {
+      capturadoEn: "2026-07-20T14:41:56.703Z",
+      energiaDiaKwh: 93.61,
+      ingresoDia: 6843.04,
+      energiaTotalKwh: 901509.7,
+      energiaInyectadaDiaKwh: 0,
+      energiaConsumidaDiaKwh: 0,
+    }
+    expect(getRegistroMasRecienteDelDia([older, newer])).toEqual(newer)
+    expect(getRegistroMasRecienteDelDia([newer, older])).toEqual(newer)
+  })
+})
+
+describe("lib/park-energy-series getRegistrosDelDiaOrdenados", () => {
+  it("returns [] for an empty registros list", () => {
+    expect(getRegistrosDelDiaOrdenados([])).toEqual([])
+  })
+
+  it("orders by capturadoEn ascending regardless of input order", () => {
+    const a: RegistroEnergiaDia = {
+      capturadoEn: "2026-07-20T06:00:00.000Z",
+      energiaDiaKwh: 10,
+      ingresoDia: 1,
+      energiaTotalKwh: 100,
+      energiaInyectadaDiaKwh: 0,
+      energiaConsumidaDiaKwh: 0,
+    }
+    const b: RegistroEnergiaDia = {
+      capturadoEn: "2026-07-20T12:00:00.000Z",
+      energiaDiaKwh: 50,
+      ingresoDia: 5,
+      energiaTotalKwh: 140,
+      energiaInyectadaDiaKwh: 0,
+      energiaConsumidaDiaKwh: 0,
+    }
+    const c: RegistroEnergiaDia = {
+      capturadoEn: "2026-07-20T18:00:00.000Z",
+      energiaDiaKwh: 93.61,
+      ingresoDia: 6843.04,
+      energiaTotalKwh: 901509.7,
+      energiaInyectadaDiaKwh: 0,
+      energiaConsumidaDiaKwh: 0,
+    }
+    expect(getRegistrosDelDiaOrdenados([c, a, b])).toEqual([a, b, c])
+  })
+})
+
+describe("lib/park-energy-series getRegistroDelMesActual", () => {
+  it("returns null for an empty registros list", () => {
+    expect(getRegistroDelMesActual([], "2026-07")).toBeNull()
+  })
+
+  it("returns the registro matching the current periodo", () => {
+    const registros: RegistroEnergiaMensual[] = [
+      { periodo: "2026-06", energiaMesKwh: 100, ingresoMes: 10 },
+      { periodo: "2026-07", energiaMesKwh: 200, ingresoMes: 20 },
+    ]
+    expect(getRegistroDelMesActual(registros, "2026-07")).toEqual({
+      periodo: "2026-07",
+      energiaMesKwh: 200,
+      ingresoMes: 20,
+    })
+  })
+
+  it("returns null when the series has no registro for the current periodo", () => {
+    const registros: RegistroEnergiaMensual[] = [
+      { periodo: "2026-06", energiaMesKwh: 100, ingresoMes: 10 },
+    ]
+    expect(getRegistroDelMesActual(registros, "2026-07")).toBeNull()
+  })
+
+  it("returns the registro even when energiaMesKwh is null, without treating it as missing", () => {
+    const registros: RegistroEnergiaMensual[] = [
+      { periodo: "2026-07", energiaMesKwh: null, ingresoMes: null },
+    ]
+    expect(getRegistroDelMesActual(registros, "2026-07")).toEqual({
+      periodo: "2026-07",
+      energiaMesKwh: null,
+      ingresoMes: null,
+    })
   })
 })

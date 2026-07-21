@@ -171,6 +171,21 @@ export interface RegistroEnergiaDiario {
   ingresoDia: number | null
 }
 
+/**
+ * Forma real de lectura de GET /parques/{parqueId}/energia?periodo=YYYY-MM-DD —
+ * snapshot de energía de un día puntual. Distinta de RegistroEnergiaDiario
+ * (forma de ?periodo=YYYY-MM, un array de días dentro de un mes). Ver
+ * specs/004-daily-monthly-energy-view/research.md Decision 1.
+ */
+export interface RegistroEnergiaDia {
+  capturadoEn: string
+  energiaDiaKwh: number | null
+  ingresoDia: number | null
+  energiaTotalKwh: number | null
+  energiaInyectadaDiaKwh: number | null
+  energiaConsumidaDiaKwh: number | null
+}
+
 export interface RegistrarRoiDto {
   socioId?: string
   periodo: string

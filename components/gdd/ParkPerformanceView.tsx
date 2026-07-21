@@ -1,12 +1,12 @@
 // components/gdd/ParkPerformanceView.tsx
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { ConsumptionHistoryTable } from "@/components/gdd/ConsumptionHistoryTable"
-import { DailyGenerationChartBlock } from "@/components/charts/DailyGenerationChartBlock"
+import { DailyEnergyTotalsBlock } from "@/components/charts/DailyEnergyTotalsBlock"
 import { ParkEnergyBarChart } from "@/components/charts/ParkEnergyBarChart"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import { CardWithResponsiveTabs } from "@/components/ui/card-with-responsive-tabs"
@@ -16,42 +16,37 @@ import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import { parkEnergyBarChartConfig } from "@/data/chart-config"
 import {
-  gddOperationsStartLabel,
   gddParkDetails,
   highlightAprilCardMock,
   savingsCardMock,
   tariffCardMock,
 } from "@/data/gdd-performance-mock"
-import {
-  getDailyGenerationData24,
-  getDailyPeak,
-  getDailyTotal,
-  MOCK_TODAY,
-  toDateKey,
-} from "@/data/gdcv-daily-mock"
-import { formatChartDayLong, formatDailyPeakLabel } from "@/lib/chart-day-format"
-import { getChartRangeSubtitle } from "@/lib/chart-range-resolve"
-import { getMonthNameEs } from "@/lib/format-periodo"
+import { toDateKey } from "@/data/gdcv-daily-mock"
+import { formatPeriodoLabel, getMonthNameEs } from "@/lib/format-periodo"
 import {
   getGenerationHistoryRows,
   getMonthlyGenerationTotal,
   getMonthlySparklinePoints,
   getRealParkEnergySeries,
+  getRegistroDelMesActual,
 } from "@/lib/park-energy-series"
 import { parqueToDetailsMetrics } from "@/lib/park-details-metrics"
-import type { Parque, RegistroEnergiaDiario, RegistroEnergiaMensual } from "@/lib/api/types"
+import type { Parque, RegistroEnergiaDia, RegistroEnergiaDiario, RegistroEnergiaMensual } from "@/lib/api/types"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { DollarSignIcon, ZapIcon } from "lucide-react"
+
+type DailyEnergiaResult =
+  | { key: string; status: "ok"; registros: RegistroEnergiaDia[] }
+  | { key: string; status: "error" }
 
 interface ParkPerformanceViewProps {
   /** Parque real — las métricas de ParkDetailsCard se derivan de acá. */
   parque: Parque
   /**
-   * Registros reales de energía mensual (GET /parques/{id}/energia).
+   * Registros reales de energía mensual (GET /parques/{id}/energia), usados
+   * por 6M/1A/TODO y por 1M (registro del mes calendario actual dentro de
+   * esta misma serie — ver specs/004-daily-monthly-energy-view).
    * `null` = la consulta falló (estado de error, distinto de lista vacía = sin datos).
-   * El resto de este componente (sparklines, KPIs derivados, vista diaria) sigue en
-   * datos mock por excepción documentada (no hay equivalente en el contrato — ver
-   * specs/002-park-energy-chart/data-model.md).
    */
   registrosEnergia: RegistroEnergiaMensual[] | null
   /**
@@ -72,16 +67,35 @@ export function ParkPerformanceView({
   periodoActual,
 }: ParkPerformanceViewProps) {
   const router = useRouter()
+  const today = useMemo(() => new Date(), [])
   const [period, setPeriod] = useState<ChartRangeChip>("6m")
-  const [activeDay, setActiveDay] = useState<Date>(MOCK_TODAY)
+  const [activeDay, setActiveDay] = useState<Date>(today)
+  const [dailyEnergia, setDailyEnergia] = useState<DailyEnergiaResult | null>(null)
+  const dailyEnergiaKey = `${parque.id}:${toDateKey(activeDay)}`
+  const isDailyLoading = period === "1d" && dailyEnergia?.key !== dailyEnergiaKey
 
-  const chartData = useMemo(
-    () =>
-      period === "1d" || registrosEnergia === null
-        ? []
-        : getRealParkEnergySeries(registrosEnergia, period),
-    [period, registrosEnergia]
+  const registroMesActual = useMemo(
+    () => getRegistroDelMesActual(registrosEnergia ?? [], periodoActual),
+    [registrosEnergia, periodoActual]
   )
+
+  const chartData = useMemo(() => {
+    if (period === "1d" || registrosEnergia === null) {
+      return []
+    }
+    if (period === "1m") {
+      return registroMesActual
+        ? [
+            {
+              label: formatPeriodoLabel(registroMesActual.periodo),
+              generated: registroMesActual.energiaMesKwh ?? 0,
+              hasData: registroMesActual.energiaMesKwh !== null && registroMesActual.energiaMesKwh !== undefined,
+            },
+          ]
+        : []
+    }
+    return getRealParkEnergySeries(registrosEnergia, period)
+  }, [period, registrosEnergia, registroMesActual])
 
   const energiaLoadFailed = registrosEnergia === null
 
@@ -102,25 +116,28 @@ export function ParkPerformanceView({
     [registrosEnergiaDiaria]
   )
 
-  const dailyChartData = useMemo(
-    () => getDailyGenerationData24(toDateKey(activeDay)),
-    [activeDay]
-  )
+  useEffect(() => {
+    if (period !== "1d") return
 
-  const dailyTotal = useMemo(
-    () => getDailyTotal(dailyChartData),
-    [dailyChartData]
-  )
+    const controller = new AbortController()
+    const key = dailyEnergiaKey
 
-  const dailyPeak = useMemo(
-    () => getDailyPeak(dailyChartData),
-    [dailyChartData]
-  )
+    fetch(`/api/parques/${parque.id}/energia-dia?periodo=${toDateKey(activeDay)}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Falla al consultar la energía del día")
+        return response.json() as Promise<{ registros: RegistroEnergiaDia[] }>
+      })
+      .then(({ registros }) => setDailyEnergia({ key, status: "ok", registros }))
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setDailyEnergia({ key, status: "error" })
+      })
 
-  const chartSubtitle =
-    period === "1d"
-      ? formatChartDayLong(activeDay)
-      : getChartRangeSubtitle(period, gddOperationsStartLabel)
+    return () => controller.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dailyEnergiaKey deriva de activeDay/parque.id, ya listados
+  }, [period, activeDay, parque.id])
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6">
@@ -140,17 +157,30 @@ export function ParkPerformanceView({
           className="h-full"
         >
           {period === "1d" ? (
-            <div className="min-h-[300px] w-full flex-1">
-              <DailyGenerationChartBlock
-                activeDay={activeDay}
-                today={MOCK_TODAY}
-                onActiveDayChange={setActiveDay}
-                data={dailyChartData}
-                totalLabel={dailyTotal}
-                peakLabel={formatDailyPeakLabel(dailyPeak.value, dailyPeak.hour)}
-                className="h-full min-h-[300px]"
-              />
-            </div>
+            isDailyLoading ? (
+              <div className="flex min-h-[300px] w-full flex-1 items-center justify-center">
+                <p className="text-sm text-muted-foreground">Cargando…</p>
+              </div>
+            ) : dailyEnergia?.status === "error" ? (
+              <div className="flex min-h-[300px] w-full flex-1 flex-col items-center justify-center gap-3 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No se pudo cargar la energía del día.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => setActiveDay(new Date(activeDay))}>
+                  Reintentar
+                </Button>
+              </div>
+            ) : (
+              <div className="min-h-[300px] w-full flex-1">
+                <DailyEnergyTotalsBlock
+                  activeDay={activeDay}
+                  today={today}
+                  onActiveDayChange={setActiveDay}
+                  registros={dailyEnergia?.status === "ok" ? dailyEnergia.registros : []}
+                  className="h-full min-h-[300px]"
+                />
+              </div>
+            )
           ) : energiaLoadFailed ? (
             <div className="flex min-h-[300px] w-full flex-1 flex-col items-center justify-center gap-3 text-center">
               <p className="text-sm text-muted-foreground">
