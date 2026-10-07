@@ -72,7 +72,7 @@ async function fetchFigmaFile(): Promise<FigmaFile> {
 
   const response = await fetch(`${API_BASE}/files/${FIGMA_FILE_KEY}`, {
     headers: {
-      "X-Figma-Token": FIGMA_TOKEN,
+      "X-Figma-Token": FIGMA_TOKEN || "",
     },
   });
 
@@ -207,7 +207,7 @@ async function exportScreenshots(
     `${API_BASE}/files/${FIGMA_FILE_KEY}/images?ids=${frameIds}&format=png&scale=2`,
     {
       headers: {
-        "X-Figma-Token": FIGMA_TOKEN,
+        "X-Figma-Token": FIGMA_TOKEN || "",
       },
     }
   );

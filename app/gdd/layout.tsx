@@ -1,5 +1,5 @@
 // app/gdd/layout.tsx
-import type { ReactNode } from "react"
+import { Suspense, type ReactNode } from "react"
 
 import { getCurrentRole } from "@/lib/api/guards"
 import { DashboardMain } from "@/components/layout/DashboardMain"
@@ -15,7 +15,9 @@ export default async function GddLayout({
 
   return (
     <GddLayoutShell role={role}>
-      <GddHeader />
+      <Suspense fallback={null}>
+        <GddHeader />
+      </Suspense>
       <DashboardMain>{children}</DashboardMain>
     </GddLayoutShell>
   )

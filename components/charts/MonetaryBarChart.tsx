@@ -56,10 +56,15 @@ type MonetaryBarRow = {
 }
 
 type StackBarLabelProps = {
-  x?: number
-  y?: number
-  width?: number
-  index?: number
+  x?: number | string;
+  y?: number | string;
+  width?: number | string;
+  height?: number | string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value?: any;
+  index?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 function renderStackTotalLabel(
@@ -67,6 +72,7 @@ function renderStackTotalLabel(
   currency: CurrencyCode,
   rows: MonetaryBarRow[]
 ) {
+  // eslint-disable-next-line react/display-name
   return (props: StackBarLabelProps) => {
     const index = props.index ?? -1
     const row = rows[index]

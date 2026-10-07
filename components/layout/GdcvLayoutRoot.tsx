@@ -2,7 +2,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import type { ReactNode } from "react"
+import { Suspense, type ReactNode } from "react"
 
 import { DashboardMain } from "@/components/layout/DashboardMain"
 import { GdcvHeader } from "@/components/layout/GdcvHeader"
@@ -16,7 +16,10 @@ export function GdcvLayoutRoot({ children, role }: { children: ReactNode; role: 
 
   const content = (
     <>
-      <GdcvHeader />
+      {/* useSearchParams (nombre del parque) exige Suspense en rutas prerenderizadas */}
+      <Suspense fallback={null}>
+        <GdcvHeader />
+      </Suspense>
       <DashboardMain>{children}</DashboardMain>
     </>
   )
