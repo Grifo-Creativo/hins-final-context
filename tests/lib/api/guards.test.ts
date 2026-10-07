@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 vi.mock("@/lib/api/usuarios", () => ({ getMe: vi.fn() }))
+vi.mock("next/server", () => ({ connection: vi.fn(async () => undefined) }))
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`REDIRECT:${url}`)
