@@ -77,6 +77,10 @@ export function NewProjectDialog({ open, onOpenChange }: NewProjectDialogProps) 
         return
       }
       router.refresh()
+      if (result.parqueError) {
+        setError(`El proyecto se creó, pero el parque no pudo generarse: ${result.parqueError}`)
+        return
+      }
       handleOpenChange(false)
     })
   }

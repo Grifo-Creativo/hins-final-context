@@ -14,7 +14,6 @@ import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
-import { gdcvEnergyBarChartConfig } from "@/data/chart-config"
 import {
   gdcvAhorroTotalAbril,
   gdcvGeneradaAbril,
@@ -27,25 +26,31 @@ import { mapSocioToRow } from "@/lib/socio-presentation"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { toDateKey } from "@/data/gdcv-daily-mock"
-import { formatPeriodoLabel, getMonthNameEs } from "@/lib/format-periodo"
+import { getMonthNameEs } from "@/lib/format-periodo"
 import {
   getMonthlyGenerationTotal,
   getMonthlySparklinePoints,
-  getRealParkEnergySeries,
   getRegistroDelMesActual,
 } from "@/lib/park-energy-series"
+import {
+  buildComparativaGeneracionMesActual,
+  getComparativaGeneracionChartRows,
+} from "@/lib/energia-comparativa"
+import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/energia-comparativa"
+import { energiaComparativaChartConfig } from "@/data/chart-config"
 import { parqueToDetailsMetrics } from "@/lib/park-details-metrics"
 import type {
   Parque,
   RegistroEnergiaDia,
   RegistroEnergiaDiario,
   RegistroEnergiaMensual,
+  RegistroMedidorPrincipal,
   Socio,
 } from "@/lib/api/types"
 import { DollarSignIcon, ZapIcon } from "lucide-react"
 
 type DailyEnergiaResult =
-  | { key: string; status: "ok"; registros: RegistroEnergiaDia[] }
+  | { key: string; status: "ok"; registros: RegistroEnergiaDia[]; registrosDimms: RegistroMedidorPrincipal[] }
   | { key: string; status: "error" }
 
 interface GdcvPerformanceViewProps {
@@ -70,6 +75,17 @@ interface GdcvPerformanceViewProps {
    * falló (estado de error, distinto de lista vacía = sin socios registrados).
    */
   socios: Socio[] | null
+  /**
+   * Estado de la consulta al medidor principal (DIMMs) para `periodoActual` —
+   * fuente principal de la comparativa de la card KPI. Ver
+   * specs/012-comparativa-dimms-huawei.
+   */
+  registroDimmsMesActual: RegistroDimmsMesActual
+  /**
+   * Consolidados DIMMs por mes, uno por período visible en el rango de
+   * gráfico (6M/1A) — fuente principal de la comparativa del gráfico.
+   */
+  registrosDimmsPorRango: RegistroDimmsPorPeriodo[]
 }
 
 export function GdcvPerformanceView({
@@ -78,6 +94,8 @@ export function GdcvPerformanceView({
   registrosEnergiaDiaria,
   periodoActual,
   socios,
+  registroDimmsMesActual,
+  registrosDimmsPorRango,
 }: GdcvPerformanceViewProps) {
   const router = useRouter()
   const today = useMemo(() => new Date(), [])
@@ -100,24 +118,6 @@ export function GdcvPerformanceView({
     [registrosEnergia, periodoActual]
   )
 
-  const chartData = useMemo(() => {
-    if (chartRange === "1d" || registrosEnergia === null) {
-      return []
-    }
-    if (chartRange === "1m") {
-      return registroMesActual
-        ? [
-            {
-              label: formatPeriodoLabel(registroMesActual.periodo),
-              generated: registroMesActual.energiaMesKwh ?? 0,
-              hasData: registroMesActual.energiaMesKwh !== null && registroMesActual.energiaMesKwh !== undefined,
-            },
-          ]
-        : []
-    }
-    return getRealParkEnergySeries(registrosEnergia, chartRange)
-  }, [chartRange, registrosEnergia, registroMesActual])
-
   const energiaLoadFailed = registrosEnergia === null
 
   const monthlyGenerationFailed = registrosEnergiaDiaria === null
@@ -139,6 +139,43 @@ export function GdcvPerformanceView({
 
   const sociosLoadFailed = socios === null
 
+  const comparativaMesActual = useMemo(
+    () =>
+      buildComparativaGeneracionMesActual(
+        periodoActual,
+        registroDimmsMesActual.status === "ok" ? registroDimmsMesActual.registro : null,
+        registroMesActual
+      ),
+    [periodoActual, registroDimmsMesActual, registroMesActual]
+  )
+
+  const dimmsMesActualNoDisponible = registroDimmsMesActual.status === "error"
+
+  const comparativaChartRows = useMemo(
+    () => getComparativaGeneracionChartRows(registrosDimmsPorRango, registrosEnergia ?? []),
+    [registrosDimmsPorRango, registrosEnergia]
+  )
+
+  const dimmsRangoNoDisponible =
+    registrosDimmsPorRango.length > 0 && registrosDimmsPorRango.every((r) => r.dato === null)
+
+  const comparativeChartData = useMemo(() => {
+    if (chartRange === "1d" || registrosEnergia === null) {
+      return []
+    }
+    if (chartRange === "1m") {
+      return [
+        {
+          label: comparativaMesActual.label,
+          dimmsKwh: comparativaMesActual.dimmsKwh,
+          huaweiKwh: comparativaMesActual.huaweiKwh,
+        },
+      ]
+    }
+    const slice = chartRange === "6m" ? -6 : chartRange === "1a" ? -12 : undefined
+    return slice ? comparativaChartRows.slice(slice) : comparativaChartRows
+  }, [chartRange, registrosEnergia, comparativaMesActual, comparativaChartRows])
+
   useEffect(() => {
     if (chartRange !== "1d") return
 
@@ -150,9 +187,12 @@ export function GdcvPerformanceView({
     })
       .then((response) => {
         if (!response.ok) throw new Error("Falla al consultar la energía del día")
-        return response.json() as Promise<{ registros: RegistroEnergiaDia[] }>
+        return response.json() as Promise<{
+          registros: RegistroEnergiaDia[]
+          registrosDimms: RegistroMedidorPrincipal[]
+        }>
       })
-      .then(({ registros }) => setDailyEnergia({ key, status: "ok", registros }))
+      .then(({ registros, registrosDimms }) => setDailyEnergia({ key, status: "ok", registros, registrosDimms }))
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return
         setDailyEnergia({ key, status: "error" })
@@ -227,6 +267,7 @@ export function GdcvPerformanceView({
                   today={today}
                   onActiveDayChange={setActiveDay}
                   registros={dailyEnergia?.status === "ok" ? dailyEnergia.registros : []}
+                  registrosDimms={dailyEnergia?.status === "ok" ? dailyEnergia.registrosDimms : []}
                   className="h-full min-h-[300px]"
                 />
               </div>
@@ -240,7 +281,7 @@ export function GdcvPerformanceView({
                 Reintentar
               </Button>
             </div>
-          ) : chartData.length === 0 ? (
+          ) : comparativeChartData.length === 0 ? (
             <div className="flex min-h-[300px] w-full flex-1 items-center justify-center">
               <p className="text-sm text-muted-foreground">
                 Sin registros de energía para este período.
@@ -248,9 +289,15 @@ export function GdcvPerformanceView({
             </div>
           ) : (
             <div className="min-h-[300px] w-full flex-1">
+              {dimmsRangoNoDisponible && (
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Medidor principal no disponible para este rango — mostrando solo FusionSolar.
+                </p>
+              )}
               <ParkEnergyBarChart
-                data={chartData}
-                chartConfig={gdcvEnergyBarChartConfig}
+                variant="comparative"
+                data={comparativeChartData}
+                chartConfig={energiaComparativaChartConfig}
                 className="h-full min-h-[300px]"
               />
             </div>
@@ -263,20 +310,34 @@ export function GdcvPerformanceView({
             icon={ZapIcon}
             label={`Generada en ${getMonthNameEs(periodoActual)}`}
             value={
-              monthlyGenerationFailed
+              comparativaMesActual.dimmsKwh === null
                 ? "—"
-                : monthlyGenerationTotal.toLocaleString("es-AR", {
+                : comparativaMesActual.dimmsKwh.toLocaleString("es-AR", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })
             }
             unit="kWh"
-            delta={
+            primaryUnavailable={registroDimmsMesActual.status !== "ok"}
+            comparativeLabel="FusionSolar"
+            comparativeValue={
               monthlyGenerationFailed
-                ? "No se pudo cargar este mes"
-                // Mock por excepción documentada: sin endpoint de acumulado
-                // histórico desde el inicio (ver specs/003-monthly-generation-kpi).
-                : gdcvGeneradaAbril.compareBadge
+                ? undefined
+                : monthlyGenerationTotal.toLocaleString("es-AR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+            }
+            delta={
+              dimmsMesActualNoDisponible
+                ? "No se pudo cargar el medidor principal"
+                : registroDimmsMesActual.status === "sin-medidor"
+                  ? "Parque sin medidor principal"
+                  : monthlyGenerationFailed
+                    ? "No se pudo cargar este mes"
+                    // Mock por excepción documentada: sin endpoint de acumulado
+                    // histórico desde el inicio (ver specs/003-monthly-generation-kpi).
+                    : gdcvGeneradaAbril.compareBadge
             }
             sparklineData={monthlyGenerationFailed ? [] : monthlySparklinePoints}
           />

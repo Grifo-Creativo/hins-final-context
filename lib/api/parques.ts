@@ -9,12 +9,7 @@ export async function createParque(dto: CreateParqueDto): Promise<Parque | null>
   return apiFetch<Parque>("/parques", { method: "POST", body: dto })
 }
 
-/**
- * Endpoint asumido a futuro (confirmado por el equipo de backend, no presente
- * en contracts/openapi.json a la fecha de esta funcionalidad): lista los
- * parques de un proyecto. Ver specs/001-api-integration-remove-mocks/data-model.md
- * → "Asunción pendiente: GET /proyectos/{id}/parques".
- */
+/** Lista los parques de un proyecto (`GET /proyectos/{proyectoId}/parques`, publicado en el swagger del backend). */
 export async function listParquesByProyecto(proyectoId: string): Promise<Parque[]> {
   const result = await apiFetch<Parque[]>(`/proyectos/${proyectoId}/parques`)
   return result ?? []

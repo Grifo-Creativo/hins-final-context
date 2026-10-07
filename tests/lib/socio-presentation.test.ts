@@ -11,6 +11,8 @@ function socio(overrides: Partial<Socio> = {}): Socio {
     participacionPorcentaje: 15,
     tipoCargo: "SIN_POTENCIA",
     medidorNumero: "3543871",
+    suministroNumero: "",
+    contratoNumero: "",
     usuarioId: null,
     ...overrides,
   }
