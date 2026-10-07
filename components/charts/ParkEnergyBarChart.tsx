@@ -23,7 +23,7 @@ import { getChartBarDensity } from "@/lib/chart-bar-density"
 import { formatChartPeriodTooltipLabel } from "@/lib/format-chart-period-tooltip"
 import { cn } from "@/lib/utils"
 
-export type ParkEnergyTotalRow = { label: string; generated: number }
+export type ParkEnergyTotalRow = { label: string; generated: number; hasData?: boolean }
 
 export type ParkEnergyShareRow = ParkEnergyTotalRow & {
   miParte: number
@@ -49,7 +49,10 @@ export type ParkEnergyBarChartProps =
   | ParkEnergyBarChartTotalProps
   | ParkEnergyBarChartShareProps
 
-function barFill(index: number, total: number): string {
+function barFill(index: number, total: number, hasData?: boolean): string {
+  if (hasData === false) {
+    return "var(--border)"
+  }
   if (index === total - 1) {
     return "var(--chart-1)"
   }
@@ -241,6 +244,14 @@ function ParkEnergyBarChartTotal({
                     typeof item?.payload?.label === "string"
                       ? data.findIndex((d) => d.label === item.payload?.label)
                       : -1
+                  const row = index >= 0 ? data[index] : undefined
+
+                  if (row?.hasData === false) {
+                    return (
+                      <span className="text-muted-foreground">Sin dato</span>
+                    )
+                  }
+
                   const delta =
                     index > 0
                       ? numericValue - (data[index - 1]?.generated ?? 0)
@@ -273,8 +284,8 @@ function ParkEnergyBarChartTotal({
           background={false}
           minPointSize={0}
         >
-          {data.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={barFill(index, n)} />
+          {data.map((row, index) => (
+            <Cell key={`cell-${index}`} fill={barFill(index, n, row.hasData)} />
           ))}
           {density.showBarLabels ? (
             <LabelList

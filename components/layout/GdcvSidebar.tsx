@@ -19,7 +19,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { gdcvParkName } from "@/data/gdcv-mock"
 import {
   LayoutDashboardIcon,
   TrendingUpIcon,
