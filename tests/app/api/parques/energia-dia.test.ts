@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest"
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest"
 
 vi.mock("@/lib/api/client", () => ({
   apiFetch: vi.fn(),
@@ -10,7 +10,12 @@ vi.mock("@/lib/api/client", () => ({
   },
 }))
 
+vi.mock("@/lib/api/medidor-principal", () => ({
+  listRegistrosMedidorPrincipal: vi.fn(),
+}))
+
 import { apiFetch, UnauthorizedError } from "@/lib/api/client"
+import { listRegistrosMedidorPrincipal } from "@/lib/api/medidor-principal"
 import { GET } from "@/app/api/parques/[parqueId]/energia-dia/route"
 
 function makeRequest(periodo?: string): Request {
@@ -21,6 +26,9 @@ function makeRequest(periodo?: string): Request {
 }
 
 describe("GET /api/parques/[parqueId]/energia-dia", () => {
+  beforeEach(() => {
+    vi.mocked(listRegistrosMedidorPrincipal).mockResolvedValue([])
+  })
   afterEach(() => vi.restoreAllMocks())
 
   it("returns 400 when periodo is missing", async () => {
@@ -75,5 +83,54 @@ describe("GET /api/parques/[parqueId]/energia-dia", () => {
     vi.mocked(apiFetch).mockRejectedValue(new Error("boom"))
     const response = await GET(makeRequest("2026-07-20"), { params: Promise.resolve({ parqueId: "p1" }) })
     expect(response.status).toBe(500)
+  })
+
+  it("fetches DIMMs registros for the Argentina calendar day range and returns them as registrosDimms/dimmsStatus: ok", async () => {
+    vi.mocked(apiFetch).mockResolvedValue([])
+    const registrosDimms = [{ fechaHora: "2026-07-20T08:00:00-03:00", energiaActivaExportadaWh: 500 }]
+    vi.mocked(listRegistrosMedidorPrincipal).mockResolvedValue(registrosDimms)
+
+    const response = await GET(makeRequest("2026-07-20"), { params: Promise.resolve({ parqueId: "p1" }) })
+
+    expect(listRegistrosMedidorPrincipal).toHaveBeenCalledWith(
+      "p1",
+      "2026-07-20T00:00:00-03:00",
+      "2026-07-21T00:00:00-03:00"
+    )
+    const body = await response.json()
+    expect(response.status).toBe(200)
+    expect(body.registrosDimms).toEqual(registrosDimms)
+    expect(body.dimmsStatus).toBe("ok")
+  })
+
+  it("does not tumble the response when listRegistrosMedidorPrincipal throws a non-Unauthorized error — dimmsStatus: error, Huawei data intact", async () => {
+    const huaweiRegistros = [
+      {
+        capturadoEn: "2026-07-20T08:00:00.000Z",
+        energiaDiaKwh: 10,
+        ingresoDia: 1,
+        energiaTotalKwh: 100,
+        energiaInyectadaDiaKwh: 0,
+        energiaConsumidaDiaKwh: 0,
+      },
+    ]
+    vi.mocked(apiFetch).mockResolvedValue(huaweiRegistros)
+    vi.mocked(listRegistrosMedidorPrincipal).mockRejectedValue(new Error("boom"))
+
+    const response = await GET(makeRequest("2026-07-20"), { params: Promise.resolve({ parqueId: "p1" }) })
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.registros).toEqual(huaweiRegistros)
+    expect(body.registrosDimms).toEqual([])
+    expect(body.dimmsStatus).toBe("error")
+  })
+
+  it("returns 401 when listRegistrosMedidorPrincipal throws UnauthorizedError", async () => {
+    vi.mocked(apiFetch).mockResolvedValue([])
+    vi.mocked(listRegistrosMedidorPrincipal).mockRejectedValue(new UnauthorizedError())
+
+    const response = await GET(makeRequest("2026-07-20"), { params: Promise.resolve({ parqueId: "p1" }) })
+    expect(response.status).toBe(401)
   })
 })

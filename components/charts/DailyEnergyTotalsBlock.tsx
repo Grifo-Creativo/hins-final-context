@@ -1,11 +1,13 @@
 // components/charts/DailyEnergyTotalsBlock.tsx
 "use client"
 
-import { DailyEnergyMeasuresChart, type DailyEnergyMeasurePoint } from "@/components/charts/DailyEnergyMeasuresChart"
+import { DailyEnergyComparativeChart } from "@/components/charts/DailyEnergyComparativeChart"
 import { Button } from "@/components/ui/button"
 import { DatePicker } from "@/components/ui/date-picker"
-import type { RegistroEnergiaDia } from "@/lib/api/types"
+import type { RegistroEnergiaDia, RegistroMedidorPrincipal } from "@/lib/api/types"
 import { getRegistroMasRecienteDelDia, getRegistrosDelDiaOrdenados } from "@/lib/park-energy-series"
+import { buildComparativaGeneracionDiaria } from "@/lib/energia-comparativa"
+import { getArgentinaCurrentHour } from "@/lib/argentina-day-range"
 import {
   addCalendarDays,
   formatChartDayLong,
@@ -14,11 +16,6 @@ import {
 } from "@/lib/chart-day-format"
 import { cn } from "@/lib/utils"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-
-function formatHourLabel(capturadoEn: string): string {
-  const d = new Date(capturadoEn)
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
-}
 
 function formatArs(value: number | null): string {
   if (value === null) return "—"
@@ -36,6 +33,12 @@ export interface DailyEnergyTotalsBlockProps {
   onActiveDayChange: (day: Date) => void
   /** Todos los registros reales del día (uno por captura), `[]` si no hay dato. */
   registros: RegistroEnergiaDia[]
+  /**
+   * Registros crudos del medidor principal (DIMMs) del día — fuente principal
+   * de la comparativa. `[]` = sin dato/sin medidor. Ver
+   * specs/012-comparativa-dimms-huawei.
+   */
+  registrosDimms: RegistroMedidorPrincipal[]
   className?: string
 }
 
@@ -52,6 +55,7 @@ export function DailyEnergyTotalsBlock({
   today,
   onActiveDayChange,
   registros,
+  registrosDimms,
   className,
 }: DailyEnergyTotalsBlockProps) {
   const prevDay = addCalendarDays(activeDay, -1)
@@ -65,10 +69,16 @@ export function DailyEnergyTotalsBlock({
     onActiveDayChange(next)
   }
 
-  const chartData: DailyEnergyMeasurePoint[] = getRegistrosDelDiaOrdenados(registros).map((r) => ({
-    label: formatHourLabel(r.capturadoEn),
-    kwh: r.energiaDiaKwh ?? 0,
-  }))
+  const comparativaDiaria = buildComparativaGeneracionDiaria(registrosDimms, getRegistrosDelDiaOrdenados(registros))
+  /**
+   * Recorte defensivo: si el día activo es hoy, no graficar puntos con hora
+   * posterior a la hora real (reloj de dispositivo mal calibrado o dato de
+   * prueba futuro en alguna fuente) — para un día ya cerrado se muestran
+   * todas sus horas igual.
+   */
+  const chartData = isToday
+    ? comparativaDiaria.filter((p) => Number(p.label.slice(0, 2)) <= getArgentinaCurrentHour())
+    : comparativaDiaria
 
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col gap-4", className)}>
@@ -86,12 +96,12 @@ export function DailyEnergyTotalsBlock({
       </div>
 
       <div className="relative min-h-[300px] flex-1">
-        {registros.length === 0 ? (
+        {chartData.length === 0 ? (
           <div className="flex h-full min-h-[300px] w-full items-center justify-center">
             <p className="text-sm text-muted-foreground">Sin registros de energía para este día.</p>
           </div>
         ) : (
-          <DailyEnergyMeasuresChart data={chartData} className="h-full min-h-[300px] w-full" />
+          <DailyEnergyComparativeChart data={chartData} className="h-full min-h-[300px] w-full" />
         )}
 
         <Button

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest"
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest"
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((url: string) => {
@@ -28,6 +28,10 @@ vi.mock("@/lib/api/socios", () => ({
   listSocios: vi.fn(),
 }))
 
+vi.mock("@/lib/api/medidor-principal", () => ({
+  getConsolidadoMedidorPrincipal: vi.fn(),
+}))
+
 vi.mock("@/components/gdcv/GdcvPerformanceView", () => ({
   GdcvPerformanceView: vi.fn(() => null),
 }))
@@ -41,6 +45,7 @@ import { UnauthorizedError } from "@/lib/api/client"
 import { resolveDashboardContext } from "@/lib/api/dashboard-context"
 import { listEnergia, listEnergiaDiaria } from "@/lib/api/energia"
 import { listSocios } from "@/lib/api/socios"
+import { getConsolidadoMedidorPrincipal } from "@/lib/api/medidor-principal"
 import GdcvPerformancePage from "@/app/gdcv/performance/page"
 import type { ReactElement } from "react"
 
@@ -74,6 +79,10 @@ const proyecto = {
 }
 
 describe("app/gdcv/performance/page", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getConsolidadoMedidorPrincipal).mockResolvedValue(null)
+  })
   afterEach(() => vi.restoreAllMocks())
 
   it("passes registrosEnergia, registrosEnergiaDiaria and periodoActual to GdcvPerformanceView", async () => {
@@ -144,6 +153,8 @@ describe("app/gdcv/performance/page", () => {
         participacionPorcentaje: 15,
         tipoCargo: "SIN_POTENCIA" as const,
         medidorNumero: "3543871",
+        suministroNumero: "",
+        contratoNumero: "",
         usuarioId: null,
       },
     ]
@@ -185,5 +196,92 @@ describe("app/gdcv/performance/page", () => {
     await expect(
       GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
     ).rejects.toThrow("REDIRECT:/login")
+  })
+
+  it("passes registroDimmsMesActual to GdcvPerformanceView when getConsolidadoMedidorPrincipal succeeds", async () => {
+    vi.mocked(resolveDashboardContext).mockResolvedValue({ proyecto, parque })
+    vi.mocked(listEnergia).mockResolvedValue([])
+    vi.mocked(listEnergiaDiaria).mockResolvedValue([])
+    vi.mocked(listSocios).mockResolvedValue([])
+    const registroDimms = {
+      desde: "2026-09-01T00:00:00.000Z",
+      hasta: "2026-10-01T00:00:00.000Z",
+      totalRegistros: 100,
+      energiaActivaExportadaKwh: 1234,
+    }
+    vi.mocked(getConsolidadoMedidorPrincipal).mockResolvedValue(registroDimms)
+
+    const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+
+    expect(findViewProps(element)).toEqual(
+      expect.objectContaining({
+        registroDimmsMesActual: { status: "ok", registro: registroDimms },
+      })
+    )
+  })
+
+  it("passes registroDimmsMesActual status 'sin-medidor' (not an error) when getConsolidadoMedidorPrincipal resolves null (404)", async () => {
+    vi.mocked(resolveDashboardContext).mockResolvedValue({ proyecto, parque })
+    vi.mocked(listEnergia).mockResolvedValue([])
+    vi.mocked(listEnergiaDiaria).mockResolvedValue([])
+    vi.mocked(listSocios).mockResolvedValue([])
+    vi.mocked(getConsolidadoMedidorPrincipal).mockResolvedValue(null)
+
+    const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+
+    expect(findViewProps(element)).toEqual(
+      expect.objectContaining({
+        registroDimmsMesActual: { status: "sin-medidor" },
+      })
+    )
+  })
+
+  it("passes registroDimmsMesActual status 'error' (distinct from sin-medidor) when getConsolidadoMedidorPrincipal throws a non-Unauthorized error, without tumbling the page", async () => {
+    vi.mocked(resolveDashboardContext).mockResolvedValue({ proyecto, parque })
+    vi.mocked(listEnergia).mockResolvedValue([])
+    vi.mocked(listEnergiaDiaria).mockResolvedValue([])
+    vi.mocked(listSocios).mockResolvedValue([])
+    vi.mocked(getConsolidadoMedidorPrincipal).mockRejectedValue(new Error("boom"))
+
+    const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+
+    expect(findViewProps(element)).toEqual(
+      expect.objectContaining({
+        registroDimmsMesActual: { status: "error" },
+      })
+    )
+  })
+
+  it("redirects to /login when getConsolidadoMedidorPrincipal throws UnauthorizedError", async () => {
+    vi.mocked(resolveDashboardContext).mockResolvedValue({ proyecto, parque })
+    vi.mocked(listEnergia).mockResolvedValue([])
+    vi.mocked(listEnergiaDiaria).mockResolvedValue([])
+    vi.mocked(listSocios).mockResolvedValue([])
+    vi.mocked(getConsolidadoMedidorPrincipal).mockRejectedValue(new UnauthorizedError())
+
+    await expect(
+      GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+    ).rejects.toThrow("REDIRECT:/login")
+  })
+
+  it("passes registrosDimmsPorRango, fetched per-month in parallel for the chart range, to GdcvPerformanceView", async () => {
+    vi.mocked(resolveDashboardContext).mockResolvedValue({ proyecto, parque })
+    vi.mocked(listEnergia).mockResolvedValue([
+      { periodo: "2026-07", energiaMesKwh: 100, ingresoMes: 1 },
+      { periodo: "2026-08", energiaMesKwh: 110, ingresoMes: 1 },
+      { periodo: "2026-09", energiaMesKwh: 120, ingresoMes: 1 },
+    ])
+    vi.mocked(listEnergiaDiaria).mockResolvedValue([])
+    vi.mocked(listSocios).mockResolvedValue([])
+    vi.mocked(getConsolidadoMedidorPrincipal).mockResolvedValue(null)
+
+    const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+    const props = findViewProps(element)
+
+    expect(Array.isArray(props.registrosDimmsPorRango)).toBe(true)
+    expect((props.registrosDimmsPorRango as unknown[]).length).toBeGreaterThan(0)
+    expect(getConsolidadoMedidorPrincipal).toHaveBeenCalledTimes(
+      (props.registrosDimmsPorRango as unknown[]).length + 1 // +1 for the current-month card fetch
+    )
   })
 })

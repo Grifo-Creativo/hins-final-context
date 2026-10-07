@@ -14,7 +14,7 @@ import { ParkDetailsCard } from "@/components/ui/park-details-card"
 import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeholder-card"
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
-import { parkEnergyBarChartConfig } from "@/data/chart-config"
+import { energiaComparativaChartConfig } from "@/data/chart-config"
 import {
   gddParkDetails,
   highlightAprilCardMock,
@@ -22,21 +22,31 @@ import {
   tariffCardMock,
 } from "@/data/gdd-performance-mock"
 import { toDateKey } from "@/data/gdcv-daily-mock"
-import { formatPeriodoLabel, getMonthNameEs } from "@/lib/format-periodo"
+import { getMonthNameEs } from "@/lib/format-periodo"
 import {
   getGenerationHistoryRows,
   getMonthlyGenerationTotal,
   getMonthlySparklinePoints,
-  getRealParkEnergySeries,
   getRegistroDelMesActual,
 } from "@/lib/park-energy-series"
+import {
+  buildComparativaGeneracionMesActual,
+  getComparativaGeneracionChartRows,
+} from "@/lib/energia-comparativa"
+import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/energia-comparativa"
 import { parqueToDetailsMetrics } from "@/lib/park-details-metrics"
-import type { Parque, RegistroEnergiaDia, RegistroEnergiaDiario, RegistroEnergiaMensual } from "@/lib/api/types"
+import type {
+  Parque,
+  RegistroEnergiaDia,
+  RegistroEnergiaDiario,
+  RegistroEnergiaMensual,
+  RegistroMedidorPrincipal,
+} from "@/lib/api/types"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { DollarSignIcon, ZapIcon } from "lucide-react"
 
 type DailyEnergiaResult =
-  | { key: string; status: "ok"; registros: RegistroEnergiaDia[] }
+  | { key: string; status: "ok"; registros: RegistroEnergiaDia[]; registrosDimms: RegistroMedidorPrincipal[] }
   | { key: string; status: "error" }
 
 interface ParkPerformanceViewProps {
@@ -58,6 +68,17 @@ interface ParkPerformanceViewProps {
   registrosEnergiaDiaria: RegistroEnergiaDiario[] | null
   /** Mes consultado para registrosEnergiaDiaria, formato "YYYY-MM" — resuelto en el servidor. */
   periodoActual: string
+  /**
+   * Estado de la consulta al medidor principal (DIMMs) para `periodoActual` —
+   * fuente principal de la comparativa de la card KPI. Ver
+   * specs/012-comparativa-dimms-huawei.
+   */
+  registroDimmsMesActual: RegistroDimmsMesActual
+  /**
+   * Consolidados DIMMs por mes, uno por período visible en el rango de
+   * gráfico (6M/1A) — fuente principal de la comparativa del gráfico.
+   */
+  registrosDimmsPorRango: RegistroDimmsPorPeriodo[]
 }
 
 export function ParkPerformanceView({
@@ -65,6 +86,8 @@ export function ParkPerformanceView({
   registrosEnergia,
   registrosEnergiaDiaria,
   periodoActual,
+  registroDimmsMesActual,
+  registrosDimmsPorRango,
 }: ParkPerformanceViewProps) {
   const router = useRouter()
   const today = useMemo(() => new Date(), [])
@@ -79,25 +102,44 @@ export function ParkPerformanceView({
     [registrosEnergia, periodoActual]
   )
 
-  const chartData = useMemo(() => {
+  const energiaLoadFailed = registrosEnergia === null
+
+  const comparativaMesActual = useMemo(
+    () =>
+      buildComparativaGeneracionMesActual(
+        periodoActual,
+        registroDimmsMesActual.status === "ok" ? registroDimmsMesActual.registro : null,
+        registroMesActual
+      ),
+    [periodoActual, registroDimmsMesActual, registroMesActual]
+  )
+
+  const dimmsMesActualNoDisponible = registroDimmsMesActual.status === "error"
+
+  const comparativaChartRows = useMemo(
+    () => getComparativaGeneracionChartRows(registrosDimmsPorRango, registrosEnergia ?? []),
+    [registrosDimmsPorRango, registrosEnergia]
+  )
+
+  const dimmsRangoNoDisponible =
+    registrosDimmsPorRango.length > 0 && registrosDimmsPorRango.every((r) => r.dato === null)
+
+  const comparativeChartData = useMemo(() => {
     if (period === "1d" || registrosEnergia === null) {
       return []
     }
     if (period === "1m") {
-      return registroMesActual
-        ? [
-            {
-              label: formatPeriodoLabel(registroMesActual.periodo),
-              generated: registroMesActual.energiaMesKwh ?? 0,
-              hasData: registroMesActual.energiaMesKwh !== null && registroMesActual.energiaMesKwh !== undefined,
-            },
-          ]
-        : []
+      return [
+        {
+          label: comparativaMesActual.label,
+          dimmsKwh: comparativaMesActual.dimmsKwh,
+          huaweiKwh: comparativaMesActual.huaweiKwh,
+        },
+      ]
     }
-    return getRealParkEnergySeries(registrosEnergia, period)
-  }, [period, registrosEnergia, registroMesActual])
-
-  const energiaLoadFailed = registrosEnergia === null
+    const slice = period === "6m" ? -6 : period === "1a" ? -12 : undefined
+    return slice ? comparativaChartRows.slice(slice) : comparativaChartRows
+  }, [period, registrosEnergia, comparativaMesActual, comparativaChartRows])
 
   const generationHistoryRows = useMemo(
     () => getGenerationHistoryRows(registrosEnergia ?? []),
@@ -127,9 +169,12 @@ export function ParkPerformanceView({
     })
       .then((response) => {
         if (!response.ok) throw new Error("Falla al consultar la energía del día")
-        return response.json() as Promise<{ registros: RegistroEnergiaDia[] }>
+        return response.json() as Promise<{
+          registros: RegistroEnergiaDia[]
+          registrosDimms: RegistroMedidorPrincipal[]
+        }>
       })
-      .then(({ registros }) => setDailyEnergia({ key, status: "ok", registros }))
+      .then(({ registros, registrosDimms }) => setDailyEnergia({ key, status: "ok", registros, registrosDimms }))
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return
         setDailyEnergia({ key, status: "error" })
@@ -177,6 +222,7 @@ export function ParkPerformanceView({
                   today={today}
                   onActiveDayChange={setActiveDay}
                   registros={dailyEnergia?.status === "ok" ? dailyEnergia.registros : []}
+                  registrosDimms={dailyEnergia?.status === "ok" ? dailyEnergia.registrosDimms : []}
                   className="h-full min-h-[300px]"
                 />
               </div>
@@ -190,7 +236,7 @@ export function ParkPerformanceView({
                 Reintentar
               </Button>
             </div>
-          ) : chartData.length === 0 ? (
+          ) : comparativeChartData.length === 0 ? (
             <div className="flex min-h-[300px] w-full flex-1 items-center justify-center">
               <p className="text-sm text-muted-foreground">
                 Sin registros de energía para este período.
@@ -198,9 +244,15 @@ export function ParkPerformanceView({
             </div>
           ) : (
             <div className="min-h-[300px] w-full flex-1">
+              {dimmsRangoNoDisponible && (
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Medidor principal no disponible para este rango — mostrando solo FusionSolar.
+                </p>
+              )}
               <ParkEnergyBarChart
-                data={chartData}
-                chartConfig={parkEnergyBarChartConfig}
+                variant="comparative"
+                data={comparativeChartData}
+                chartConfig={energiaComparativaChartConfig}
                 className="h-full min-h-[300px]"
               />
             </div>
@@ -212,20 +264,34 @@ export function ParkPerformanceView({
             icon={ZapIcon}
             label={`Generada en ${getMonthNameEs(periodoActual)}`}
             value={
-              monthlyGenerationFailed
+              comparativaMesActual.dimmsKwh === null
                 ? "—"
-                : monthlyGenerationTotal.toLocaleString("es-AR", {
+                : comparativaMesActual.dimmsKwh.toLocaleString("es-AR", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })
             }
             unit="kWh"
-            delta={
+            primaryUnavailable={registroDimmsMesActual.status !== "ok"}
+            comparativeLabel="FusionSolar"
+            comparativeValue={
               monthlyGenerationFailed
-                ? "No se pudo cargar este mes"
-                // Mock por excepción documentada: sin endpoint de acumulado
-                // histórico desde el inicio (ver specs/003-monthly-generation-kpi).
-                : highlightAprilCardMock.compareBadge
+                ? undefined
+                : monthlyGenerationTotal.toLocaleString("es-AR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+            }
+            delta={
+              dimmsMesActualNoDisponible
+                ? "No se pudo cargar el medidor principal"
+                : registroDimmsMesActual.status === "sin-medidor"
+                  ? "Parque sin medidor principal"
+                  : monthlyGenerationFailed
+                    ? "No se pudo cargar este mes"
+                    // Mock por excepción documentada: sin endpoint de acumulado
+                    // histórico desde el inicio (ver specs/003-monthly-generation-kpi).
+                    : highlightAprilCardMock.compareBadge
             }
             sparklineData={monthlyGenerationFailed ? [] : monthlySparklinePoints}
           />

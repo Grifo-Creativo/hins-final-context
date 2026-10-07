@@ -1,7 +1,7 @@
 // components/gdcv/SociosTable.tsx
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import {
   flexRender,
   getCoreRowModel,
@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CreateSocioDialog } from "@/components/gdcv/CreateSocioDialog"
+import { SocioHistoricoDialog } from "@/components/gdcv/SocioHistoricoDialog"
 import { Heading } from "@/components/ui/heading"
 import {
   DropdownMenu,
@@ -48,6 +49,7 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
+  HistoryIcon,
   MoreHorizontalIcon,
   PlusIcon,
   ShareIcon,
@@ -112,7 +114,8 @@ function sortableHeader(
 
 // ─── Column definitions ───────────────────────────────────────────────────────
 
-const columns: ColumnDef<SocioRow>[] = [
+function createColumns(onHistoricoClick: (socio: SocioRow) => void): ColumnDef<SocioRow>[] {
+  return [
   {
     accessorKey: "nombre",
     enableHiding: false,
@@ -221,7 +224,21 @@ const columns: ColumnDef<SocioRow>[] = [
     enableSorting: false,
     header: "",
     cell: ({ row }) => (
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-8 shadow-xs"
+          aria-label={`Ver histórico — ${row.original.nombre}`}
+          title="Ver histórico"
+          onClick={(e) => {
+            e.stopPropagation()
+            onHistoricoClick(row.original)
+          }}
+        >
+          <HistoryIcon className="size-4" aria-hidden />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -260,7 +277,8 @@ const columns: ColumnDef<SocioRow>[] = [
       </div>
     ),
   },
-]
+  ]
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -294,6 +312,12 @@ export function SociosTable({
   const [internalMedidoresSheet, setInternalMedidoresSheet] =
     useState<SocioRow | null>(null)
   const [createSocioOpen, setCreateSocioOpen] = useState(false)
+  const [historicoSocio, setHistoricoSocio] = useState<SocioRow | null>(null)
+
+  const columns = useMemo(
+    () => createColumns((socio) => setHistoricoSocio(socio)),
+    []
+  )
 
   const isMedidoresSheetControlled = onMedidoresSheetOpenChange !== undefined
   const medidoresSheet = isMedidoresSheetControlled
@@ -542,6 +566,16 @@ export function SociosTable({
         open={createSocioOpen}
         onOpenChange={setCreateSocioOpen}
       />
+
+      {historicoSocio ? (
+        <SocioHistoricoDialog
+          parqueId={parqueId}
+          socioId={historicoSocio.id}
+          socioNombre={historicoSocio.nombre}
+          open={!!historicoSocio}
+          onOpenChange={(open) => { if (!open) setHistoricoSocio(null) }}
+        />
+      ) : null}
     </>
   )
 }
