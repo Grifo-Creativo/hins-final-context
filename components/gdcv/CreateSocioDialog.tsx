@@ -30,6 +30,8 @@ interface SocioFormData {
   participacionPorcentaje: string
   tipoCargo: TipoCargo | undefined
   medidorNumero: string
+  suministroNumero: string
+  contratoNumero: string
 }
 
 const EMPTY_FORM: SocioFormData = {
@@ -37,9 +39,42 @@ const EMPTY_FORM: SocioFormData = {
   participacionPorcentaje: "",
   tipoCargo: undefined,
   medidorNumero: "",
+  suministroNumero: "",
+  contratoNumero: "",
 }
 
 const TIPO_CARGO_OPTIONS: TipoCargo[] = ["CON_POTENCIA", "SIN_POTENCIA"]
+
+/**
+ * No. de Medidor es opcional; si se completa, dispara la obligatoriedad de
+ * No. de Suministro y No. de Contrato (ver specs/008-socio-dimms-fields).
+ */
+export function getSocioFormValidationError(formData: SocioFormData): string | null {
+  if (!formData.nombre.trim()) {
+    return "Por favor ingresa el nombre del socio"
+  }
+  const participacionValue = Number(formData.participacionPorcentaje)
+  const isParticipacionValid =
+    formData.participacionPorcentaje.trim() !== "" &&
+    Number.isFinite(participacionValue) &&
+    participacionValue > 0 &&
+    participacionValue <= 100
+  if (!isParticipacionValid) {
+    return "Por favor ingresa un porcentaje de participación válido (0–100)"
+  }
+  if (!formData.tipoCargo) {
+    return "Por favor selecciona el tipo de cargo"
+  }
+  if (formData.medidorNumero.trim() !== "") {
+    if (!formData.suministroNumero.trim()) {
+      return "Por favor ingresa el número de suministro"
+    }
+    if (!formData.contratoNumero.trim()) {
+      return "Por favor ingresa el número de contrato"
+    }
+  }
+  return null
+}
 
 export function CreateSocioDialog({ parqueId, open, onOpenChange }: CreateSocioDialogProps) {
   const router = useRouter()
@@ -60,33 +95,13 @@ export function CreateSocioDialog({ parqueId, open, onOpenChange }: CreateSocioD
   }
 
   const participacionValue = Number(formData.participacionPorcentaje)
-  const isParticipacionValid =
-    formData.participacionPorcentaje.trim() !== "" &&
-    Number.isFinite(participacionValue) &&
-    participacionValue > 0 &&
-    participacionValue <= 100
-
-  const isFormValid =
-    formData.nombre.trim() !== "" &&
-    isParticipacionValid &&
-    formData.tipoCargo !== undefined &&
-    formData.medidorNumero.trim() !== ""
+  const validationError = getSocioFormValidationError(formData)
+  const isFormValid = validationError === null
 
   const handleCreate = () => {
-    if (!formData.nombre.trim()) {
-      setError("Por favor ingresa el nombre del socio")
-      return
-    }
-    if (!isParticipacionValid) {
-      setError("Por favor ingresa un porcentaje de participación válido (0–100)")
-      return
-    }
-    if (!formData.tipoCargo) {
-      setError("Por favor selecciona el tipo de cargo")
-      return
-    }
-    if (!formData.medidorNumero.trim()) {
-      setError("Por favor ingresa el número de medidor")
+    const formError = getSocioFormValidationError(formData)
+    if (formError) {
+      setError(formError)
       return
     }
 
@@ -97,6 +112,8 @@ export function CreateSocioDialog({ parqueId, open, onOpenChange }: CreateSocioD
         participacionPorcentaje: participacionValue,
         tipoCargo: formData.tipoCargo as TipoCargo,
         medidorNumero: formData.medidorNumero.trim(),
+        suministroNumero: formData.suministroNumero.trim(),
+        contratoNumero: formData.contratoNumero.trim(),
       }
       const result = await createSocioAction(parqueId, dto)
       if (result.error) {
@@ -178,6 +195,30 @@ export function CreateSocioDialog({ parqueId, open, onOpenChange }: CreateSocioD
               placeholder="Ingresar..."
               value={formData.medidorNumero}
               onChange={(e) => setFormData({ ...formData, medidorNumero: e.target.value })}
+            />
+          </div>
+
+          {/* N° de Suministro */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              N° de Suministro
+            </label>
+            <Input
+              placeholder="Ingresar..."
+              value={formData.suministroNumero}
+              onChange={(e) => setFormData({ ...formData, suministroNumero: e.target.value })}
+            />
+          </div>
+
+          {/* N° de Contrato */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              N° de Contrato
+            </label>
+            <Input
+              placeholder="Ingresar..."
+              value={formData.contratoNumero}
+              onChange={(e) => setFormData({ ...formData, contratoNumero: e.target.value })}
             />
           </div>
 

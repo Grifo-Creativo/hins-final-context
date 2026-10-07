@@ -6,6 +6,8 @@ import { resolveDashboardContext, type DashboardContext } from "@/lib/api/dashbo
 import { UnauthorizedError } from "@/lib/api/client"
 import { listEnergia, listEnergiaDiaria } from "@/lib/api/energia"
 import { listSocios } from "@/lib/api/socios"
+import { getConsolidadoMedidorPrincipal } from "@/lib/api/medidor-principal"
+import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/energia-comparativa"
 import type { RegistroEnergiaDiario, RegistroEnergiaMensual, Socio } from "@/lib/api/types"
 
 interface GdcvPerformancePageProps {
@@ -80,6 +82,57 @@ async function loadSocios(parqueId: string): Promise<{ socios: Socio[] | null }>
   }
 }
 
+/**
+ * Igual criterio que loadRegistrosEnergia: una falla acá no debe tumbar la
+ * página, solo el estado de la card KPI comparativa. 404 (sin medidor
+ * principal configurado) es una condición de negocio, distinta de un fallo
+ * transitorio — ver contracts/medidor-principal-consolidado.md.
+ */
+async function loadRegistroDimmsMesActual(
+  parqueId: string,
+  periodo: string
+): Promise<RegistroDimmsMesActual> {
+  try {
+    const registro = await getConsolidadoMedidorPrincipal(parqueId, periodo)
+    return registro ? { status: "ok", registro } : { status: "sin-medidor" }
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      redirect("/login")
+    }
+    return { status: "error" }
+  }
+}
+
+/**
+ * El endpoint DIMMs consolidado solo devuelve el total de un único período
+ * por llamada (ver research.md Decision 2) — se pide uno por mes visible en
+ * el rango de gráfico (acotado a los últimos 12 meses de registrosEnergia),
+ * en paralelo. Cada período fallido individualmente queda como `dato: null`
+ * (mismo tratamiento que "sin datos" para ese punto del gráfico).
+ */
+async function loadRegistrosDimmsPorRango(
+  parqueId: string,
+  registrosEnergia: RegistroEnergiaMensual[] | null
+): Promise<RegistroDimmsPorPeriodo[]> {
+  const periodos = [...new Set((registrosEnergia ?? []).map((r) => r.periodo))]
+    .sort((a, b) => a.localeCompare(b))
+    .slice(-12)
+
+  return Promise.all(
+    periodos.map(async (periodo) => {
+      try {
+        const dato = await getConsolidadoMedidorPrincipal(parqueId, periodo)
+        return { periodo, dato }
+      } catch (error) {
+        if (error instanceof UnauthorizedError) {
+          redirect("/login")
+        }
+        return { periodo, dato: null }
+      }
+    })
+  )
+}
+
 export default async function GdcvPerformancePage({ searchParams }: GdcvPerformancePageProps) {
   const { proyectoId } = await searchParams
   if (!proyectoId) {
@@ -96,11 +149,15 @@ export default async function GdcvPerformancePage({ searchParams }: GdcvPerforma
     { registros: registrosEnergia },
     { registros: registrosEnergiaDiaria },
     { socios },
+    registroDimmsMesActual,
   ] = await Promise.all([
     loadRegistrosEnergia(context.parque.id),
     loadRegistrosEnergiaDiaria(context.parque.id, periodoActual),
     loadSocios(context.parque.id),
+    loadRegistroDimmsMesActual(context.parque.id, periodoActual),
   ])
+
+  const registrosDimmsPorRango = await loadRegistrosDimmsPorRango(context.parque.id, registrosEnergia)
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
@@ -111,6 +168,8 @@ export default async function GdcvPerformancePage({ searchParams }: GdcvPerforma
         registrosEnergiaDiaria={registrosEnergiaDiaria}
         periodoActual={periodoActual}
         socios={socios}
+        registroDimmsMesActual={registroDimmsMesActual}
+        registrosDimmsPorRango={registrosDimmsPorRango}
       />
     </div>
   )

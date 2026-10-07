@@ -90,6 +90,8 @@ export interface CreateSocioDto {
   participacionPorcentaje: number
   tipoCargo: TipoCargo
   medidorNumero: string
+  suministroNumero: string
+  contratoNumero: string
 }
 
 export interface Socio {
@@ -99,6 +101,8 @@ export interface Socio {
   participacionPorcentaje: number
   tipoCargo: TipoCargo
   medidorNumero: string
+  suministroNumero: string
+  contratoNumero: string
   usuarioId: string | null
 }
 
@@ -187,6 +191,33 @@ export interface RegistroEnergiaDia {
   energiaConsumidaDiaKwh: number | null
 }
 
+/**
+ * Forma real (slim) de un registro crudo de
+ * GET /parques/{parqueId}/medidor-principal/registros?desde=...&hasta=... —
+ * solo los campos usados por la comparativa diaria (DIMMs vs Huawei). Cada
+ * registro ya es el delta de energía de su intervalo (confirmado por el
+ * usuario), no una lectura acumulada del medidor.
+ */
+export interface RegistroMedidorPrincipal {
+  /** Momento de la medición, hora local del parque (America/Argentina/Buenos_Aires). */
+  fechaHora: string
+  /** Delta de energía activa exportada del intervalo, en Wh. */
+  energiaActivaExportadaWh: number | null
+}
+
+/**
+ * Forma real de lectura de
+ * GET /parques/{parqueId}/medidor-principal/registros/consolidado?periodo=YYYY-MM —
+ * solo los campos usados por la comparativa DIMMs vs Huawei (no se persiste
+ * `porTarifa`). Ver specs/012-comparativa-dimms-huawei/contracts/medidor-principal-consolidado.md.
+ */
+export interface ConsolidadoMedidorPrincipal {
+  desde: string
+  hasta: string
+  totalRegistros: number
+  energiaActivaExportadaKwh: number | null
+}
+
 export interface RegistrarRoiDto {
   socioId?: string
   periodo: string
@@ -251,3 +282,83 @@ export interface RegistroEjecucionSincronizacionDto {
   registrosOmitidos: number
   mensajeError: string | null
 }
+
+/**
+ * Cada item es un registro plano devuelto tal cual por la API externa
+ * consultada por el backend — sin esquema fijo más allá de `id`/`socioId`/
+ * `obtenidoEn` (ver specs/010-socio-historico-tablas/research.md, corregido
+ * respecto a la asunción inicial de un wrapper `payload`).
+ */
+export type RegistroHistorico = Record<string, unknown>
+export type FacturacionHistorico = Record<string, unknown>
+export type MedicionHistorico = Record<string, unknown>
+
+// ─── Configuración de administrador (specs/013-admin-config-tarifas-costos) ─────
+
+export type TarifaEstado = "HISTORICA" | "VIGENTE" | "FUTURA"
+export type TipoCosto = "FIJO" | "VARIABLE"
+export type Periodicidad = "DIARIA" | "MENSUAL" | "ANUAL"
+export type TipoCambioTipo = "PROYECTO" | "REAL"
+
+export interface Tarifa {
+  id: string
+  nombre: string
+  valorEnergia: number
+  valorInyeccion: number
+  unidad: string
+  vigenteDesde: string
+  vigenteHasta: string | null
+  estado: TarifaEstado
+}
+
+export interface CreateTarifaDto {
+  nombre: string
+  valorEnergia: number
+  valorInyeccion: number
+  unidad: string
+  vigenteDesde: string
+}
+
+export type UpdateTarifaDto = Partial<Omit<CreateTarifaDto, "nombre">>
+
+export interface Costo {
+  id: string
+  proyectoId: string
+  parqueId: string
+  concepto: string
+  tipoCosto: TipoCosto
+  valor: number
+  moneda: string
+  unidad: string
+}
+
+export interface CreateCostoDto {
+  proyectoId: string
+  parqueId: string
+  concepto: string
+  tipoCosto: TipoCosto
+  valor: number
+  moneda: string
+  unidad: string
+}
+
+export type UpdateCostoDto = Partial<CreateCostoDto>
+
+export interface TipoCambio {
+  id: string
+  tipo: TipoCambioTipo
+  periodicidad: Periodicidad
+  periodo: string
+  valor: number
+  unidad: "ARS/USD"
+}
+
+export interface CreateTipoCambioDto {
+  periodo: string
+  periodicidad: Periodicidad
+  tipo: TipoCambioTipo
+  valor: number
+  unidad: "ARS/USD"
+}
+
+export type UpdateTipoCambioDto = Partial<CreateTipoCambioDto>
