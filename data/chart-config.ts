@@ -78,6 +78,14 @@ export const dailyGenerationChartConfig = {
   },
 } satisfies ChartConfig
 
+/** Energía generada por hora, real (GET /parques/{id}/energia?periodo=AAAA-MM-DD) — pestaña DIA. */
+export const dailyEnergyMeasuresChartConfig = {
+  kwh: {
+    label: "Generada",
+    color: "var(--chart-1)",
+  },
+} satisfies ChartConfig
+
 /** Alias del mismo preset que `roiRecoveryChartConfig` para GDCV/agc/socio */
 export const gdcvRoiRecoveryChartConfig = roiRecoveryChartConfig
 
