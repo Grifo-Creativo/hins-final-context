@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CreateSocioDialog } from "@/components/gdcv/CreateSocioDialog"
 import { SocioHistoricoDialog } from "@/components/gdcv/SocioHistoricoDialog"
+import { SocioTarifasDialog } from "@/components/gdcv/SocioTarifasDialog"
 import { Heading } from "@/components/ui/heading"
 import {
   DropdownMenu,
@@ -50,6 +51,7 @@ import {
   ArrowUp,
   ArrowUpDown,
   HistoryIcon,
+  TagIcon,
   MoreHorizontalIcon,
   PlusIcon,
   ShareIcon,
@@ -114,7 +116,10 @@ function sortableHeader(
 
 // ─── Column definitions ───────────────────────────────────────────────────────
 
-function createColumns(onHistoricoClick: (socio: SocioRow) => void): ColumnDef<SocioRow>[] {
+function createColumns(
+  onHistoricoClick: (socio: SocioRow) => void,
+  onTarifasClick: (socio: SocioRow) => void
+): ColumnDef<SocioRow>[] {
   return [
   {
     accessorKey: "nombre",
@@ -239,6 +244,20 @@ function createColumns(onHistoricoClick: (socio: SocioRow) => void): ColumnDef<S
         >
           <HistoryIcon className="size-4" aria-hidden />
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-8 shadow-xs"
+          aria-label={`Ver tarifas — ${row.original.nombre}`}
+          title="Ver tarifas"
+          onClick={(e) => {
+            e.stopPropagation()
+            onTarifasClick(row.original)
+          }}
+        >
+          <TagIcon className="size-4" aria-hidden />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -313,9 +332,10 @@ export function SociosTable({
     useState<SocioRow | null>(null)
   const [createSocioOpen, setCreateSocioOpen] = useState(false)
   const [historicoSocio, setHistoricoSocio] = useState<SocioRow | null>(null)
+  const [tarifasSocio, setTarifasSocio] = useState<SocioRow | null>(null)
 
   const columns = useMemo(
-    () => createColumns((socio) => setHistoricoSocio(socio)),
+    () => createColumns((socio) => setHistoricoSocio(socio), (socio) => setTarifasSocio(socio)),
     []
   )
 
@@ -574,6 +594,16 @@ export function SociosTable({
           socioNombre={historicoSocio.nombre}
           open={!!historicoSocio}
           onOpenChange={(open) => { if (!open) setHistoricoSocio(null) }}
+        />
+      ) : null}
+
+      {tarifasSocio ? (
+        <SocioTarifasDialog
+          parqueId={parqueId}
+          socioId={tarifasSocio.id}
+          socioNombre={tarifasSocio.nombre}
+          open={!!tarifasSocio}
+          onOpenChange={(open) => { if (!open) setTarifasSocio(null) }}
         />
       ) : null}
     </>

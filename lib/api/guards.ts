@@ -32,3 +32,20 @@ export async function requireAdmin(): Promise<void> {
   }
   if (role !== "HINS_ADMIN") redirect("/main")
 }
+
+/**
+ * Guard de lectura de esquemas tarifarios: HINS_ADMIN y AGC (la escritura
+ * sigue exigiendo `requireAdmin`). Mismos redirects que `requireAdmin`.
+ */
+export async function requireReader(): Promise<UsuarioRole> {
+  await connection()
+  let role: UsuarioRole | null = null
+  try {
+    role = (await getMe())?.role ?? null
+  } catch (error) {
+    if (error instanceof UnauthorizedError) redirect("/login")
+    redirect("/main")
+  }
+  if (role !== "HINS_ADMIN" && role !== "AGC") redirect("/main")
+  return role
+}

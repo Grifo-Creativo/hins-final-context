@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 import { getMe } from "@/lib/api/usuarios"
 import { UnauthorizedError } from "@/lib/api/client"
-import { getCurrentRole, requireAdmin } from "@/lib/api/guards"
+import { getCurrentRole, requireAdmin, requireReader } from "@/lib/api/guards"
 
 describe("lib/api/guards", () => {
   beforeEach(() => vi.clearAllMocks())
@@ -43,5 +43,20 @@ describe("lib/api/guards", () => {
   it("getCurrentRole devuelve el rol", async () => {
     vi.mocked(getMe).mockResolvedValue({ id: "1", email: "a@b.c", nombre: "A", role: "SOCIO" })
     expect(await getCurrentRole()).toBe("SOCIO")
+  })
+
+  it.each(["HINS_ADMIN", "AGC"] as const)("requireReader deja pasar a %s", async (role) => {
+    vi.mocked(getMe).mockResolvedValue({ id: "1", email: "a@b.c", nombre: "A", role })
+    await expect(requireReader()).resolves.toBe(role)
+  })
+
+  it("requireReader redirige a /main si el rol no puede leer", async () => {
+    vi.mocked(getMe).mockResolvedValue({ id: "1", email: "a@b.c", nombre: "A", role: "SOCIO" })
+    await expect(requireReader()).rejects.toThrow("REDIRECT:/main")
+  })
+
+  it("requireReader redirige a /login si la sesión expiró", async () => {
+    vi.mocked(getMe).mockRejectedValue(new UnauthorizedError())
+    await expect(requireReader()).rejects.toThrow("REDIRECT:/login")
   })
 })

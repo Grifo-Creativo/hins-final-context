@@ -34,3 +34,11 @@ export const UNIDADES_SUGERIDAS: readonly string[] = ["ARS/kWh", "USD/kWh", "men
 export function labelOf(options: readonly SelectOption[], value: string): string {
   return options.find((o) => o.value === value)?.label ?? value
 }
+
+export const TIPOS_FRANJA: readonly SelectOption<import("@/lib/api/types").TipoFranja>[] = [
+  { value: "RESTO", label: "Resto" },
+  { value: "PICO", label: "Pico" },
+  { value: "VALLE", label: "Valle" },
+]
+
+export const ORIGEN_LABEL = { PROPIO: "Propio", CATALOGO: "Catálogo" } as const

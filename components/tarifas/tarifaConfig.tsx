@@ -13,7 +13,7 @@ const ESTADO_LABEL: Record<TarifaEstado, string> = {
   FUTURA: "Futura",
 }
 
-const IMPACT_WARNING = "Este cambio puede afectar cálculos existentes (facturación, ROI)."
+const IMPACT_WARNING = "Este cambio puede afectar cálculos existentes (facturación, ROI) y los esquemas tarifarios de parques y socios que usan esta tarifa."
 
 const formatValor = (n: number) => n.toLocaleString("es-AR", { maximumFractionDigits: 6 })
 

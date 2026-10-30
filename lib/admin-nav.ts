@@ -36,7 +36,7 @@ export function buildMainNav(role: UsuarioRole | null | undefined): NavItem[] {
   return items
 }
 
-/** Menú de un parque (GDD/GDC/GDCV). Costos: solo admin. Conserva `?proyectoId`. */
+/** Menú de un parque (GDD/GDC/GDCV). Tarifas: admin y AGC. Costos: solo admin. Conserva `?proyectoId`. */
 export function buildParkNav(
   modelo: ModeloNegocio,
   proyectoId: string | null | undefined,
@@ -49,6 +49,9 @@ export function buildParkNav(
     { title: "Retorno de inversión", href: `${base}/roi${query}`, icon: TrendingUpIcon },
     { title: "Mantenimiento", href: `${base}/mantenimiento${query}`, icon: WrenchIcon },
   ]
+  if (isAdmin(role) || role === "AGC") {
+    items.push({ title: "Tarifas", href: `${base}/tarifas${query}`, icon: TagIcon })
+  }
   if (isAdmin(role)) {
     items.push({ title: "Costos", href: `${base}/costos${query}`, icon: WalletIcon })
   }

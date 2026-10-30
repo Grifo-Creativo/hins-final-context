@@ -362,3 +362,87 @@ export interface CreateTipoCambioDto {
 }
 
 export type UpdateTipoCambioDto = Partial<CreateTipoCambioDto>
+
+// ─── Esquemas tarifarios (specs/014-esquemas-tarifarios) ─────────────────────
+
+export type TipoFranja = "RESTO" | "PICO" | "VALLE"
+export type EsquemaEstado = "HISTORICA" | "VIGENTE" | "FUTURA"
+export type DestinoTipo = "PARQUE" | "SOCIO"
+export type OrigenValor = "PROPIO" | "CATALOGO"
+
+/** Destino de un esquema: un parque, o un socio de ese parque. */
+export type Destino = { tipo: "PARQUE"; parqueId: string } | { tipo: "SOCIO"; parqueId: string; socioId: string }
+
+export interface DestinoRef {
+  tipo: DestinoTipo
+  id: string
+}
+
+export interface Franja {
+  tipo: TipoFranja
+  horaInicio: string
+  horaFin: string
+  tarifaNombre: string
+  /** null = se toma del catálogo. */
+  valorEnergia: number | null
+  valorInyeccion: number | null
+  unidad: string | null
+}
+
+export interface FranjaDto {
+  tipo: TipoFranja
+  tarifaNombre: string
+  horaInicio?: string
+  horaFin?: string
+  valorEnergia?: number
+  valorInyeccion?: number
+  unidad?: string
+}
+
+export interface Esquema {
+  id: string
+  destino: DestinoRef
+  vigenteDesde: string
+  vigenteHasta: string | null
+  estado: EsquemaEstado
+  franjas: Franja[]
+}
+
+export interface CreateEsquemaDto {
+  vigenteDesde: string
+  franjas: FranjaDto[]
+}
+
+export interface UpdateEsquemaDto {
+  vigenteDesde?: string
+  franjas?: FranjaDto[]
+}
+
+export interface ValorConOrigen<T> {
+  valor: T
+  origen: OrigenValor
+}
+
+export interface FranjaEfectiva {
+  tipo: TipoFranja
+  horaInicio: string
+  horaFin: string
+  tarifaNombre: string
+  versionCatalogoDesde: string | null
+  valorEnergia: ValorConOrigen<number>
+  valorInyeccion: ValorConOrigen<number>
+  unidad: ValorConOrigen<string>
+}
+
+export interface EsquemaAplicado {
+  id: string
+  destino: DestinoRef
+  vigenteDesde: string
+  vigenteHasta: string | null
+}
+
+export interface FranjasEfectivas {
+  esquema: EsquemaAplicado
+  fecha: string
+  franjas: FranjaEfectiva[]
+}

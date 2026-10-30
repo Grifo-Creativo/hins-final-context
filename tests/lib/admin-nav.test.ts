@@ -19,7 +19,7 @@ describe("buildMainNav", () => {
 describe("buildParkNav", () => {
   it("admin ve Costos y no Tarifas/Tipos de cambio", () => {
     const nav = titles(buildParkNav("GDCV", "p1", "HINS_ADMIN"))
-    expect(nav).toEqual(["Performance", "Retorno de inversión", "Mantenimiento", "Costos"])
+    expect(nav).toEqual(["Performance", "Retorno de inversión", "Mantenimiento", "Tarifas", "Costos"])
   })
 
   it("no admin no ve Costos", () => {
@@ -33,11 +33,23 @@ describe("buildParkNav", () => {
       "/gdc/performance?proyectoId=abc%201",
       "/gdc/roi?proyectoId=abc%201",
       "/gdc/mantenimiento?proyectoId=abc%201",
+      "/gdc/tarifas?proyectoId=abc%201",
       "/gdc/costos?proyectoId=abc%201",
     ])
   })
 
   it("sin proyectoId deja los hrefs sin query", () => {
     expect(buildParkNav("GDD", null, "AGC")[0].href).toBe("/gdd/performance")
+  })
+})
+
+describe("buildParkNav — Tarifas (esquemas)", () => {
+  it.each(["HINS_ADMIN", "AGC"] as const)("%s ve Tarifas con proyectoId", (role) => {
+    const item = buildParkNav("GDCV", "p1", role).find((i) => i.title === "Tarifas")
+    expect(item?.href).toBe("/gdcv/tarifas?proyectoId=p1")
+  })
+
+  it.each(["GDD_OWNER", "SOCIO", null] as const)("%s no ve Tarifas", (role) => {
+    expect(titles(buildParkNav("GDD", "p1", role))).not.toContain("Tarifas")
   })
 })

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { getArgentinaDayRangeIso, getArgentinaCurrentHour } from "@/lib/argentina-day-range"
+import { getArgentinaDayRangeIso, getArgentinaCurrentHour, getArgentinaTodayIso } from "@/lib/argentina-day-range"
 
 describe("getArgentinaDayRangeIso", () => {
   it("returns the Argentina calendar day (UTC-3, no DST) as an explicit-offset ISO range", () => {
@@ -34,5 +34,12 @@ describe("getArgentinaCurrentHour", () => {
 
   it("rolls back across midnight correctly", () => {
     expect(getArgentinaCurrentHour(new Date("2026-09-22T02:00:00.000Z"))).toBe(23)
+  })
+})
+
+describe("getArgentinaTodayIso", () => {
+  it("usa UTC-3: a las 01:00Z sigue siendo el día anterior en Argentina", () => {
+    expect(getArgentinaTodayIso(new Date("2026-10-30T01:00:00Z"))).toBe("2026-10-29")
+    expect(getArgentinaTodayIso(new Date("2026-10-30T03:00:00Z"))).toBe("2026-10-30")
   })
 })

@@ -33,3 +33,8 @@ export function getArgentinaDayRangeIso(date: Date): { desde: string; hasta: str
 export function getArgentinaCurrentHour(now: Date = new Date()): number {
   return (now.getUTCHours() + 24 - 3) % 24
 }
+
+/** Fecha de hoy en Argentina (UTC-3 fijo) como YYYY-MM-DD. */
+export function getArgentinaTodayIso(now: Date = new Date()): string {
+  return new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10)
+}
