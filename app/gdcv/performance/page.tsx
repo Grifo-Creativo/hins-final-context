@@ -7,6 +7,10 @@ import { UnauthorizedError } from "@/lib/api/client"
 import { listEnergia, listEnergiaDiaria } from "@/lib/api/energia"
 import { listSocios } from "@/lib/api/socios"
 import { getConsolidadoMedidorPrincipal } from "@/lib/api/medidor-principal"
+import { getIngresosKpis, getIngresosPorSocio } from "@/lib/api/ingresos"
+import { cargarBloqueIngresos } from "@/lib/ingresos-bloque"
+import { getCurrentRole } from "@/lib/api/guards"
+import { puedeVerSocios } from "@/lib/ingresos-permisos"
 import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/energia-comparativa"
 import type { RegistroEnergiaDiario, RegistroEnergiaMensual, Socio } from "@/lib/api/types"
 
@@ -145,16 +149,26 @@ export default async function GdcvPerformancePage({ searchParams }: GdcvPerforma
   }
 
   const periodoActual = currentPeriodo()
+  // FR-007b: tabla/detalle de socios solo HINS Admin y AGC (rol desconocido → denegado).
+  const verSocios = puedeVerSocios(await getCurrentRole())
   const [
     { registros: registrosEnergia },
     { registros: registrosEnergiaDiaria },
     { socios },
     registroDimmsMesActual,
+    ingresosKpis,
+    ingresosPorSocio,
   ] = await Promise.all([
     loadRegistrosEnergia(context.parque.id),
     loadRegistrosEnergiaDiaria(context.parque.id, periodoActual),
-    loadSocios(context.parque.id),
+    verSocios ? loadSocios(context.parque.id) : Promise.resolve({ socios: [] as Socio[] }),
     loadRegistroDimmsMesActual(context.parque.id, periodoActual),
+    // KPIs del parque: alcance PARQUE (medidor principal), mes en curso.
+    cargarBloqueIngresos(() => getIngresosKpis(context.parque.id, { alcance: "PARQUE" })),
+    // Por socio: alcance SOCIOS, bloque aislado (HINS_ADMIN/AGC; 403 → "sin-acceso").
+    verSocios
+      ? cargarBloqueIngresos(() => getIngresosPorSocio(context.parque.id))
+      : Promise.resolve({ status: "sin-acceso" } as const),
   ])
 
   const registrosDimmsPorRango = await loadRegistrosDimmsPorRango(context.parque.id, registrosEnergia)
@@ -170,6 +184,9 @@ export default async function GdcvPerformancePage({ searchParams }: GdcvPerforma
         socios={socios}
         registroDimmsMesActual={registroDimmsMesActual}
         registrosDimmsPorRango={registrosDimmsPorRango}
+        ingresosKpis={ingresosKpis}
+        ingresosPorSocio={ingresosPorSocio}
+        verSocios={verSocios}
       />
     </div>
   )

@@ -13,6 +13,18 @@ vi.mock("@/lib/api/client", () => ({
       this.name = "UnauthorizedError"
     }
   },
+  ForbiddenError: class ForbiddenError extends Error {},
+}))
+
+// Ingresos por inyección: bloque aislado, sin datos en estos tests (cubiertos en tests/lib).
+vi.mock("@/lib/api/ingresos", () => ({
+  getIngresosKpis: vi.fn(async () => null),
+  getIngresosResumen: vi.fn(async () => null),
+  getIngresosPorSocio: vi.fn(async () => null),
+}))
+
+vi.mock("@/lib/api/guards", () => ({
+  getCurrentRole: vi.fn(async () => "AGC"),
 }))
 
 vi.mock("@/lib/api/dashboard-context", () => ({
@@ -46,6 +58,8 @@ import { resolveDashboardContext } from "@/lib/api/dashboard-context"
 import { listEnergia, listEnergiaDiaria } from "@/lib/api/energia"
 import { listSocios } from "@/lib/api/socios"
 import { getConsolidadoMedidorPrincipal } from "@/lib/api/medidor-principal"
+import { getIngresosKpis, getIngresosPorSocio } from "@/lib/api/ingresos"
+import { getCurrentRole } from "@/lib/api/guards"
 import GdcvPerformancePage from "@/app/gdcv/performance/page"
 import type { ReactElement } from "react"
 
@@ -283,5 +297,41 @@ describe("app/gdcv/performance/page", () => {
     expect(getConsolidadoMedidorPrincipal).toHaveBeenCalledTimes(
       (props.registrosDimmsPorRango as unknown[]).length + 1 // +1 for the current-month card fetch
     )
+  })
+  describe("ingresos por inyección (specs/015)", () => {
+    beforeEach(() => {
+      vi.mocked(resolveDashboardContext).mockResolvedValue({ proyecto, parque })
+      vi.mocked(listEnergia).mockResolvedValue([])
+      vi.mocked(listEnergiaDiaria).mockResolvedValue([])
+      vi.mocked(listSocios).mockResolvedValue([])
+    })
+
+    it("consulta KPIs con alcance PARQUE y por-socio para AGC", async () => {
+      vi.mocked(getCurrentRole).mockResolvedValue("AGC")
+      const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+
+      expect(getIngresosKpis).toHaveBeenCalledWith("parque-1", { alcance: "PARQUE" })
+      expect(getIngresosPorSocio).toHaveBeenCalledWith("parque-1")
+      expect(findViewProps(element)).toEqual(expect.objectContaining({ verSocios: true }))
+    })
+
+    it("no consulta por-socio ni socios si el rol no es HINS Admin/AGC (FR-007b)", async () => {
+      vi.mocked(getCurrentRole).mockResolvedValue("GDD_OWNER")
+      const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+
+      expect(getIngresosPorSocio).not.toHaveBeenCalled()
+      expect(listSocios).not.toHaveBeenCalled()
+      expect(findViewProps(element)).toEqual(
+        expect.objectContaining({ verSocios: false, ingresosPorSocio: { status: "sin-acceso" } })
+      )
+    })
+
+    it("una falla de ingresos queda aislada: status error y la pantalla sigue", async () => {
+      vi.mocked(getCurrentRole).mockResolvedValue("AGC")
+      vi.mocked(getIngresosKpis).mockRejectedValue(new Error("boom"))
+      const element = await GdcvPerformancePage({ searchParams: Promise.resolve({ proyectoId: "proy-1" }) })
+
+      expect(findViewProps(element)).toEqual(expect.objectContaining({ ingresosKpis: { status: "error" } }))
+    })
   })
 })

@@ -35,12 +35,6 @@ export const GDD_ENERGY_MONTHLY_CANONICAL: ParkEnergyRow[] = [
   { label: "Abr 26", generated: 830 },
 ]
 
-export const highlightAprilCardMock = {
-  title: "Generada en Abril",
-  kwh: 830.17,
-  compareBadge: "8.240 kWh desde el Inicio",
-} as const
-
 export const parkName = "Parque General Roca"
 
 /** Datos de la card de detalle del parque (GDD Performance — columna 1/3). */
@@ -65,19 +59,6 @@ export const generationSparklinePoints = [
   { i: 6, value: 28 },
   { i: 7, value: 34 },
 ]
-
-export const savingsCardMock = {
-  label: "Ahorro acumulado en Abril",
-  amount: formatCurrency(66_400, "ars", "full"),
-  deltaBadge: "+36% Mes",
-}
-
-export const tariffCardMock = {
-  label: "Valor de Tarifa Actual",
-  value: formatCurrency(80, "ars", "full"),
-  unit: "/ kWh",
-  deltaBadge: "+ 1.6% Mes",
-}
 
 export interface ConsumptionHistoryRow {
   period: string

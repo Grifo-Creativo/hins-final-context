@@ -7,27 +7,6 @@ import type {
   RoiCurvePoint,
 } from "@/data/gdd-roi-mock"
 
-/** KPIs ROI — Parque Río Cuarto (base USD, alineado a GDCV_flow.md). */
-export const gdcvRoiKpis = {
-  totalInvertido: 38_000_000,
-  inversionRecuperada: 14_200_000,
-  porcentajeRecuperado: 37,
-  pendienteRecuperar: 23_800_000,
-  recuperoEstimado: "6.8 años",
-  tir: "18.50%",
-  plazo: "25 años",
-  timeline: {
-    inicio: { label: "Inicio", fecha: "Mar 2024" },
-    hoy: {
-      label: "Hoy",
-      fecha: "May 2026",
-      pct: 37,
-      elapsedYears: "2.2",
-    },
-    payback: { label: "Payback", fecha: "Mar 2030" },
-  },
-} as const
-
 export const gdcvRoiProyectado: GddRoiProyectadoRow[] = [
   {
     periodo: "Mayo 2026",

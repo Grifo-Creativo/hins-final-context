@@ -88,12 +88,6 @@ export function getGdcvEnergyChartSubtitle(range: ChartRangeChip): string {
 
 // ─── KPIs (performance) ────────────────────────────────────────────────────
 
-export const gdcvGeneradaAbril = {
-  title: "Generada en Abril",
-  kwh: 124.2,
-  compareBadge: "13.556 kWh desde el Inicio",
-} as const
-
 export const gdcvGenerationSparkline: { value: number }[] = [
   { value: 42 },
   { value: 58 },
@@ -103,18 +97,6 @@ export const gdcvGenerationSparkline: { value: number }[] = [
   { value: 74 },
   { value: 124 },
 ]
-
-export const gdcvAhorroTotalAbril = {
-  label: "Ahorro Total en Abril",
-  amount: formatCurrency(248_143, "ars", "full"),
-  deltaBadge: "+2.3% Mes",
-}
-
-export const gdcvPromedioPorUsuario = {
-  label: "Promedio por usuario",
-  amount: formatCurrency(21_836, "ars", "full"),
-  deltaBadge: "+1.6% Mes",
-}
 
 // ─── Socios ────────────────────────────────────────────────────────────────
 
@@ -138,6 +120,10 @@ export interface SocioRow {
   energiaGenerada: string
   ahorroGenerado: string
   tipo?: "Virtual"
+  /** Estado explícito del socio frente a los ingresos (FR-008, FR-026). */
+  estado?: "sin-medidor" | "sin-ingresos"
+  /** Esquema tarifario que rige para el socio (propio o el del parque). */
+  esquema?: "PROPIO" | "PARQUE"
 }
 
 export const sociosMock: SocioRow[] = [
