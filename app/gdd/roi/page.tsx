@@ -4,8 +4,8 @@ import { GddPageHeading } from "@/components/gdd/GddPageHeading"
 import { GddRoiView } from "@/components/gdd/GddRoiView"
 import { resolveDashboardContext, type DashboardContext } from "@/lib/api/dashboard-context"
 import { UnauthorizedError } from "@/lib/api/client"
-import { listRoi } from "@/lib/api/roi"
-import { computeRealRoiKpis } from "@/lib/roi-kpis"
+import { getRoiRealizado } from "@/lib/api/roi"
+import { cargarBloqueIngresos } from "@/lib/ingresos-bloque"
 
 interface GddRoiPageProps {
   searchParams: Promise<{ proyectoId?: string }>
@@ -33,13 +33,13 @@ export default async function GddRoiPage({ searchParams }: GddRoiPageProps) {
     return <p className="text-sm text-muted-foreground">Proyecto o parque no encontrado.</p>
   }
 
-  const registros = await listRoi(context.parque.id)
-  const realKpis = computeRealRoiKpis(registros)
+  // ROI realizado (alcance PARQUE): falla aislada, no tumba la pantalla.
+  const roi = await cargarBloqueIngresos(() => getRoiRealizado(context.parque.id))
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
       <GddPageHeading />
-      <GddRoiView realKpis={realKpis} />
+      <GddRoiView roi={roi} />
     </div>
   )
 }

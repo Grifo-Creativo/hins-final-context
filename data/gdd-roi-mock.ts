@@ -17,26 +17,6 @@ export type ROIDataPoint = {
   riesgo?: number
 }
 
-export const gddRoiKpis = {
-  totalInvertido: 21_000_000,
-  inversionRecuperada: 6_000_000,
-  porcentajeRecuperado: 28.5,
-  pendienteRecuperar: 15_000_000,
-  recuperoEstimado: "7.0 años",
-  tir: "15.00%",
-  plazo: "20 años",
-  timeline: {
-    inicio: { label: "Inicio", fecha: "Mayo 2024" },
-    hoy: {
-      label: "Hoy",
-      fecha: "Mayo 2026",
-      pct: 28.5,
-      elapsedYears: "2.0",
-    },
-    payback: { label: "Payback", fecha: "Mayo 2031" },
-  },
-}
-
 export type GddRoiProyectadoRow = {
   periodo: string
   ahorroEstimado: number

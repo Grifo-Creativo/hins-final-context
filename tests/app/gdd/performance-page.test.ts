@@ -13,6 +13,18 @@ vi.mock("@/lib/api/client", () => ({
       this.name = "UnauthorizedError"
     }
   },
+  ForbiddenError: class ForbiddenError extends Error {},
+}))
+
+// Ingresos por inyección: bloque aislado, sin datos en estos tests (cubiertos en tests/lib).
+vi.mock("@/lib/api/ingresos", () => ({
+  getIngresosKpis: vi.fn(async () => null),
+  getIngresosResumen: vi.fn(async () => null),
+  getIngresosPorSocio: vi.fn(async () => null),
+}))
+
+vi.mock("@/lib/api/guards", () => ({
+  getCurrentRole: vi.fn(async () => "AGC"),
 }))
 
 vi.mock("@/lib/api/dashboard-context", () => ({

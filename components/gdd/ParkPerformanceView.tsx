@@ -15,12 +15,17 @@ import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeh
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import { energiaComparativaChartConfig } from "@/data/chart-config"
+import { gddParkDetails } from "@/data/gdd-performance-mock"
+import { BloqueConError } from "@/components/ingresos/BloqueConError"
+import { IngresosIncompletosAlert } from "@/components/ingresos/IngresosIncompletosAlert"
+import { UltimaActualizacion } from "@/components/ingresos/UltimaActualizacion"
+import type { BloqueIngresos } from "@/lib/ingresos-bloque"
 import {
-  gddParkDetails,
-  highlightAprilCardMock,
-  savingsCardMock,
-  tariffCardMock,
-} from "@/data/gdd-performance-mock"
+  energiaAcumuladaFromBloque,
+  ingresosMesCardFromBloque,
+  tarifaCardFromBloque,
+} from "@/lib/ingresos-kpis"
+import { ingresosMensualesPorPeriodo } from "@/lib/ingresos-series"
 import { toDateKey } from "@/data/gdcv-daily-mock"
 import { getMonthNameEs } from "@/lib/format-periodo"
 import {
@@ -36,7 +41,9 @@ import {
 import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/energia-comparativa"
 import { parqueToDetailsMetrics } from "@/lib/park-details-metrics"
 import type {
+  KpisIngresos,
   Parque,
+  ResumenIngresos,
   RegistroEnergiaDia,
   RegistroEnergiaDiario,
   RegistroEnergiaMensual,
@@ -79,6 +86,10 @@ interface ParkPerformanceViewProps {
    * gráfico (6M/1A) — fuente principal de la comparativa del gráfico.
    */
   registrosDimmsPorRango: RegistroDimmsPorPeriodo[]
+  /** KPIs de ingresos por inyección del mes en curso (alcance PARQUE). Falla aislada: no tumba la pantalla. */
+  ingresosKpis: BloqueIngresos<KpisIngresos>
+  /** Ingresos por inyección por mes (alcance PARQUE) para el Historial de Generación. */
+  ingresosMensuales: BloqueIngresos<ResumenIngresos>
 }
 
 export function ParkPerformanceView({
@@ -88,6 +99,8 @@ export function ParkPerformanceView({
   periodoActual,
   registroDimmsMesActual,
   registrosDimmsPorRango,
+  ingresosKpis,
+  ingresosMensuales,
 }: ParkPerformanceViewProps) {
   const router = useRouter()
   const today = useMemo(() => new Date(), [])
@@ -142,9 +155,21 @@ export function ParkPerformanceView({
   }, [period, registrosEnergia, comparativaMesActual, comparativaChartRows])
 
   const generationHistoryRows = useMemo(
-    () => getGenerationHistoryRows(registrosEnergia ?? []),
-    [registrosEnergia]
+    () =>
+      getGenerationHistoryRows(
+        registrosEnergia ?? [],
+        ingresosMensuales.status === "ok"
+          ? ingresosMensualesPorPeriodo(ingresosMensuales.data.items)
+          : ingresosMensuales.status === "vacio"
+            ? new Map()
+            : null
+      ),
+    [registrosEnergia, ingresosMensuales]
   )
+
+  const ingresosCard = ingresosMesCardFromBloque(ingresosKpis)
+  const tarifaCard = tarifaCardFromBloque(ingresosKpis)
+  const cobertura = ingresosKpis.status === "ok" ? ingresosKpis.data.cobertura : null
 
   const monthlyGenerationFailed = registrosEnergiaDiaria === null
 
@@ -186,6 +211,9 @@ export function ParkPerformanceView({
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6">
+      {ingresosKpis.status === "error" && <BloqueConError titulo="los ingresos por inyección" />}
+      <IngresosIncompletosAlert cobertura={cobertura} />
+      <UltimaActualizacion ultimoIngresoCalculadoEn={cobertura?.ultimoIngresoCalculadoEn} />
       <div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
         <ParkDetailsCard
           imageSrc={gddParkDetails.imageSrc}
@@ -289,9 +317,7 @@ export function ParkPerformanceView({
                   ? "Parque sin medidor principal"
                   : monthlyGenerationFailed
                     ? "No se pudo cargar este mes"
-                    // Mock por excepción documentada: sin endpoint de acumulado
-                    // histórico desde el inicio (ver specs/003-monthly-generation-kpi).
-                    : highlightAprilCardMock.compareBadge
+                    : energiaAcumuladaFromBloque(ingresosKpis)
             }
             sparklineData={monthlyGenerationFailed ? [] : monthlySparklinePoints}
           />
@@ -299,15 +325,15 @@ export function ParkPerformanceView({
           <div className="grid flex-1 grid-cols-2 gap-4 sm:gap-6">
             <KpiSecondary
               icon={DollarSignIcon}
-              label={savingsCardMock.label}
-              value={savingsCardMock.amount}
-              delta={savingsCardMock.deltaBadge}
+              label={ingresosCard.label}
+              value={ingresosCard.value}
+              delta={ingresosCard.delta}
             />
             <KpiSecondary
               icon={DollarSignIcon}
-              label={tariffCardMock.label}
-              value={`${tariffCardMock.value} ${tariffCardMock.unit}`}
-              delta={tariffCardMock.deltaBadge}
+              label={tarifaCard.label}
+              value={tarifaCard.value}
+              delta={tarifaCard.delta}
               infoTooltip={{ content: "Ver tarifas vigentes", href: "#" }}
             />
           </div>

@@ -55,31 +55,32 @@ function formatKwh(value: number): string {
   return `${value.toLocaleString("es-AR", { maximumFractionDigits: 0 })} kWh`
 }
 
-function formatPercent(value: number): string {
-  return `${value.toLocaleString("es-AR", { maximumFractionDigits: 1 })}%`
-}
-
 /**
  * Filas de la tabla "Historial de Generación" (ConsumptionHistoryTable) con
- * datos reales para período y energía generada. El resto de las columnas
- * (adquirida, otras fuentes, total, porcentajes, ahorro) no tiene equivalente
- * en GET /parques/{parqueId}/energia y se muestra en 0 por decisión explícita
- * del usuario — no hay excepción-mock que resolver, es el valor real.
+ * datos reales para período, energía generada e ingresos por inyección
+ * (GET /parques/{id}/ingresos/resumen agrupar=mes). Las columnas sin dato real
+ * (adquirida, otras fuentes, total, porcentajes) se muestran con guion.
  */
 export function getGenerationHistoryRows(
-  registros: RegistroEnergiaMensual[]
+  registros: RegistroEnergiaMensual[],
+  ingresosPorPeriodo: Map<string, string> | null = null
 ): ConsumptionHistoryRow[] {
   const sorted = sortByPeriodoAscDeduped(registros).reverse()
 
   return sorted.map((registro) => ({
     period: formatPeriodoLabel(registro.periodo),
     energyGenerated: formatKwh(registro.energiaMesKwh ?? 0),
-    energyAcquired: formatKwh(0),
-    energyFromOtherSources: formatKwh(0),
-    totalEnergy: formatKwh(0),
-    acquiredPercent: formatPercent(0),
-    totalPercent: formatPercent(0),
-    estimatedSavings: formatCurrency(0, "ars", "full"),
+    // Sin dato real (pendiente de definición de producto): guion, no cero.
+    energyAcquired: "—",
+    energyFromOtherSources: "—",
+    totalEnergy: "—",
+    acquiredPercent: "—",
+    totalPercent: "—",
+    // Ingresos por inyección reales; mes ausente = 0 (backend rellena ceros); sin datos = guion.
+    estimatedSavings:
+      ingresosPorPeriodo === null
+        ? "—"
+        : formatCurrency(Number(ingresosPorPeriodo.get(registro.periodo) ?? 0), "ars", "full"),
   }))
 }
 

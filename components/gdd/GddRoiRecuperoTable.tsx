@@ -55,7 +55,8 @@ import {
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
 
-import { formatRoiFromUsdResponsive, type CurrencyCode } from "@/lib/format-currency"
+import { formatCurrency, formatRoiFromUsdResponsive, type CurrencyCode } from "@/lib/format-currency"
+import type { RoiHistoricoRow } from "@/lib/roi-realizado"
 import { useIsMobile } from "@/hooks/use-is-mobile"
 
 export type GddRoiCurrency = CurrencyCode
@@ -247,6 +248,65 @@ function buildHistoricoColumns(
   ]
 }
 
+/**
+ * Columnas del Histórico con datos reales (GET /roi/realizado): en USD cada mes usa su
+ * propio tipo de cambio REAL (sin tipo de cambio → no se estima); en ARS se muestran los
+ * ingresos originales, sin conversión (FR-014, FR-017).
+ */
+function buildHistoricoRealColumns(currency: GddRoiCurrency): ColumnDef<RoiHistoricoRow>[] {
+  const sinTc = <span className="text-sm text-amber-700">Sin tipo de cambio</span>
+  return [
+    {
+      accessorKey: "periodo",
+      enableHiding: false,
+      enableSorting: false,
+      meta: { label: "Período", sticky: "start" },
+      header: "Período",
+      cell: ({ row }) => (
+        <span className="text-sm font-medium text-muted-foreground">{row.getValue("periodo")}</span>
+      ),
+    },
+    {
+      id: "capRecuperado",
+      enableSorting: false,
+      meta: { label: "Cap. Recuperado" },
+      header: "Cap. Recuperado",
+      cell: ({ row }) =>
+        currency === "ars" ? (
+          <span className="tabular-nums">{formatCurrency(row.original.capRecuperadoArs, "ars", "full")}</span>
+        ) : row.original.capRecuperadoUsd === null ? (
+          sinTc
+        ) : (
+          <span className="tabular-nums">{formatCurrency(row.original.capRecuperadoUsd, "usd", "full")}</span>
+        ),
+    },
+    {
+      id: "capRecuperadoAcumulado",
+      enableSorting: false,
+      meta: { label: "Recupero Acumulado" },
+      header: "Recupero Acumulado",
+      cell: ({ row }) => (
+        <span className="tabular-nums">
+          {currency === "ars"
+            ? formatCurrency(row.original.acumuladoArs, "ars", "full")
+            : formatCurrency(row.original.acumuladoUsd, "usd", "full")}
+        </span>
+      ),
+    },
+    {
+      id: "porcentajeRecuperacion",
+      enableSorting: false,
+      meta: { label: "Avance de Recuperación" },
+      header: "Avance de Recuperación",
+      cell: ({ row }) => (
+        <span className="tabular-nums">
+          {row.original.porcentaje === null ? "—" : `${row.original.porcentaje.toLocaleString("es-AR", { maximumFractionDigits: 1 })}%`}
+        </span>
+      ),
+    },
+  ]
+}
+
 export type GddRoiRecuperoTableLayout = "page" | "embedded"
 
 interface GddRoiRecuperoTableProps {
@@ -255,6 +315,8 @@ interface GddRoiRecuperoTableProps {
   currency: GddRoiCurrency
   proyectadoData?: GddRoiProyectadoRow[]
   historicoData?: GddRoiHistoricoRow[]
+  /** Histórico con datos reales (ROI realizado). Si se pasa, reemplaza a `historicoData`. */
+  historicoReal?: RoiHistoricoRow[]
   tipoCambio?: number
   /**
    * `page` (default): bloque en vista ROI — superficie blanca + sombra.
@@ -281,6 +343,7 @@ export function GddRoiRecuperoTable({
   currency,
   proyectadoData = gddRoiProyectado,
   historicoData = gddRoiHistorico,
+  historicoReal,
   tipoCambio = TIPO_CAMBIO_ARS,
   layout = "page",
   hideTitle = false,
@@ -298,11 +361,17 @@ export function GddRoiRecuperoTable({
     () =>
       variant === "proyectado"
         ? buildProyectadoColumns(currency, tipoCambio, isMobile)
-        : buildHistoricoColumns(currency, tipoCambio, isMobile),
-    [variant, currency, tipoCambio, isMobile]
+        : historicoReal
+          ? buildHistoricoRealColumns(currency)
+          : buildHistoricoColumns(currency, tipoCambio, isMobile),
+    [variant, currency, tipoCambio, isMobile, historicoReal]
   )
 
-  const data = variant === "proyectado" ? proyectadoData : historicoData
+  const data = (variant === "proyectado" ? proyectadoData : (historicoReal ?? historicoData)) as (
+    | GddRoiProyectadoRow
+    | GddRoiHistoricoRow
+    | RoiHistoricoRow
+  )[]
 
   const table = useReactTable({
     data,

@@ -104,6 +104,17 @@ export interface Socio {
   suministroNumero: string
   contratoNumero: string
   usuarioId: string | null
+  /** Todos los medidores del socio (puede tener varios). */
+  medidores?: MedidorDeSocio[]
+  /** participacionPorcentaje / 100 × potencia total del parque (kWp). */
+  potenciaAsociadaKwp?: number
+}
+
+export interface MedidorDeSocio {
+  id: string
+  numeroSerie: string
+  suministroNumero?: string
+  contratoNumero?: string
 }
 
 export interface Dispositivo {
@@ -445,4 +456,126 @@ export interface FranjasEfectivas {
   esquema: EsquemaAplicado
   fecha: string
   franjas: FranjaEfectiva[]
+}
+
+// ---------------------------------------------------------------------------
+// Ingresos por inyección — specs/015-ingresos-detalle-proyecto/data-model.md
+// Los montos ARS/USD llegan como string decimal (2 decimales) y se conservan así.
+// ---------------------------------------------------------------------------
+
+/** PARQUE = medidor principal; SOCIOS = medidores de socio. Nunca se suman entre sí. */
+export type AlcanceIngresos = "PARQUE" | "SOCIOS"
+export type FranjaIngreso = "RESTO" | "PICO" | "VALLE"
+export type AgruparIngresos = "intervalo" | "hora" | "dia" | "mes" | "total"
+
+export interface CoberturaIngresos {
+  registrosConEnergia: number
+  /** > 0 ⇒ el total puede estar incompleto. */
+  registrosSinIngreso: number
+  ultimoIngresoCalculadoEn: string | null
+}
+
+export interface FranjaResumenIngreso {
+  franja: FranjaIngreso
+  energiaKwh: number
+  montoArs: string
+}
+
+export interface FilaResumenIngreso {
+  periodo: string
+  montoArs: string
+  energiaKwh: number
+  registros: number
+  valorInyeccionPromedio: number | null
+  porFranja?: FranjaResumenIngreso[]
+}
+
+export interface TotalIngresos {
+  montoArs: string
+  energiaKwh: number
+  registros: number
+}
+
+export interface ResumenIngresos {
+  agrupar: AgruparIngresos
+  alcance: AlcanceIngresos
+  moneda: string
+  items: FilaResumenIngreso[]
+  total: TotalIngresos
+  cobertura: CoberturaIngresos
+}
+
+export interface TarifaInyeccionVigente {
+  valor: number
+  unidad: string
+  franja: FranjaIngreso
+  vigenteDesde: string
+  origen: "PROPIO" | "CATALOGO"
+  variacionPct: number | null
+}
+
+export interface KpisIngresos {
+  periodo: string
+  alcance: AlcanceIngresos
+  mes: TotalIngresos
+  mesAnterior: { periodo: string; montoArs: string; energiaKwh: number }
+  variacion: { montoPct: number | null; energiaPct: number | null }
+  acumulado: { desde: string | null; montoArs: string; energiaKwh: number }
+  tarifaInyeccionVigente: TarifaInyeccionVigente | null
+  promedioPorSocio: { montoArs: string; sociosConIngreso: number } | null
+  cobertura: CoberturaIngresos
+}
+
+export interface MedidorIngreso {
+  medidorId: string
+  numeroSerie: string
+  energiaKwh: number
+  montoArs: string
+}
+
+export interface IngresoPorSocio {
+  socioId: string
+  nombre: string
+  participacionPorcentaje: number
+  potenciaAsociadaKwp: number
+  medidores: MedidorIngreso[]
+  energiaKwh: number
+  montoArs: string
+  esquema: "PROPIO" | "PARQUE"
+  sinMedidor: boolean
+  sinIngresos: boolean
+}
+
+export interface IngresosPorSocio {
+  desde: string
+  hasta: string
+  items: IngresoPorSocio[]
+  total: { energiaKwh: number; montoArs: string; participacionPorcentaje: number }
+}
+
+export interface MesRoiRealizado {
+  periodo: string
+  ingresoArs: string
+  tipoCambio: { valor: number; tipo: "PROYECTO" | "REAL"; periodicidad: "DIARIA" | "MENSUAL" | "ANUAL" } | null
+  ingresoUsd: string | null
+  acumuladoUsd: string
+  porcentajeRecuperado: number | null
+  tipoCambioFaltante: boolean
+}
+
+export interface RoiRealizado {
+  parqueId: string
+  socioId: string | null
+  fechaPuestaEnMarcha: string
+  inversionMeta: { valor: number; moneda: string; periodoRegistro: string } | null
+  sinInversionMeta: boolean
+  meses: MesRoiRealizado[]
+  resumen: {
+    acumuladoUsd: string
+    pendienteUsd: string | null
+    porcentajeRecuperado: number | null
+    mesesTranscurridos: number
+    aniosTranscurridos: number
+    mesesSinTipoCambio: string[]
+  }
 }

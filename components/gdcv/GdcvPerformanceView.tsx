@@ -15,14 +15,22 @@ import { GDD_PERFORMANCE_TOP_ROW_GRID } from "@/components/ui/performance-placeh
 import { KpiPrimary } from "@/components/ui/kpi-primary"
 import { KpiSecondary } from "@/components/ui/kpi-secondary"
 import {
-  gdcvAhorroTotalAbril,
-  gdcvGeneradaAbril,
   gdcvParkDetails,
-  gdcvPromedioPorUsuario,
   type MedidorDetalle,
   type SocioRow,
 } from "@/data/gdcv-mock"
-import { mapSocioToRow } from "@/lib/socio-presentation"
+import { buildSociosTotals, mapSocioToRow } from "@/lib/socio-presentation"
+import { formatPeriodoLabel } from "@/lib/format-periodo"
+import { BloqueConError } from "@/components/ingresos/BloqueConError"
+import { IngresosIncompletosAlert } from "@/components/ingresos/IngresosIncompletosAlert"
+import { UltimaActualizacion } from "@/components/ingresos/UltimaActualizacion"
+import type { BloqueIngresos } from "@/lib/ingresos-bloque"
+import {
+  energiaAcumuladaFromBloque,
+  ingresosMesCardFromBloque,
+  promedioPorUsuarioCard,
+  tarifaCardFromBloque,
+} from "@/lib/ingresos-kpis"
 import { CHART_RANGE_TABS } from "@/components/gdd/chart-range-options"
 import type { ChartRangeChip } from "@/types/chart-range"
 import { toDateKey } from "@/data/gdcv-daily-mock"
@@ -40,6 +48,8 @@ import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/ener
 import { energiaComparativaChartConfig } from "@/data/chart-config"
 import { parqueToDetailsMetrics } from "@/lib/park-details-metrics"
 import type {
+  IngresosPorSocio,
+  KpisIngresos,
   Parque,
   RegistroEnergiaDia,
   RegistroEnergiaDiario,
@@ -86,6 +96,12 @@ interface GdcvPerformanceViewProps {
    * gráfico (6M/1A) — fuente principal de la comparativa del gráfico.
    */
   registrosDimmsPorRango: RegistroDimmsPorPeriodo[]
+  /** KPIs de ingresos por inyección del mes en curso (alcance PARQUE). Falla aislada. */
+  ingresosKpis: BloqueIngresos<KpisIngresos>
+  /** Ingresos por socio del mes (alcance SOCIOS, solo HINS Admin/AGC). Falla aislada. */
+  ingresosPorSocio: BloqueIngresos<IngresosPorSocio>
+  /** FR-007b: tabla/detalle de socios solo para HINS Admin y AGC. */
+  verSocios: boolean
 }
 
 export function GdcvPerformanceView({
@@ -96,6 +112,9 @@ export function GdcvPerformanceView({
   socios,
   registroDimmsMesActual,
   registrosDimmsPorRango,
+  ingresosKpis,
+  ingresosPorSocio,
+  verSocios,
 }: GdcvPerformanceViewProps) {
   const router = useRouter()
   const today = useMemo(() => new Date(), [])
@@ -109,6 +128,11 @@ export function GdcvPerformanceView({
   const [sheetOpen, setSheetOpen] = useState(false)
   const [medidoresSheetSocio, setMedidoresSheetSocio] =
     useState<SocioRow | null>(null)
+
+  const ingresosCard = ingresosMesCardFromBloque(ingresosKpis)
+  const tarifaCard = tarifaCardFromBloque(ingresosKpis)
+  const promedioCard = ingresosKpis.status === "ok" ? promedioPorUsuarioCard(ingresosKpis.data) : null
+  const ingresosCobertura = ingresosKpis.status === "ok" ? ingresosKpis.data.cobertura : null
 
   const dailyEnergiaKey = `${parque.id}:${toDateKey(activeDay)}`
   const isDailyLoading = chartRange === "1d" && dailyEnergia?.key !== dailyEnergiaKey
@@ -132,9 +156,16 @@ export function GdcvPerformanceView({
     [registrosEnergiaDiaria]
   )
 
-  const socioRows = useMemo(
-    () => (socios ?? []).map(mapSocioToRow),
-    [socios]
+  const socioRows = useMemo(() => {
+    const porSocio = new Map(
+      (ingresosPorSocio.status === "ok" ? ingresosPorSocio.data.items : []).map((i) => [i.socioId, i])
+    )
+    return (socios ?? []).map((s) => mapSocioToRow(s, porSocio.get(s.id)))
+  }, [socios, ingresosPorSocio])
+
+  const sociosTotals = useMemo(
+    () => (ingresosPorSocio.status === "ok" ? buildSociosTotals(ingresosPorSocio.data) : null),
+    [ingresosPorSocio]
   )
 
   const sociosLoadFailed = socios === null
@@ -230,7 +261,9 @@ export function GdcvPerformanceView({
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-6">
-
+      {ingresosKpis.status === "error" && <BloqueConError titulo="los ingresos por inyección" />}
+      <IngresosIncompletosAlert cobertura={ingresosCobertura} />
+      <UltimaActualizacion ultimoIngresoCalculadoEn={ingresosCobertura?.ultimoIngresoCalculadoEn} />
       <div className={GDD_PERFORMANCE_TOP_ROW_GRID}>
         <ParkDetailsCard
           imageSrc={gdcvParkDetails.imageSrc}
@@ -335,50 +368,68 @@ export function GdcvPerformanceView({
                   ? "Parque sin medidor principal"
                   : monthlyGenerationFailed
                     ? "No se pudo cargar este mes"
-                    // Mock por excepción documentada: sin endpoint de acumulado
-                    // histórico desde el inicio (ver specs/003-monthly-generation-kpi).
-                    : gdcvGeneradaAbril.compareBadge
+                    : energiaAcumuladaFromBloque(ingresosKpis)
             }
             sparklineData={monthlyGenerationFailed ? [] : monthlySparklinePoints}
           />
 
           <div className="grid grid-cols-2 gap-4 sm:gap-6 flex-1">
-            <KpiSecondary
-              icon={DollarSignIcon}
-              label={gdcvAhorroTotalAbril.label}
-              value={gdcvAhorroTotalAbril.amount}
-              delta={gdcvAhorroTotalAbril.deltaBadge}
-            />
-            <KpiSecondary
-              icon={DollarSignIcon}
-              label={gdcvPromedioPorUsuario.label}
-              value={gdcvPromedioPorUsuario.amount}
-              delta={gdcvPromedioPorUsuario.deltaBadge}
-            />
+            <div className={promedioCard ? "" : "col-span-2"}>
+              <KpiSecondary
+                icon={DollarSignIcon}
+                label={ingresosCard.label}
+                value={ingresosCard.value}
+                delta={ingresosCard.delta}
+              />
+            </div>
+            {promedioCard && (
+              <KpiSecondary
+                icon={DollarSignIcon}
+                label={promedioCard.label}
+                value={promedioCard.value}
+                delta={promedioCard.delta}
+              />
+            )}
+            <div className="col-span-2">
+              <KpiSecondary
+                icon={DollarSignIcon}
+                label={tarifaCard.label}
+                value={tarifaCard.value}
+                delta={tarifaCard.delta}
+                layout="horizontal"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Socios del Parque table */}
-      <SociosTable
-        parqueId={parque.id}
-        data={socioRows}
-        loadFailed={sociosLoadFailed}
-        onRetry={() => router.refresh()}
-        onRowClick={handleRowClick}
-        onMedidorClick={handleMedidorClick}
-        medidoresSheetSocio={medidoresSheetSocio}
-        onMedidoresSheetOpenChange={setMedidoresSheetSocio}
-      />
+      {verSocios && (
+        <>
+          {ingresosPorSocio.status === "error" && <BloqueConError titulo="los ingresos por socio" />}
+          {/* Socios del Parque table */}
+          <SociosTable
+            parqueId={parque.id}
+            data={socioRows}
+            loadFailed={sociosLoadFailed}
+            onRetry={() => router.refresh()}
+            onRowClick={handleRowClick}
+            onMedidorClick={handleMedidorClick}
+            medidoresSheetSocio={medidoresSheetSocio}
+            onMedidoresSheetOpenChange={setMedidoresSheetSocio}
+            totals={sociosTotals}
+          />
 
-      {/* Socio detail sheet */}
-      <SocioDetailSheet
-        socio={selectedSocio}
-        selectedMedidor={selectedMedidor}
-        open={sheetOpen}
-        onOpenChange={handleDetailOpenChange}
-        onBack={selectedMedidor ? handleBackToMedidores : undefined}
-      />
+          {/* Socio detail sheet */}
+          <SocioDetailSheet
+            socio={selectedSocio}
+            selectedMedidor={selectedMedidor}
+            periodoLabel={formatPeriodoLabel(periodoActual)}
+            open={sheetOpen}
+            onOpenChange={handleDetailOpenChange}
+            onBack={selectedMedidor ? handleBackToMedidores : undefined}
+          />
+        </>
+      )}
     </div>
   )
 }

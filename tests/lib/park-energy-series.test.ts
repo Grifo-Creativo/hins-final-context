@@ -105,21 +105,31 @@ describe("lib/park-energy-series getGenerationHistoryRows", () => {
     expect(result.map((r) => r.period)).toEqual(["Marzo 2026", "Febrero 2026", "Enero 2026"])
   })
 
-  it("maps energiaMesKwh to energyGenerated and zeroes out every other column", () => {
+  it("maps energiaMesKwh and real ingreso; columnas sin dato real quedan en guion", () => {
     const registros: RegistroEnergiaMensual[] = [
       { periodo: "2026-07", energiaMesKwh: 18190.5, ingresoMes: 53518.69 },
     ]
-    const result = getGenerationHistoryRows(registros)
+    const result = getGenerationHistoryRows(registros, new Map([["2026-07", "74400.00"]]))
     expect(result[0]).toEqual({
       period: "Julio 2026",
       energyGenerated: "18.191 kWh",
-      energyAcquired: "0 kWh",
-      energyFromOtherSources: "0 kWh",
-      totalEnergy: "0 kWh",
-      acquiredPercent: "0%",
-      totalPercent: "0%",
-      estimatedSavings: "$ 0",
+      energyAcquired: "—",
+      energyFromOtherSources: "—",
+      totalEnergy: "—",
+      acquiredPercent: "—",
+      totalPercent: "—",
+      estimatedSavings: "$ 74.400",
     })
+  })
+
+  it("mes sin ingresos en el mapa → importe cero (no guion)", () => {
+    const registros: RegistroEnergiaMensual[] = [{ periodo: "2026-07", energiaMesKwh: 10, ingresoMes: null }]
+    expect(getGenerationHistoryRows(registros, new Map())[0].estimatedSavings).toBe("$ 0")
+  })
+
+  it("ingresos no disponibles (null) → guion en la columna de ingresos", () => {
+    const registros: RegistroEnergiaMensual[] = [{ periodo: "2026-07", energiaMesKwh: 10, ingresoMes: null }]
+    expect(getGenerationHistoryRows(registros, null)[0].estimatedSavings).toBe("—")
   })
 
   it("maps a null energiaMesKwh to 0 kWh generated instead of dropping the row", () => {

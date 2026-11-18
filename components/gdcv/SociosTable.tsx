@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/table"
 import type { MedidorDetalle, SocioRow } from "@/data/gdcv-mock"
 import { parseKwhDisplay, parsePercentDisplay } from "@/lib/format-energy"
+import { textoEstadoNulo } from "@/components/ingresos/EstadoNulo"
+import type { SociosTotals } from "@/lib/socio-presentation"
 import { stickyStartCellClassName } from "@/lib/table-utils"
 import { cn } from "@/lib/utils"
 import {
@@ -217,10 +219,17 @@ function createColumns(
     sortingFn: (rowA, rowB) =>
       parseMoneyDisplay(rowA.original.ahorroGenerado) -
       parseMoneyDisplay(rowB.original.ahorroGenerado),
-    meta: { label: "Ahorro Generado" },
-    header: ({ column }) => sortableHeader(column, "Ahorro Generado"),
+    meta: { label: "Ingresos por inyección" },
+    header: ({ column }) => sortableHeader(column, "Ingresos por inyección"),
     cell: ({ row }) => (
-      <span className="text-sm tabular-nums">{row.original.ahorroGenerado}</span>
+      <div className="flex flex-col">
+        <span className="text-sm tabular-nums">{row.original.ahorroGenerado}</span>
+        {row.original.estado && (
+          <span className="text-xs text-muted-foreground">
+            {textoEstadoNulo(row.original.estado === "sin-medidor" ? "sin-medidor" : "sin-ingresos-periodo")}
+          </span>
+        )}
+      </div>
     ),
   },
   {
@@ -314,6 +323,8 @@ interface SociosTableProps {
   /** Control opcional del sheet intermedio (para volver desde SocioDetailSheet). */
   medidoresSheetSocio?: SocioRow | null
   onMedidoresSheetOpenChange?: (socio: SocioRow | null) => void
+  /** Totales al pie (calculados por el backend). `null` = no disponibles. */
+  totals?: SociosTotals | null
 }
 
 export function SociosTable({
@@ -325,6 +336,7 @@ export function SociosTable({
   onMedidorClick,
   medidoresSheetSocio,
   onMedidoresSheetOpenChange,
+  totals = null,
 }: SociosTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -498,7 +510,30 @@ export function SociosTable({
               </TableRow>
             )}
           </TableBody>
+          {totals && !loadFailed && data.length > 0 ? (
+            <TableFooter>
+              <TableRow className="h-12 font-medium bg-muted/40">
+                <TableCell className="text-sm">Total</TableCell>
+                {table.getVisibleLeafColumns().slice(1).map((col) => (
+                  <TableCell key={col.id} className="text-sm tabular-nums">
+                    {col.id === "participacion"
+                      ? totals.participacion
+                      : col.id === "energiaGenerada"
+                        ? totals.energiaGenerada
+                        : col.id === "ahorroGenerado"
+                          ? totals.ahorroGenerado
+                          : null}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableFooter>
+          ) : null}
         </Table>
+        {totals?.participacionInconsistente && !loadFailed ? (
+          <p role="status" className="text-sm text-amber-700">
+            La suma de participaciones ({totals.participacion}) no es 100%: revisá la carga de socios.
+          </p>
+        ) : null}
 
         {/* Pagination */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">

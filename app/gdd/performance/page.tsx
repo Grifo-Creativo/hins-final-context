@@ -6,6 +6,8 @@ import { resolveDashboardContext, type DashboardContext } from "@/lib/api/dashbo
 import { UnauthorizedError } from "@/lib/api/client"
 import { listEnergia, listEnergiaDiaria } from "@/lib/api/energia"
 import { getConsolidadoMedidorPrincipal } from "@/lib/api/medidor-principal"
+import { getIngresosKpis, getIngresosResumen } from "@/lib/api/ingresos"
+import { cargarBloqueIngresos } from "@/lib/ingresos-bloque"
 import type { RegistroDimmsMesActual, RegistroDimmsPorPeriodo } from "@/lib/energia-comparativa"
 import type { RegistroEnergiaDiario, RegistroEnergiaMensual } from "@/lib/api/types"
 
@@ -132,10 +134,15 @@ export default async function GddPerformancePage({ searchParams }: GddPerformanc
     { registros: registrosEnergia },
     { registros: registrosEnergiaDiaria },
     registroDimmsMesActual,
+    ingresosKpis,
+    ingresosMensuales,
   ] = await Promise.all([
     loadRegistrosEnergia(context.parque.id),
     loadRegistrosEnergiaDiaria(context.parque.id, periodoActual),
     loadRegistroDimmsMesActual(context.parque.id, periodoActual),
+    // Ingresos por inyección: alcance PARQUE (medidor principal), mes en curso (hora Argentina).
+    cargarBloqueIngresos(() => getIngresosKpis(context.parque.id, { alcance: "PARQUE" })),
+    cargarBloqueIngresos(() => getIngresosResumen(context.parque.id, { alcance: "PARQUE", agrupar: "mes" })),
   ])
 
   const registrosDimmsPorRango = await loadRegistrosDimmsPorRango(context.parque.id, registrosEnergia)
@@ -150,6 +157,8 @@ export default async function GddPerformancePage({ searchParams }: GddPerformanc
         periodoActual={periodoActual}
         registroDimmsMesActual={registroDimmsMesActual}
         registrosDimmsPorRango={registrosDimmsPorRango}
+        ingresosKpis={ingresosKpis}
+        ingresosMensuales={ingresosMensuales}
       />
     </div>
   )
